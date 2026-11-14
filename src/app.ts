@@ -667,3 +667,6 @@ function isUuid(value: string): boolean {
     value,
   );
 }
+
+export const app = createApp();
+export default app;

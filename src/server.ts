@@ -1,10 +1,9 @@
 import http from "node:http";
 import "dotenv/config";
-import { createApp } from "./app.js";
+import app from "./app.js";
 import { loadConfig } from "./config.js";
 
 const { port } = loadConfig();
-const app = createApp();
 const server = http.createServer(app);
 
 server.on("error", (error: NodeJS.ErrnoException) => {
