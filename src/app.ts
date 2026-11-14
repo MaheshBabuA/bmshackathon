@@ -53,30 +53,116 @@ import {
 } from "./services/crisis-service.js";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-function findProjectRoot(): string {
+function getCandidateRoots(): string[] {
+  const roots: string[] = [];
   const cwd = process.cwd();
-  if (existsSync(path.join(cwd, "stitch_crisisgrid_emergency_command_platform"))) {
-    return cwd;
-  }
+  roots.push(cwd);
   try {
     const dir = path.dirname(fileURLToPath(import.meta.url));
-    const parent = path.resolve(dir, "..");
-    if (existsSync(path.join(parent, "stitch_crisisgrid_emergency_command_platform"))) {
-      return parent;
-    }
-    const grandParent = path.resolve(parent, "..");
-    if (existsSync(path.join(grandParent, "stitch_crisisgrid_emergency_command_platform"))) {
-      return grandParent;
-    }
+    roots.push(dir);
+    roots.push(path.resolve(dir, ".."));
+    roots.push(path.resolve(dir, "../.."));
+    roots.push(path.resolve(dir, "../../.."));
   } catch {}
-  return cwd;
+  roots.push("/var/task");
+  roots.push("/var/task/dist");
+  return [...new Set(roots.filter(Boolean))];
 }
 
-const PROJECT_ROOT = findProjectRoot();
-const SCREENS_DIRECTORY = path.join(
-  PROJECT_ROOT,
-  "stitch_crisisgrid_emergency_command_platform",
-);
+function resolvePublicFile(filename: string): string | null {
+  for (const root of getCandidateRoots()) {
+    const candidates = [
+      path.join(root, "public", filename),
+      path.join(root, "dist", "public", filename),
+      path.join(root, filename),
+    ];
+    for (const candidate of candidates) {
+      if (existsSync(candidate)) {
+        return candidate;
+      }
+    }
+  }
+  return null;
+}
+
+function findPublicDir(): string | null {
+  for (const root of getCandidateRoots()) {
+    const candidate = path.join(root, "public");
+    if (existsSync(candidate)) return candidate;
+    const distCandidate = path.join(root, "dist", "public");
+    if (existsSync(distCandidate)) return distCandidate;
+  }
+  return null;
+}
+
+function resolveScreenFile(screen: string, filename = "code.html"): string | null {
+  for (const root of getCandidateRoots()) {
+    const candidates = [
+      path.join(root, "stitch_crisisgrid_emergency_command_platform", screen, filename),
+      path.join(root, "dist", "stitch_crisisgrid_emergency_command_platform", screen, filename),
+    ];
+    for (const candidate of candidates) {
+      if (existsSync(candidate)) {
+        return candidate;
+      }
+    }
+  }
+  return null;
+}
+
+function findScreensDir(): string | null {
+  for (const root of getCandidateRoots()) {
+    const candidate = path.join(root, "stitch_crisisgrid_emergency_command_platform");
+    if (existsSync(candidate)) return candidate;
+    const distCandidate = path.join(root, "dist", "stitch_crisisgrid_emergency_command_platform");
+    if (existsSync(distCandidate)) return distCandidate;
+  }
+  return null;
+}
+
+function sendHtmlFileSafely(
+  response: Response,
+  filename: string,
+  fallbackTitle: string,
+): void {
+  const resolved = resolvePublicFile(filename);
+  if (resolved && existsSync(resolved)) {
+    response.sendFile(resolved, (error) => {
+      if (error && !response.headersSent) {
+        console.error(`[CRISISGRID] Failed sending ${filename}:`, error);
+        response
+          .status(500)
+          .type("html")
+          .send(
+            `<!DOCTYPE html><html><head><title>CRISISGRID</title></head><body style="background:#0f131d;color:#dfe2f0;font-family:sans-serif;padding:32px;text-align:center;"><h2>CRISISGRID System Temporarily Unavailable</h2><p>${fallbackTitle} is loading. Please refresh.</p></body></html>`,
+          );
+      }
+    });
+    return;
+  }
+
+  console.error(
+    `[CRISISGRID] Missing frontend file "${filename}". Candidate roots searched:`,
+    getCandidateRoots(),
+  );
+
+  // If access.html is specifically requested but somehow missing, try login.html fallback
+  if (filename === "access.html") {
+    const loginFallback = resolvePublicFile("login.html");
+    if (loginFallback && existsSync(loginFallback)) {
+      response.sendFile(loginFallback);
+      return;
+    }
+  }
+
+  response
+    .status(404)
+    .type("html")
+    .send(
+      `<!DOCTYPE html><html><head><title>CRISISGRID — ${fallbackTitle}</title></head><body style="background:#0f131d;color:#dfe2f0;font-family:sans-serif;padding:40px;text-align:center;"><h2 style="color:#adc6ff;">CRISISGRID — ${fallbackTitle}</h2><p>The requested page is temporarily initializing. Please access <a href="/login" style="color:#4ae176;">Command Authorization</a> or retry.</p></body></html>`,
+    );
+}
+
 const SCREEN_SLUGS = new Set([
   "allocation_confirmed_dispatched",
   "authority_review_authorization",
@@ -556,15 +642,15 @@ export function createApp(
   app.use("/api", api);
 
   app.get("/login", (_request, response) => {
-    response.sendFile(path.join(PROJECT_ROOT, "public", "login.html"));
+    sendHtmlFileSafely(response, "login.html", "Emergency Command Authorization");
   });
 
   app.get("/access", (_request, response) => {
-    response.sendFile(path.join(PROJECT_ROOT, "public", "access.html"));
+    sendHtmlFileSafely(response, "access.html", "Select Access Mode");
   });
 
   app.get("/public", (_request, response) => {
-    response.sendFile(path.join(PROJECT_ROOT, "public", "public_information.html"));
+    sendHtmlFileSafely(response, "public_information.html", "Public Information Portal");
   });
 
   app.get("/public-alerts", (_request, response) => {
@@ -577,6 +663,18 @@ export function createApp(
     );
   });
 
+  app.get("/command-center", (_request, response) => {
+    response.redirect("/command");
+  });
+
+  app.get("/dashboard", (request, response, next) => {
+    if (request.accepts("html") && !request.xhr) {
+      response.redirect("/command");
+    } else {
+      next();
+    }
+  });
+
   app.get("/incidents", (_request, response) => {
     response.redirect(
       "/stitch_crisisgrid_emergency_command_platform/live_incidents_system_impact/code.html",
@@ -587,6 +685,10 @@ export function createApp(
     response.redirect(
       "/stitch_crisisgrid_emergency_command_platform/authority_review_authorization/code.html",
     );
+  });
+
+  app.get("/authority-review", (_request, response) => {
+    response.redirect("/authority");
   });
 
   app.get("/capacity", (_request, response) => {
@@ -610,7 +712,13 @@ export function createApp(
         return;
       }
 
-      const screenPath = path.join(SCREENS_DIRECTORY, screen, "code.html");
+      const screenPath = resolveScreenFile(screen, "code.html");
+      if (!screenPath || !existsSync(screenPath)) {
+        console.error(`[CRISISGRID] Screen file not found for ${screen}`);
+        next();
+        return;
+      }
+
       const html = await readFile(screenPath, "utf8");
       const wiredHtml = html.replace(
         /<\/body\s*>/i,
@@ -625,31 +733,47 @@ export function createApp(
   );
 
   app.get("/crisisgrid.js", (_request, response, next) => {
-    response.sendFile(path.join(PROJECT_ROOT, "public", "crisisgrid.js"), (error) => {
-      if (error) next(error);
-    });
+    const jsPath = resolvePublicFile("crisisgrid.js");
+    if (jsPath && existsSync(jsPath)) {
+      response.sendFile(jsPath, (error) => {
+        if (error) next(error);
+      });
+    } else {
+      next();
+    }
   });
 
   app.get("/crisisgrid_logo.png", (_request, response, next) => {
-    response.sendFile(path.join(PROJECT_ROOT, "public", "crisisgrid_logo.png"), (error) => {
-      if (error) next(error);
-    });
+    const imgPath = resolvePublicFile("crisisgrid_logo.png");
+    if (imgPath && existsSync(imgPath)) {
+      response.sendFile(imgPath, (error) => {
+        if (error) next(error);
+      });
+    } else {
+      next();
+    }
   });
 
-  app.use(express.static(path.join(PROJECT_ROOT, "public")));
+  const publicDir = findPublicDir();
+  if (publicDir) {
+    app.use(express.static(publicDir));
+  }
 
   app.get("/", (_request, response) => {
     response.redirect("/access");
   });
 
-  app.use(
-    "/stitch_crisisgrid_emergency_command_platform",
-    express.static(SCREENS_DIRECTORY, {
-      dotfiles: "deny",
-      index: false,
-      fallthrough: true,
-    }),
-  );
+  const screensDir = findScreensDir();
+  if (screensDir) {
+    app.use(
+      "/stitch_crisisgrid_emergency_command_platform",
+      express.static(screensDir, {
+        dotfiles: "deny",
+        index: false,
+        fallthrough: true,
+      }),
+    );
+  }
 
   app.use((_request, response) => {
     response.status(404).json({
