@@ -3778,6 +3778,9 @@ export async function getLiveResourceNegotiation(
   },
 ) {
   const activeInc = inMemoryCrisisRepository.listIncidents().find((i) => i.status === "active");
+  if (!activeInc && !activeCrisisKey) {
+    throw new ServiceError("No active crisis detected. Simulate a crisis before starting resource negotiation.", 404);
+  }
   const rawKey =
     activeCrisisKey ||
     (activeInc?.scenario_type as string) ||

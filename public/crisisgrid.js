@@ -2331,15 +2331,13 @@
         }
       } else if (
         dataPath === "resource-allocations" ||
-        /resource units|resource allocations/i.test(label)
+        /resource units|resource allocations|resource negotiation/i.test(label)
       ) {
-        if (currentHref === "#" || currentHref === "") {
-          anchor.href = "#";
-          anchor.addEventListener("click", function (e) {
-            e.preventDefault();
-            openLiveNegotiationModal();
-          });
-        }
+        anchor.href = "#";
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          openLiveNegotiationModal();
+        });
       } else if (
         dataPath === "comms-broadcast" ||
         /civic broadcast/i.test(label)
@@ -2433,6 +2431,524 @@
         node.classList.remove("bg-primary-container", "text-on-primary-container", "font-medium");
         node.classList.add("text-on-surface-variant", "hover:bg-surface-container-high", "hover:text-on-surface");
         node.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  function escapeHtml(str) {
+    if (str == null) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function showNoActiveCrisisAlert() {
+    let alertBox = document.getElementById("no-active-crisis-modal");
+    if (!alertBox) {
+      alertBox = document.createElement("div");
+      alertBox.id = "no-active-crisis-modal";
+      alertBox.className =
+        "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4";
+      document.body.appendChild(alertBox);
+    }
+    alertBox.innerHTML = `
+      <div class="w-full max-w-md bg-surface-container border border-amber-400/40 rounded-2xl shadow-2xl p-6 flex flex-col gap-4 text-on-surface">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-400/15 border border-amber-400/30 flex items-center justify-center text-amber-400 flex-shrink-0">
+            <span class="material-symbols-outlined text-[24px]">crisis_alert</span>
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-base font-bold text-on-surface">No Active Crisis Detected</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed">
+              No active crisis detected. Simulate a crisis before starting resource negotiation.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-outline-variant/30 font-mono text-xs">
+          <button id="btn-dismiss-no-crisis" type="button" class="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">
+            Dismiss
+          </button>
+          <button id="btn-start-sim-from-no-crisis" type="button" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold transition-colors flex items-center gap-1.5 cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">bolt</span>
+            <span>Simulate Crisis</span>
+          </button>
+        </div>
+      </div>
+    `;
+    alertBox.classList.remove("hidden");
+    alertBox.classList.add("flex");
+
+    alertBox.querySelector("#btn-dismiss-no-crisis")?.addEventListener("click", function () {
+      alertBox.classList.add("hidden");
+      alertBox.classList.remove("flex");
+    });
+    alertBox.querySelector("#btn-start-sim-from-no-crisis")?.addEventListener("click", function () {
+      alertBox.classList.add("hidden");
+      alertBox.classList.remove("flex");
+      openSimulationModal();
+    });
+  }
+
+  let resetDemoModalEl = null;
+
+  function ensureResetDemoModal() {
+    if (!resetDemoModalEl) {
+      resetDemoModalEl = document.getElementById("crisisgrid-reset-demo-modal");
+    }
+    if (!resetDemoModalEl) {
+      resetDemoModalEl = document.createElement("div");
+      resetDemoModalEl.id = "crisisgrid-reset-demo-modal";
+      resetDemoModalEl.className =
+        "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4";
+      document.body.appendChild(resetDemoModalEl);
+    }
+    return resetDemoModalEl;
+  }
+
+  function closeResetDemoModal() {
+    if (resetDemoModalEl) {
+      resetDemoModalEl.classList.add("hidden");
+      resetDemoModalEl.classList.remove("flex");
+    }
+  }
+
+  function openResetDemoModal() {
+    const modal = ensureResetDemoModal();
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    modal.innerHTML = `
+      <div class="w-full max-w-md bg-surface-container border border-outline-variant/40 rounded-2xl shadow-2xl p-6 flex flex-col gap-4 text-on-surface">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-outline flex-shrink-0">
+            <span class="material-symbols-outlined text-[24px]">restart_alt</span>
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-base font-bold text-on-surface">Reset Demo Environment</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed">
+              This will resolve active crisis simulations, clear pending priority requests, and restore Bengaluru city infrastructure to nominal STABLE baseline (45.0 MW capacity).
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-outline-variant/30 font-mono text-xs">
+          <button id="cancel-reset-demo-btn" type="button" class="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">
+            Cancel
+          </button>
+          <button id="confirm-reset-demo-btn" type="button" class="px-4 py-2 rounded-xl bg-error hover:bg-error-container text-on-error font-semibold transition-colors flex items-center gap-1.5 cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+            <span>Confirm Reset</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    modal.querySelector("#cancel-reset-demo-btn")?.addEventListener("click", closeResetDemoModal);
+    modal.querySelector("#confirm-reset-demo-btn")?.addEventListener("click", async function () {
+      const confirmBtn = modal.querySelector("#confirm-reset-demo-btn");
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Resetting...</span>`;
+      try {
+        await request("/api/simulation/reset", { method: "POST" });
+        closeResetDemoModal();
+        closeLiveNegotiationModal();
+        await refreshDashboard(false);
+        showNotice("Demo reset complete. CITY STATUS: STABLE. Baseline 45.0 MW capacity restored.", false, false);
+      } catch (err) {
+        console.error("Demo reset error:", err);
+        showNotice("Failed to reset demo: " + (err instanceof Error ? err.message : "Unknown error"), true, true);
+        closeResetDemoModal();
+      }
+    });
+  }
+
+  let liveNegotiationModalEl = null;
+
+  function ensureLiveNegotiationModal() {
+    if (!liveNegotiationModalEl) {
+      liveNegotiationModalEl = document.getElementById("crisisgrid-live-negotiation-modal");
+    }
+    if (!liveNegotiationModalEl) {
+      liveNegotiationModalEl = document.createElement("div");
+      liveNegotiationModalEl.id = "crisisgrid-live-negotiation-modal";
+      liveNegotiationModalEl.className =
+        "fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-6 overflow-y-auto";
+      document.body.appendChild(liveNegotiationModalEl);
+    }
+    return liveNegotiationModalEl;
+  }
+
+  function closeLiveNegotiationModal() {
+    if (liveNegotiationModalEl) {
+      liveNegotiationModalEl.classList.add("hidden");
+      liveNegotiationModalEl.classList.remove("flex");
+    }
+  }
+
+  async function openLiveNegotiationModal() {
+    const hasActiveCrisis =
+      dashboard &&
+      dashboard.status === "crisis_active" &&
+      dashboard.activeIncident &&
+      dashboard.activeIncident.status === "active";
+
+    if (!hasActiveCrisis) {
+      showNoActiveCrisisAlert();
+      return;
+    }
+
+    const modal = ensureLiveNegotiationModal();
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+
+    modal.innerHTML = `
+      <div class="relative w-full max-w-4xl bg-surface-container border border-outline-variant/40 rounded-2xl shadow-2xl p-8 flex flex-col items-center justify-center gap-4 text-center my-auto text-on-surface">
+        <div class="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <div>
+          <h3 class="text-lg font-bold text-on-surface">Initializing Resource Negotiation...</h3>
+          <p class="text-xs text-outline font-mono mt-1">Connecting to 4 specialized operational agents &amp; loading active crisis telemetry...</p>
+        </div>
+      </div>
+    `;
+
+    try {
+      const activeScenarioKey =
+        dashboard.activeIncident.scenarioKey ||
+        dashboard.activeIncident.scenario_type ||
+        dashboard.activeIncident.incidentType;
+      const data = await request("/api/negotiation?scenario=" + encodeURIComponent(activeScenarioKey || ""));
+      renderLiveNegotiationView(data);
+    } catch (err) {
+      console.error("Unable to start resource negotiation:", err);
+      modal.innerHTML = `
+        <div class="relative w-full max-w-md bg-surface-container border border-error/40 rounded-2xl shadow-2xl p-6 flex flex-col gap-4 text-on-surface my-auto">
+          <div class="flex items-center gap-3 text-error">
+            <span class="material-symbols-outlined text-[28px]">error</span>
+            <h3 class="text-base font-bold">Unable to start resource negotiation.</h3>
+          </div>
+          <p class="text-xs text-on-surface-variant font-mono leading-relaxed">
+            ${escapeHtml(err instanceof Error ? err.message : "A failure occurred while initializing the multi-agent negotiation engine.")}
+          </p>
+          <div class="flex justify-end pt-2">
+            <button id="close-negotiation-err-btn" class="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-semibold cursor-pointer">
+              Close
+            </button>
+          </div>
+        </div>
+      `;
+      modal.querySelector("#close-negotiation-err-btn")?.addEventListener("click", closeLiveNegotiationModal);
+    }
+  }
+
+  function renderLiveNegotiationView(data) {
+    const modal = ensureLiveNegotiationModal();
+    const crisis = data.activeCrisis || {};
+    const cap = data.capacitySummary || {};
+    const agents = data.agentParticipants || [];
+    const stream = data.negotiationStream || [];
+    const allocation = data.proposedAllocation || [];
+    const rationale = data.coordinatorRationale || "";
+    const hasConflict = (cap.allocationGapMw || 0) > 0 || (cap.totalRequestedMw || 0) > (cap.totalEmergencyReserveMw || 45);
+
+    modal.innerHTML = `
+      <div class="relative w-full max-w-5xl bg-surface-container-low border border-outline-variant/50 rounded-2xl shadow-2xl p-5 sm:p-7 flex flex-col gap-5 text-on-surface max-h-[92vh] overflow-y-auto">
+        <!-- Top Title & Badge Bar -->
+        <div class="flex items-start justify-between gap-4 border-b border-outline-variant/30 pb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="material-symbols-outlined text-primary text-[22px]">smart_toy</span>
+              <span class="font-mono text-xs uppercase tracking-wider text-primary font-bold">AUTONOMOUS MULTI-AGENT COORDINATION</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+              <span class="font-mono text-[11px] text-tertiary">ARBITRATION PROTOCOL ACTIVE</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-on-surface">LIVE RESOURCE NEGOTIATION</h2>
+            <p class="text-xs text-on-surface-variant font-mono mt-0.5">
+              4 specialized infrastructure agents actively negotiating critical capacity under 45.0 MW municipal statutory ceiling.
+            </p>
+          </div>
+          <button id="close-negotiation-btn" class="p-2 rounded-xl text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer" title="Close Negotiation">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <!-- Active Crisis & Capacity Snapshot -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 p-4 rounded-xl bg-surface-container border border-outline-variant/30">
+          <!-- Col 1: Incident Identity -->
+          <div class="space-y-1 border-b lg:border-b-0 lg:border-r border-outline-variant/30 pb-3 lg:pb-0 lg:pr-3">
+            <div class="text-[10px] font-mono uppercase text-outline flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px] text-amber-400">crisis_alert</span>
+              <span>Target Crisis Grounding</span>
+            </div>
+            <div class="text-sm font-bold text-on-surface flex items-center gap-2">
+              <span>${escapeHtml(crisis.title || "Active Emergency")}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-error/20 text-error uppercase">${escapeHtml(crisis.severity || "CRITICAL")}</span>
+            </div>
+            <div class="text-xs text-on-surface-variant flex items-center gap-1 font-mono">
+              <span class="material-symbols-outlined text-[14px] text-outline">pin_drop</span>
+              <span>${escapeHtml(crisis.location || "Bengaluru Metro")}</span>
+            </div>
+          </div>
+
+          <!-- Col 2: Demand & Pool -->
+          <div class="space-y-1 border-b lg:border-b-0 lg:border-r border-outline-variant/30 pb-3 lg:pb-0 lg:px-3">
+            <div class="text-[10px] font-mono uppercase text-outline">Emergency Reserve Ceiling</div>
+            <div class="flex items-baseline gap-2">
+              <span class="text-2xl font-bold text-primary font-mono">${Number(cap.totalEmergencyReserveMw || 45).toFixed(1)} <span class="text-xs text-outline">MW MAX</span></span>
+              <span class="text-xs font-mono text-outline">/ 4 Sectors</span>
+            </div>
+            <div class="text-xs font-mono text-on-surface-variant flex items-center justify-between">
+              <span>Total Demanded: <strong class="text-amber-400">${Number(cap.totalRequestedMw || 0).toFixed(1)} MW</strong></span>
+              <span>Net Gap: <strong class="${hasConflict ? 'text-error' : 'text-tertiary'}">${hasConflict ? '-' + Number(cap.allocationGapMw || 0).toFixed(1) + ' MW' : '0.0 MW'}</strong></span>
+            </div>
+          </div>
+
+          <!-- Col 3: Conflict Status -->
+          <div class="space-y-1 lg:pl-3 flex flex-col justify-center">
+            <div class="text-[10px] font-mono uppercase text-outline">Arbitration Verdict</div>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${hasConflict ? 'bg-error-container/20 border border-error/40 text-error' : 'bg-tertiary/15 border border-tertiary/30 text-tertiary'} text-xs font-mono font-bold">
+              <span class="material-symbols-outlined text-[16px]">${hasConflict ? 'warning' : 'verified'}</span>
+              <span>${hasConflict ? 'DEFICIT RESOLVED VIA CONCESSIONS' : 'DEMANDS FULLY BALANCED'}</span>
+            </div>
+            <div class="text-[11px] font-mono text-outline">
+              100% within 45.0 MW capacity ceiling
+            </div>
+          </div>
+        </div>
+
+        <!-- Stepper / Lifecycle Indicator -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
+          <div class="p-2.5 rounded-lg bg-surface-container border border-tertiary/40 text-tertiary flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">check_circle</span>
+            <span>1. Agents Deployed</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-surface-container border border-tertiary/40 text-tertiary flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">check_circle</span>
+            <span>2. Demands Submitted</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-surface-container border border-tertiary/40 text-tertiary flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">check_circle</span>
+            <span>3. Deficit Arbitrated</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-surface-container border border-primary/40 text-primary flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">pending_actions</span>
+            <span>4. Awaiting Authority</span>
+          </div>
+        </div>
+
+        <!-- The 4 Operational Agents Grid -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-mono text-xs uppercase tracking-wider text-outline font-semibold">Specialized Infrastructure Agents</span>
+            <span class="font-mono text-[11px] text-outline">Statutory safety floors enforced</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            ${agents.map(function (agent) {
+              const isProtected = agent.status === "PROTECTED";
+              const isConcession = agent.status === "CONCESSION_OFFERED";
+              const badgeClass = isProtected
+                ? "bg-tertiary/15 text-tertiary border-tertiary/30"
+                : isConcession
+                  ? "bg-amber-400/15 text-amber-400 border-amber-400/30"
+                  : "bg-primary/15 text-primary border-primary/30";
+              return `
+                <div class="p-3.5 rounded-xl bg-surface-container border border-outline-variant/30 flex flex-col justify-between gap-2.5">
+                  <div>
+                    <div class="flex items-center justify-between gap-1 mb-2">
+                      <div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined text-[18px]">${agent.icon || 'hub'}</span>
+                      </div>
+                      <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${badgeClass}">
+                        ${agent.status}
+                      </span>
+                    </div>
+                    <div class="text-xs font-bold text-on-surface">${escapeHtml(agent.agentName)}</div>
+                    <div class="text-[11px] text-outline font-mono mb-2">${escapeHtml(agent.domain)}</div>
+                    
+                    <div class="p-2 rounded bg-surface-container-lowest/60 text-[11px] font-mono space-y-1 mb-2">
+                      <div class="flex justify-between">
+                        <span class="text-outline">Demanded:</span>
+                        <strong class="text-on-surface">${Number(agent.requestedCapacityMw).toFixed(1)} MW</strong>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-outline">Safety Floor:</span>
+                        <strong class="text-amber-400">${Number(agent.safetyFloorMw).toFixed(1)} MW</strong>
+                      </div>
+                    </div>
+
+                    <p class="text-[11px] text-on-surface-variant leading-relaxed line-clamp-3" title="${escapeHtml(agent.rationale)}">
+                      ${escapeHtml(agent.rationale)}
+                    </p>
+                  </div>
+                  <div class="text-[10px] font-mono text-outline pt-2 border-t border-outline-variant/20 truncate" title="${escapeHtml(agent.operationalImpactIfUnderfunded)}">
+                    ⚠️ ${escapeHtml(agent.operationalImpactIfUnderfunded)}
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+
+        <!-- Autonomous Multi-Agent Negotiation Stream -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-mono text-xs uppercase tracking-wider text-outline font-semibold">Autonomous Negotiation Event Stream</span>
+            <span class="font-mono text-[11px] text-outline">${stream.length} Agent Interactions (IST)</span>
+          </div>
+          <div class="rounded-xl bg-surface-container-lowest/70 border border-outline-variant/30 p-3 max-h-48 overflow-y-auto space-y-2.5 font-mono text-xs">
+            ${stream.map(function (ev) {
+              const isCoord = ev.senderRole === "coordinator";
+              const roleColor = isCoord ? "text-primary border-primary/30 bg-primary/10" : "text-amber-400 border-amber-400/30 bg-amber-400/10";
+              return `
+                <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20 flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                  <div class="flex items-start gap-2 min-w-0">
+                    <div class="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 text-primary bg-surface-container-high mt-0.5">
+                      <span class="material-symbols-outlined text-[15px]">${ev.senderIcon || 'smart_toy'}</span>
+                    </div>
+                    <div class="space-y-0.5 min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="px-1.5 py-0.2 rounded text-[10px] font-bold border ${roleColor}">${escapeHtml(ev.senderName)}</span>
+                        <span class="text-[10px] text-outline uppercase">${escapeHtml(ev.messageType)}</span>
+                        <span class="text-[10px] text-outline/70">• ${escapeHtml(ev.timestampIst)}</span>
+                      </div>
+                      <p class="text-xs text-on-surface leading-relaxed">${escapeHtml(ev.message)}</p>
+                    </div>
+                  </div>
+                  ${ev.highlightedMetrics ? `
+                    <div class="flex-shrink-0 text-[10px] text-outline bg-surface-container-lowest px-2 py-1 rounded border border-outline-variant/30">
+                      ${ev.highlightedMetrics.requestedMw ? `Req: ${ev.highlightedMetrics.requestedMw}MW ` : ''}
+                      ${ev.highlightedMetrics.minimumSafeMw ? `Floor: ${ev.highlightedMetrics.minimumSafeMw}MW ` : ''}
+                      ${ev.highlightedMetrics.proposedMw ? `Prop: ${ev.highlightedMetrics.proposedMw}MW` : ''}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+
+        <!-- Central Coordinator Proposed Allocation Table -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-mono text-xs uppercase tracking-wider text-outline font-semibold">Central Coordinator Arbitration &amp; Allocation Proposal</span>
+            <span class="font-mono text-[11px] text-tertiary">All allocations satisfy safety floors</span>
+          </div>
+          <div class="overflow-x-auto rounded-xl border border-outline-variant/30 bg-surface-container">
+            <table class="w-full text-left font-mono text-xs">
+              <thead class="bg-surface-container-high/60 text-outline border-b border-outline-variant/30 text-[11px]">
+                <tr>
+                  <th class="p-3">Sector</th>
+                  <th class="p-3">Requested</th>
+                  <th class="p-3">Safety Floor</th>
+                  <th class="p-3">Proposed</th>
+                  <th class="p-3">Adjustment</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3">Trade-off Rationale</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/20">
+                ${allocation.map(function (row) {
+                  const adj = Number(row.adjustmentMw || 0);
+                  const adjText = adj > 0 ? `+${adj.toFixed(1)} MW` : adj < 0 ? `${adj.toFixed(1)} MW` : "0.0 MW";
+                  const adjColor = adj < 0 ? "text-amber-400" : adj > 0 ? "text-tertiary" : "text-outline";
+                  return `
+                    <tr class="hover:bg-surface-container-high/30 transition-colors">
+                      <td class="p-3 font-semibold text-on-surface">${escapeHtml(row.sectorName)}</td>
+                      <td class="p-3 text-on-surface-variant">${Number(row.requestedMw).toFixed(1)} MW</td>
+                      <td class="p-3 text-outline">${Number(row.minimumSafeMw).toFixed(1)} MW</td>
+                      <td class="p-3 font-bold text-primary">${Number(row.allocatedMw).toFixed(1)} MW</td>
+                      <td class="p-3 font-bold ${adjColor}">${adjText}</td>
+                      <td class="p-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${row.status === 'FULL_ALLOCATION' ? 'bg-tertiary/15 text-tertiary' : 'bg-amber-400/15 text-amber-400'}">
+                          ${escapeHtml(row.status)}
+                        </span>
+                      </td>
+                      <td class="p-3 text-[11px] text-on-surface-variant font-sans">${escapeHtml(row.tradeOffRationale)}</td>
+                    </tr>
+                  `;
+                }).join("")}
+                <tr class="bg-surface-container-high/40 font-bold border-t border-outline-variant/40">
+                  <td class="p-3 text-on-surface">TOTAL EMERGENCY DISPATCH</td>
+                  <td class="p-3 text-on-surface-variant">${Number(cap.totalRequestedMw || 0).toFixed(1)} MW</td>
+                  <td class="p-3 text-outline">—</td>
+                  <td class="p-3 text-tertiary text-sm">${Number(cap.totalAllocatedMw || 45).toFixed(1)} MW / 45.0 MW</td>
+                  <td class="p-3 text-outline">—</td>
+                  <td class="p-3 text-tertiary">STRICTLY BALANCED</td>
+                  <td class="p-3 text-[11px] text-tertiary font-sans">100% Within Maximum Municipal Capacity</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Coordinator Rationale Box -->
+        ${rationale ? `
+          <div class="p-3.5 rounded-xl bg-surface-container-lowest/80 border border-primary/30 flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-[18px]">verified_user</span>
+            </div>
+            <div class="space-y-1">
+              <div class="text-[11px] font-mono uppercase font-bold text-primary">CENTRAL COORDINATOR STATUTORY ATTESTATION</div>
+              <p class="text-xs text-on-surface-variant leading-relaxed font-sans">${escapeHtml(rationale)}</p>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Interactive Actions Footer -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-outline-variant/30 font-mono text-xs">
+          <button id="btn-reallocate-surge" type="button" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/50 text-on-surface transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+            <span class="material-symbols-outlined text-[16px] text-amber-400">add_alert</span>
+            <span>Simulate ICU Surge (+3 MW)</span>
+          </button>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button id="btn-close-negotiation-bottom" type="button" class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">
+              Close
+            </button>
+            <button id="btn-send-to-authority" type="button" class="px-5 py-2.5 rounded-xl bg-tertiary hover:bg-tertiary-container text-on-tertiary font-semibold tracking-wide transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
+              <span class="material-symbols-outlined text-[18px]">gavel</span>
+              <span>SEND TO AUTHORITY REVIEW →</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Wire modal action listeners
+    modal.querySelector("#close-negotiation-btn")?.addEventListener("click", closeLiveNegotiationModal);
+    modal.querySelector("#btn-close-negotiation-bottom")?.addEventListener("click", closeLiveNegotiationModal);
+    
+    modal.querySelector("#btn-send-to-authority")?.addEventListener("click", function () {
+      closeLiveNegotiationModal();
+      window.location.assign(PAGE_PATHS.authority_review_authorization);
+    });
+
+    modal.querySelector("#btn-reallocate-surge")?.addEventListener("click", async function () {
+      const surgeBtn = modal.querySelector("#btn-reallocate-surge");
+      surgeBtn.disabled = true;
+      surgeBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Re-arbitrating…</span>';
+      try {
+        const activeScenarioKey =
+          crisis.scenarioKey ||
+          dashboard?.activeIncident?.scenarioKey ||
+          dashboard?.activeIncident?.scenario_type ||
+          "industrial_fire";
+        const result = await request("/api/negotiation/reallocate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            organizationName: "BMS Hospital",
+            resourceType: "Emergency Electricity",
+            requestedAmountMw: 3,
+            reason: "Critical ICU trauma surge",
+            scenario: activeScenarioKey,
+          }),
+        });
+        renderLiveNegotiationView(result);
+      } catch (err) {
+        console.error("Reallocation error:", err);
+        surgeBtn.disabled = false;
+        surgeBtn.innerHTML = '<span class="material-symbols-outlined text-[16px]">error</span><span>Re-arbitration failed</span>';
       }
     });
   }
@@ -3920,10 +4436,35 @@
         const target = event.target;
         if (!(target instanceof Element)) return;
 
-        const simBtn = target.closest("#crisisgrid-simulate-crisis-btn");
+        // 1. Simulate Crisis Button
+        const simBtn = target.closest("#crisisgrid-simulate-crisis-btn") ||
+                       target.closest("#simulateBtn") ||
+                       (target.closest("button") && /simulate crisis/i.test(target.closest("button").textContent));
         if (simBtn) {
           event.preventDefault();
           openSimulationModal();
+          return;
+        }
+
+        // 2. Reset Demo Button
+        const resetBtn = target.closest("#crisisgrid-reset-demo-btn") ||
+                         target.closest("#header-reset-demo-btn") ||
+                         target.closest("#crisisgrid-demo-reset-btn") ||
+                         (target.closest("button") && /reset demo/i.test(target.closest("button").textContent));
+        if (resetBtn) {
+          event.preventDefault();
+          openResetDemoModal();
+          return;
+        }
+
+        // 3. LIVE RESOURCE NEGOTIATION Button
+        const negBtn = target.closest("#crisisgrid-negotiation-btn") ||
+                       target.closest("[data-action='negotiation']") ||
+                       target.closest("a[data-path='resource-allocations']") ||
+                       (target.closest("button") && /live resource negotiation/i.test(target.closest("button").textContent));
+        if (negBtn) {
+          event.preventDefault();
+          openLiveNegotiationModal();
           return;
         }
 
@@ -4234,6 +4775,12 @@
       await refreshDashboard(true);
     } catch {
       return;
+    }
+
+    if (window.location.search.includes("action=negotiate")) {
+      setTimeout(function () {
+        openLiveNegotiationModal();
+      }, 350);
     }
 
     window.setInterval(function () {

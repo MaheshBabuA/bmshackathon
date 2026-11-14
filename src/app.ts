@@ -574,6 +574,12 @@ export function createApp(
     );
   });
 
+  app.get("/negotiation", (_request, response) => {
+    response.redirect(
+      "/stitch_crisisgrid_emergency_command_platform/city_command_center/code.html?action=negotiate",
+    );
+  });
+
   app.get(
     "/stitch_crisisgrid_emergency_command_platform/:screen/code.html",
     asyncRoute(async (request, response, next) => {
