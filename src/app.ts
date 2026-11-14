@@ -18,6 +18,7 @@ import {
   IncidentStatusSchema,
   ManualOverrideSchema,
   ModifyParametersSchema,
+  ReviewResourceRequestSchema,
 } from "./http/schemas.js";
 import {
   createRecommendation,
@@ -25,15 +26,22 @@ import {
   getDashboard,
   getEmergencyReport,
   getIncidentAnalysis,
+  getLiveResourceNegotiation,
+  getPublicAlerts,
+  publishCivicBroadcast,
+  getResourceRequest,
+  getResourceRequestRecommendation,
   getSectors,
   getSimulationScenarios,
   initiateCrisisSimulation,
   listIncidents,
+  listResourceRequests,
   markIncidentStatus,
   modifyAllocationParameters,
   resetCrisisSimulation,
   resetPlanSignatures,
   reviewAllocationPlan,
+  reviewResourceRequest,
   ServiceError,
   simulateDynamicAllocation,
   submitEmergencyReport,
@@ -174,6 +182,14 @@ export function createApp(
     "/dashboard",
     asyncRoute(async (_request, response) => {
       response.json(await getDashboard(database));
+    }),
+  );
+
+  api.get(
+    "/timeline",
+    asyncRoute(async (_request, response) => {
+      const data = await getDashboard(database);
+      response.json({ timeline: data.incidentTimeline || [] });
     }),
   );
 
@@ -421,7 +437,9 @@ export function createApp(
       const scenario =
         typeof request.body?.scenario === "string"
           ? request.body.scenario
-          : "industrial_fire";
+          : typeof request.body?.scenarioKey === "string"
+            ? request.body.scenarioKey
+            : "industrial_fire";
       response
         .status(201)
         .json(await initiateCrisisSimulation(database, scenario));
@@ -435,7 +453,126 @@ export function createApp(
     }),
   );
 
+  api.get(
+    "/resource-requests",
+    asyncRoute(async (request, response) => {
+      const incidentId =
+        typeof request.query?.incident_id === "string"
+          ? request.query.incident_id
+          : undefined;
+      response.json(await listResourceRequests(database, incidentId));
+    }),
+  );
+
+  api.get(
+    "/resource-requests/:id",
+    asyncRoute(async (request, response) => {
+      const id = request.params.id;
+      if (!id) throw new ServiceError("Resource request ID is required.", 400);
+      response.json(await getResourceRequest(database, id));
+    }),
+  );
+
+  api.get(
+    "/resource-requests/:id/recommendation",
+    asyncRoute(async (request, response) => {
+      const id = request.params.id;
+      if (!id) throw new ServiceError("Resource request ID is required.", 400);
+      response.json(await getResourceRequestRecommendation(database, id));
+    }),
+  );
+
+  api.post(
+    "/resource-requests/:id/review",
+    asyncRoute(async (request, response) => {
+      const id = request.params.id;
+      if (!id) throw new ServiceError("Resource request ID is required.", 400);
+      const review = ReviewResourceRequestSchema.parse(request.body);
+      response.json(await reviewResourceRequest(database, id, review));
+    }),
+  );
+
+  api.get(
+    "/negotiation/current",
+    asyncRoute(async (request, response) => {
+      const scenario =
+        typeof request.query?.scenario === "string"
+          ? request.query.scenario
+          : undefined;
+      response.json(await getLiveResourceNegotiation(database, scenario));
+    }),
+  );
+
+  api.post(
+    "/negotiation/reallocate",
+    asyncRoute(async (request, response) => {
+      const { organizationName, resourceType, requestedAmountMw, reason, scenario } = request.body ?? {};
+      response.json(
+        await getLiveResourceNegotiation(database, scenario, {
+          organizationName: typeof organizationName === "string" ? organizationName : "BMS Hospital",
+          resourceType: typeof resourceType === "string" ? resourceType : "Emergency Electricity",
+          requestedAmountMw: typeof requestedAmountMw === "number" ? requestedAmountMw : 3,
+          reason: typeof reason === "string" ? reason : "Critical ICU trauma surge",
+        }),
+      );
+    }),
+  );
+
+  api.get(
+    "/public/alerts",
+    asyncRoute(async (_request, response) => {
+      response.json(await getPublicAlerts(database));
+    }),
+  );
+
+  api.post(
+    "/public/broadcast",
+    asyncRoute(async (request, response) => {
+      response.json(await publishCivicBroadcast(database, request.body ?? {}));
+    }),
+  );
+
   app.use("/api", api);
+
+  app.get("/login", (_request, response) => {
+    response.sendFile(path.join(PROJECT_ROOT, "public", "login.html"));
+  });
+
+  app.get("/access", (_request, response) => {
+    response.sendFile(path.join(PROJECT_ROOT, "public", "access.html"));
+  });
+
+  app.get("/public", (_request, response) => {
+    response.sendFile(path.join(PROJECT_ROOT, "public", "public_information.html"));
+  });
+
+  app.get("/public-alerts", (_request, response) => {
+    response.redirect("/public");
+  });
+
+  app.get("/command", (_request, response) => {
+    response.redirect(
+      "/stitch_crisisgrid_emergency_command_platform/city_command_center/code.html",
+    );
+  });
+
+  app.get("/incidents", (_request, response) => {
+    response.redirect(
+      "/stitch_crisisgrid_emergency_command_platform/live_incidents_system_impact/code.html",
+    );
+  });
+
+  app.get("/authority", (_request, response) => {
+    response.redirect(
+      "/stitch_crisisgrid_emergency_command_platform/authority_review_authorization/code.html",
+    );
+  });
+
+  app.get("/capacity", (_request, response) => {
+    response.redirect(
+      "/stitch_crisisgrid_emergency_command_platform/city_command_center/code.html#section-infrastructure-sectors",
+    );
+  });
 
   app.get(
     "/stitch_crisisgrid_emergency_command_platform/:screen/code.html",
@@ -466,10 +603,16 @@ export function createApp(
     });
   });
 
+  app.get("/crisisgrid_logo.png", (_request, response, next) => {
+    response.sendFile(path.join(PROJECT_ROOT, "public", "crisisgrid_logo.png"), (error) => {
+      if (error) next(error);
+    });
+  });
+
+  app.use(express.static(path.join(PROJECT_ROOT, "public")));
+
   app.get("/", (_request, response) => {
-    response.redirect(
-      "/stitch_crisisgrid_emergency_command_platform/city_command_center/code.html",
-    );
+    response.redirect("/access");
   });
 
   app.use(

@@ -172,3 +172,13 @@ export const ManualOverrideSchema = z.object({
   requestedCapacityMw: z.number().finite().min(0).max(45),
 });
 export type ManualOverride = z.infer<typeof ManualOverrideSchema>;
+
+export const ReviewResourceRequestSchema = z.object({
+  decision: z
+    .enum(["APPROVE", "MODIFY", "REJECT", "approve", "modify", "reject"])
+    .transform((val) => val.toUpperCase() as "APPROVE" | "MODIFY" | "REJECT"),
+  allocatedAmount: z.number().finite().positive().optional(),
+  notes: z.string().trim().max(1_000).default(""),
+  reviewerRole: z.string().trim().max(120).default("Authority EOC Lead"),
+});
+export type ReviewResourceRequest = z.infer<typeof ReviewResourceRequestSchema>;

@@ -1,551 +1,837 @@
 <!DOCTYPE html>
 
-<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link rel="icon" type="image/png" href="/crisisgrid_logo.png"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primary-fixed-variant": "#004395", "on-secondary-fixed-variant": "#39485a", "secondary": "#b9c8de", "tertiary-container": "#00a74b", "on-tertiary": "#003915", "background": "#0f131d", "on-secondary-container": "#a7b6cc", "primary-fixed-dim": "#adc6ff", "on-primary-container": "#00285d", "error-container": "#93000a", "inverse-on-surface": "#2c303b", "surface-container-lowest": "#0a0e17", "on-surface-variant": "#c2c6d6", "surface": "#0f131d", "tertiary-fixed": "#6bff8f", "secondary-fixed-dim": "#b9c8de", "surface-container-high": "#262a34", "surface-tint": "#adc6ff", "on-error-container": "#ffdad6", "error": "#ffb4ab", "on-tertiary-fixed-variant": "#005321", "on-surface": "#dfe2f0", "primary": "#adc6ff", "surface-bright": "#353944", "inverse-primary": "#005ac2", "on-secondary-fixed": "#0d1c2d", "surface-variant": "#31353f", "secondary-container": "#39485a", "on-tertiary-container": "#003111", "on-tertiary-fixed": "#002109", "tertiary": "#4ae176", "surface-container-highest": "#31353f", "outline-variant": "#424754", "secondary-fixed": "#d4e4fa", "on-background": "#dfe2f0", "outline": "#8c909f", "surface-container-low": "#171c25", "primary-container": "#4d8eff", "surface-dim": "#0f131d", "on-primary-fixed": "#001a42", "primary-fixed": "d8e2ff", "on-error": "#690005", "on-secondary": "#233143", "inverse-surface": "#dfe2f0", "on-primary": "#002e6a", "surface-container": "#1b2029", "tertiary-fixed-dim": "#4ae176" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter-desktop": "1.5rem", "space-xl": "2rem", "space-xs": "0.25rem", "margin-desktop": "2rem", "gutter": "1rem", "space-md": "1rem", "space-sm": "0.5rem", "margin": "1rem", "space-lg": "1.5rem" }, "fontFamily": { "label-md": ["Inter"], "body-lg": ["Inter"], "body-sm": ["Inter"], "headline-md": ["Inter"], "label-sm": ["Inter"], "headline-lg": ["Inter"], "display": ["Inter"], "body-md": ["Inter"], "headline-lg-mobile": ["Inter"], "display-mobile": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "label-md": ["0.8125rem", { "lineHeight": "1rem", "letterSpacing": "0.01em", "fontWeight": "500" }], "body-lg": ["1rem", { "lineHeight": "1.625rem", "letterSpacing": "-0.005em", "fontWeight": "400" }], "body-sm": ["0.75rem", { "lineHeight": "1.25rem", "letterSpacing": "0.01em", "fontWeight": "400" }], "headline-md": ["1.25rem", { "lineHeight": "1.75rem", "letterSpacing": "-0.01em", "fontWeight": "500" }], "label-sm": ["0.6875rem", { "lineHeight": "0.875rem", "letterSpacing": "0.06em", "fontWeight": "600" }], "headline-lg": ["2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "600" }], "display": ["3rem", { "lineHeight": "3.5rem", "letterSpacing": "-0.03em", "fontWeight": "600" }], "body-md": ["0.875rem", { "lineHeight": "1.5rem", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg-mobile": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-mobile": ["2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-sm": ["1rem", { "lineHeight": "1.5rem", "letterSpacing": "0em", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.45)]"><div class="h-16 w-full px-gutter-desktop flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm"><img alt="CRISISGRID Emblem" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrAJFiMQH3LM9jOXVB1IUxlbdnqVXohruCCFkoqF6-BWAdrOdWpYHitOpM7WNE3re90Cdjs7BdkJt_4SQN4g3PRjrjbOtAd0OO4MFc-w7dyd-uzHkiSSfi2Uv2ZFvfomCoKdp8tSYlUiKpFJ9zdzcbZAGthgCbOZSfgS-FksL9jLtUxd7W7EDazGnWRRBHfRYtVcYplrtMKXIYlqjPEEXa9zq62q26-zl48Ym3P6wgWG"/><span class="font-headline-sm text-headline-sm font-semibold tracking-tight text-on-surface">CRISISGRID</span></div><div class="h-4 w-px bg-outline-variant/40 hidden md:block"></div><button class="flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container hover:text-on-surface text-on-surface-variant transition-colors"><span class="font-label-md text-label-md text-on-surface">Bengaluru Region</span><span class="material-symbols-outlined text-[16px] text-outline">expand_more</span></button><div class="flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-error-container/20"><span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span><span class="font-label-sm text-label-sm tracking-wider uppercase text-error font-semibold">CRISIS ACTIVE</span></div></div><nav class="hidden xl:flex items-center gap-1" data-active-classes="bg-primary-container text-on-primary-container rounded font-medium"><a class="px-space-md py-2 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" data-path="command-overview" href="#">Command Overview</a><a class="px-space-md py-2 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" data-path="live-incidents-impact" href="#">Live Incidents &amp; Impact</a><a class="px-space-md py-2 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" data-path="authority-review" href="#">Authority Review</a><a class="px-space-md py-2 font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" data-path="capacity-history" href="#">Capacity History</a></nav><div class="flex items-center gap-space-md"><div class="hidden sm:flex flex-col text-right"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">UTC+05:30</span><span class="font-label-md text-label-md font-mono text-on-surface">2026-03-30 14:42:18 IST</span></div><div class="h-4 w-px bg-outline-variant/40 hidden sm:block"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container-low"><span class="w-2 h-2 rounded-full bg-tertiary"></span><span class="font-label-sm text-label-sm uppercase text-on-surface-variant">OP-4 READY</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><aside class="fixed left-0 top-16 bottom-0 w-64 bg-surface-container-lowest/90 backdrop-blur-xl z-40 hidden lg:flex flex-col py-space-md shadow-[4px_0_24px_rgba(0,0,0,0.3)]"><div class="px-space-lg mb-space-md"><span class="font-label-sm text-label-sm uppercase tracking-widest text-outline">Operational Nodes</span></div><nav class="flex-1 px-space-sm space-y-1" data-active-classes="bg-primary-container text-on-primary-container font-medium rounded-lg"><a class="flex items-center justify-between px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md" data-path="command-overview" href="#"><span class="material-symbols-outlined text-[20px]">hub</span>Command Center</a><a class="flex items-center justify-between px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md" data-path="live-incidents-impact" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">warning</span><span>Incidents</span></div><span class="px-1.5 py-0.5 rounded-full bg-error-container/40 text-error font-label-sm text-label-sm">14</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md" data-path="authority-review" href="#"><span class="material-symbols-outlined text-[20px]">gavel</span>Authority Review</a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md" data-path="capacity-history" href="#"><span class="material-symbols-outlined text-[20px]">monitoring</span>Capacity &amp; Telemetry</a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md" data-path="resource-allocations" href="#"><span class="material-symbols-outlined text-[20px]">deployed_code</span>Resource Units</a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md" data-path="comms-broadcast" href="#"><span class="material-symbols-outlined text-[20px]">cell_tower</span>Civic Broadcast</a></nav><div class="px-space-md pt-space-md bg-surface-container-lowest"><div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1"><span class="font-label-sm text-label-sm text-outline uppercase">Secure Link</span><div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-md text-label-md font-mono">EOC-NET // SEC-4</span><span class="material-symbols-outlined text-[16px] text-tertiary">lock</span></div></div></div></aside><div class="lg:pl-64"><main class="relative pt-16 min-h-screen bg-surface"><div class="flex flex-col w-full">
-<!-- Sub-navigation Context Scrim / Subtle Glow Backing -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primary-fixed-variant": "#004395", "on-secondary-fixed-variant": "#39485a", "secondary": "#b9c8de", "tertiary-container": "#00a74b", "on-tertiary": "#003915", "background": "#0f131d", "on-secondary-container": "#a7b6cc", "primary-fixed-dim": "#adc6ff", "on-primary-container": "#00285d", "error-container": "#93000a", "inverse-on-surface": "#2c303b", "surface-container-lowest": "#0a0e17", "on-surface-variant": "#c2c6d6", "surface": "#0f131d", "tertiary-fixed": "#6bff8f", "secondary-fixed-dim": "#b9c8de", "surface-container-high": "#262a34", "surface-tint": "#adc6ff", "on-error-container": "#ffdad6", "error": "#ffb4ab", "on-tertiary-fixed-variant": "#005321", "on-surface": "#dfe2f0", "primary": "#adc6ff", "surface-bright": "#353944", "inverse-primary": "#005ac2", "on-secondary-fixed": "#0d1c2d", "surface-variant": "#31353f", "secondary-container": "#39485a", "on-tertiary-container": "#003111", "on-tertiary-fixed": "#002109", "tertiary": "#4ae176", "surface-container-highest": "#31353f", "outline-variant": "#424754", "secondary-fixed": "#d4e4fa", "on-background": "#dfe2f0", "outline": "#8c909f", "surface-container-low": "#171c25", "primary-container": "#4d8eff", "surface-dim": "#0f131d", "on-primary-fixed": "#001a42", "primary-fixed": "d8e2ff", "on-error": "#690005", "on-secondary": "#233143", "inverse-surface": "#dfe2f0", "on-primary": "#002e6a", "surface-container": "#1b2029", "tertiary-fixed-dim": "#4ae176" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter-desktop": "1.5rem", "space-xl": "2rem", "space-xs": "0.25rem", "margin-desktop": "2rem", "gutter": "1rem", "space-md": "1rem", "space-sm": "0.5rem", "margin": "1rem", "space-lg": "1.5rem" }, "fontFamily": { "label-md": ["Inter"], "body-lg": ["Inter"], "body-sm": ["Inter"], "headline-md": ["Inter"], "label-sm": ["Inter"], "headline-lg": ["Inter"], "display": ["Inter"], "body-md": ["Inter"], "headline-lg-mobile": ["Inter"], "display-mobile": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "label-md": ["0.8125rem", { "lineHeight": "1rem", "letterSpacing": "0.01em", "fontWeight": "500" }], "body-lg": ["1rem", { "lineHeight": "1.625rem", "letterSpacing": "-0.005em", "fontWeight": "400" }], "body-sm": ["0.75rem", { "lineHeight": "1.25rem", "letterSpacing": "0.01em", "fontWeight": "400" }], "headline-md": ["1.25rem", { "lineHeight": "1.75rem", "letterSpacing": "-0.01em", "fontWeight": "500" }], "label-sm": ["0.6875rem", { "lineHeight": "0.875rem", "letterSpacing": "0.06em", "fontWeight": "600" }], "headline-lg": ["2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "600" }], "display": ["3rem", { "lineHeight": "3.5rem", "letterSpacing": "-0.03em", "fontWeight": "600" }], "body-md": ["0.875rem", { "lineHeight": "1.5rem", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg-mobile": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-mobile": ["2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-sm": ["1rem", { "lineHeight": "1.5rem", "letterSpacing": "0em", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_4px_20px_rgba(0,0,0,0.45)]">
+  <div class="h-16 w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-6">
+    <!-- LEFT: Brand + Context -->
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <a href="/stitch_crisisgrid_emergency_command_platform/city_command_center/code.html" class="flex items-center gap-2.5 group">
+        <img alt="CRISISGRID Logo" class="h-8 w-auto object-contain rounded-md bg-white/95 p-0.5 shadow-sm group-hover:scale-105 transition-transform" src="/crisisgrid_logo.png"/>
+        <span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">CRISISGRID</span>
+      </a>
+      <div class="h-4 w-px bg-outline-variant/40 hidden sm:block"></div>
+      <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container-low/70 border border-outline-variant/20 text-on-surface-variant font-mono text-[11px]">
+        <span class="material-symbols-outlined text-[14px] text-outline">location_on</span>
+        <span>Bengaluru Region</span>
+      </div>
+    </div>
+
+    <!-- CENTER: Primary Navigation -->
+    <nav class="flex items-center gap-1 sm:gap-1.5" id="crisisgrid-primary-nav" aria-label="Primary Navigation">
+      <a class="nav-tab-link px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high" data-path="command-overview" href="/stitch_crisisgrid_emergency_command_platform/city_command_center/code.html">Command</a>
+      <a class="nav-tab-link px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high" data-path="live-incidents-impact" href="/stitch_crisisgrid_emergency_command_platform/live_incidents_system_impact/code.html">Incidents</a>
+      <a class="nav-tab-link px-3 py-1.5 rounded-lg text-[13px] font-semibold transition-all bg-primary/20 text-primary border border-primary/40 shadow-sm" data-path="authority-review" href="/stitch_crisisgrid_emergency_command_platform/authority_review_authorization/code.html" aria-current="page">Authority</a>
+      <a class="nav-tab-link px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high" data-path="capacity-history" href="/stitch_crisisgrid_emergency_command_platform/city_command_center/code.html#section-infrastructure-sectors">Capacity</a>
+    </nav>
+
+    <!-- RIGHT: System Status + Utilities -->
+    <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+      <!-- 1. Crisis Status Badge -->
+      <div id="header-crisis-status-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container/20 border border-error/30 text-error">
+        <span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+        <span id="header-crisis-status-text" class="font-mono text-[11px] font-semibold uppercase tracking-wider">CRISIS ACTIVE</span>
+      </div>
+
+      <!-- 2. System Health -->
+      <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container-low border border-outline-variant/30 text-on-surface-variant font-mono text-[11px]">
+        <span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+        <span>SYSTEM READY</span>
+      </div>
+
+      <!-- 3. Demo Reset -->
+      <button id="header-reset-demo-btn" type="button" class="flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/40 text-on-surface-variant hover:text-tertiary font-mono text-[11px] transition-colors cursor-pointer" title="Reset Demo to Nominal State">
+        <span class="material-symbols-outlined text-[14px]">refresh</span>
+        <span>Reset</span>
+      </button>
+
+      <!-- 4. Subtle IST Timestamp -->
+      <div class="hidden xl:flex flex-col text-right font-mono text-[10px] text-outline leading-tight border-l border-outline-variant/30 pl-2.5">
+        <span>IST (UTC+5:30)</span>
+        <span id="header-live-clock" class="text-on-surface-variant font-medium">14:42:18</span>
+      </div>
+
+      <!-- 5. User Avatar & Menu -->
+      <div class="relative" id="header-user-profile-container">
+        <button id="header-user-avatar-btn" type="button" class="w-8 h-8 rounded-full bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 flex items-center justify-center shadow-sm cursor-pointer transition-colors" title="Authorized Official Profile">
+          <span class="material-symbols-outlined text-[17px]">person</span>
+        </button>
+        <div id="header-user-menu-dropdown" class="hidden absolute right-0 top-11 w-64 rounded-xl bg-surface-container-low border border-outline-variant/50 shadow-2xl p-3 z-50 text-left font-sans">
+          <div class="flex items-center gap-2.5 pb-2.5 border-b border-outline-variant/30">
+            <div class="w-9 h-9 rounded-full bg-primary/20 text-primary flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-[20px]">shield_person</span>
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-on-surface truncate" id="menu-user-name">Authorized Official</div>
+              <div class="text-[11px] font-mono text-outline truncate" id="menu-user-email">official@crisisgrid.gov</div>
+              <div class="text-[10px] font-mono text-tertiary flex items-center gap-1 mt-0.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                <span>CLEARANCE LEVEL 4</span>
+              </div>
+            </div>
+          </div>
+          <div class="py-1.5 space-y-1 text-xs">
+            <a href="/public" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+              <span class="material-symbols-outlined text-[16px] text-outline">public</span>
+              <span>Public Information Portal</span>
+            </a>
+            <a href="/access" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+              <span class="material-symbols-outlined text-[16px] text-outline">swap_horiz</span>
+              <span>Switch Access Mode</span>
+            </a>
+          </div>
+          <div class="pt-1.5 border-t border-outline-variant/30">
+            <button id="btn-header-logout" type="button" class="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-error hover:bg-error-container/20 transition-colors text-xs font-medium cursor-pointer">
+              <span class="material-symbols-outlined text-[16px]">logout</span>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header><aside class="fixed left-0 top-16 bottom-0 w-64 bg-surface-container-lowest/90 backdrop-blur-xl z-40 hidden lg:flex flex-col py-space-md shadow-[4px_0_24px_rgba(0,0,0,0.3)]"><div class="px-space-lg mb-space-md"><span class="font-label-sm text-label-sm uppercase tracking-widest text-outline">Operational Nodes</span></div><nav class="flex-1 px-space-sm space-y-1" data-active-classes="bg-primary-container text-on-primary-container font-medium rounded-lg"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md" data-path="command-overview" href="/command"><span class="material-symbols-outlined text-[20px]">hub</span>Command Center</a><a class="flex items-center justify-between px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md" data-path="live-incidents-impact" href="/incidents"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">warning</span><span>Live Incidents</span></div><span class="px-1.5 py-0.5 rounded-full bg-error-container/40 text-error font-label-sm text-label-sm" id="sidebar-incident-count">1</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-2.5 transition-colors bg-primary-container text-on-primary-container font-medium rounded-lg" data-path="authority-review" href="/authority"><span class="material-symbols-outlined text-[20px]">gavel</span>Authority Review</a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md" data-path="capacity-history" href="/capacity"><span class="material-symbols-outlined text-[20px]">monitoring</span>Capacity &amp; Resources</a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md" data-path="resource-allocations" href="#"><span class="material-symbols-outlined text-[20px]">smart_toy</span>Resource Negotiation</a></nav><div class="px-space-md pt-space-md bg-surface-container-lowest"><div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1"><span class="font-label-sm text-label-sm text-outline uppercase">Secure Link</span><div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-md text-label-md font-mono">EOC-NET // SEC-4</span><span class="material-symbols-outlined text-[16px] text-tertiary">lock</span></div></div></div></aside><div class="lg:pl-64"><main class="relative pt-16 min-h-screen bg-surface"><div class="flex flex-col w-full">
+<!-- Ambient Canvas Backing -->
 <div class="relative w-full px-gutter-desktop py-space-xl overflow-hidden">
-<!-- Atmospheric Ambient Grid Canvas Accent (Non-blocking) -->
 <div class="absolute -top-32 right-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none"></div>
 <div class="absolute top-20 -left-16 w-80 h-80 rounded-full bg-tertiary/5 blur-3xl pointer-events-none"></div>
+
 <!-- Executive Review Container -->
 <div class="max-w-[1400px] mx-auto flex flex-col gap-space-xl relative z-10">
-<!-- Breadcrumbs & Live State Banner -->
+
+<!-- BREADCRUMBS & LIVE CLEARANCE HEADER -->
 <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
-<div class="flex flex-col gap-1">
-<div class="flex items-center gap-2 text-outline font-label-sm uppercase tracking-wider">
-<span>Crisis Command</span>
-<span class="material-symbols-outlined text-[12px]">chevron_right</span>
-<span>Allocation Review</span>
-<span class="material-symbols-outlined text-[12px]">chevron_right</span>
-<span class="text-primary font-semibold">EOC Clearance Tier-1</span>
+  <div class="flex flex-col gap-1">
+    <div class="flex items-center gap-2 text-outline font-label-sm uppercase tracking-wider">
+      <span>Crisis Command</span>
+      <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+      <span>Allocation Review</span>
+      <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+      <span class="text-primary font-semibold">Executive Clearance</span>
+    </div>
+    <h1 class="font-headline-lg text-headline-lg font-semibold tracking-tight text-on-surface">Allocation Review &amp; Authorization</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl" id="authority-review-incident-context">
+      A capacity recommendation has been generated following critical surge demand from Incident <span class="font-mono text-on-surface font-medium" id="authority-review-incident-code">INC-8092</span> (<span id="authority-review-incident-title">Indiranagar Chemical &amp; Structural Fire</span>). Review dynamic load-shifts, compliance safety margins, and execute executive sign-off.
+    </p>
+  </div>
+  <!-- Live Status Pills Stack -->
+  <div class="flex flex-wrap md:flex-col lg:flex-row items-start md:items-end lg:items-center gap-space-xs self-start md:self-center">
+    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high" id="plan-status-pill">
+      <span class="w-2 h-2 rounded-full bg-error" id="plan-status-dot"></span>
+      <span class="font-label-sm text-label-sm uppercase tracking-wider text-error font-medium" id="plan-status-text">Pending Executive Clearance</span>
+    </div>
+    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high" id="plan-quorum-pill">
+      <span class="material-symbols-outlined text-[14px] text-tertiary" id="plan-quorum-icon">verified_user</span>
+      <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-medium">Quorum: <strong class="text-on-surface" id="plan-quorum-text">1 of 2 Signed</strong></span>
+    </div>
+    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high font-mono">
+      <span class="material-symbols-outlined text-[14px] text-outline">timer</span>
+      <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Cooldown:</span>
+      <span class="font-label-sm text-label-sm font-semibold text-primary" id="countdown-timer">04:12</span>
+    </div>
+  </div>
 </div>
-<h1 class="font-headline-lg text-headline-lg font-semibold tracking-tight text-on-surface">Allocation Review &amp; Authorization</h1>
-<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
-            A capacity recommendation has been generated following critical surge demand from Incident <span class="font-mono text-on-surface font-medium">INC-8092</span> (Indiranagar Chemical &amp; Structural Fire). Review dynamic load-shifts, compliance safety margins, and execute executive sign-off.
+
+<!-- ============================================================ -->
+<!-- PRIMARY SCREEN: PRIORITIZED LIST — ACTION REQUIRED -->
+<!-- ============================================================ -->
+<div class="rounded-2xl p-space-xl bg-surface-container-low border border-primary/25 shadow-xl flex flex-col gap-space-md" id="section-action-required">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs pb-space-xs border-b border-outline-variant/20">
+    <div class="flex items-center gap-space-sm flex-wrap">
+      <div class="w-3 h-3 rounded-full bg-error animate-pulse"></div>
+      <h2 class="font-headline-md text-headline-md font-bold text-on-surface">ACTION REQUIRED</h2>
+      <span class="px-2.5 py-0.5 rounded-full bg-error-container/30 text-error font-mono text-label-sm font-semibold uppercase" id="action-required-count-badge">Prioritized Critical Queue</span>
+    </div>
+    <span class="text-outline font-label-sm text-label-sm font-mono">Sort Order: 1. CRITICAL • 2. HIGH • 3. MEDIUM</span>
+  </div>
+
+  <!-- Prioritized List Container -->
+  <div class="flex flex-col gap-3" id="authority-action-required-list">
+    <!-- Item 1: BMS Hospital (Default Critical) -->
+    <div class="p-space-md rounded-xl bg-surface-container border border-error/30 hover:border-primary/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm" data-request-id="demo-bms">
+      <div class="flex items-start gap-3">
+        <span class="text-xl leading-none mt-1">🔴</span>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-headline-sm text-headline-sm font-bold text-on-surface">BMS Hospital</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-error-container/30 text-error">CRITICAL</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-surface-container-high text-on-surface-variant font-medium">PENDING</span>
+          </div>
+          <p class="text-body-sm text-primary font-semibold mt-0.5">Needs +3 MW Emergency Power</p>
+        </div>
+      </div>
+      <button class="select-review-request-btn px-space-md py-2 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md font-semibold text-center transition-all shadow flex items-center justify-center gap-1 flex-shrink-0 cursor-pointer" data-request-id="demo-bms">
+        <span>REVIEW</span>
+        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+      </button>
+    </div>
+
+    <!-- Item 2: Water Infrastructure -->
+    <div class="p-space-md rounded-xl bg-surface-container border border-outline-variant/30 hover:border-primary/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm" data-request-id="demo-water">
+      <div class="flex items-start gap-3">
+        <span class="text-xl leading-none mt-1">🟠</span>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-headline-sm text-headline-sm font-bold text-on-surface">Water Infrastructure</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/20 text-amber-400">HIGH</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-surface-container-high text-on-surface-variant font-medium">PENDING</span>
+          </div>
+          <p class="text-body-sm text-primary font-semibold mt-0.5">Needs +2 MW Pumping Capacity</p>
+        </div>
+      </div>
+      <button class="select-review-request-btn px-space-md py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md font-semibold text-center transition-all flex items-center justify-center gap-1 flex-shrink-0 cursor-pointer" data-request-id="demo-water">
+        <span>REVIEW</span>
+        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+      </button>
+    </div>
+
+    <!-- Item 3: Emergency Operations -->
+    <div class="p-space-md rounded-xl bg-surface-container border border-outline-variant/30 hover:border-primary/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm" data-request-id="demo-ops">
+      <div class="flex items-start gap-3">
+        <span class="text-xl leading-none mt-1">🟠</span>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-headline-sm text-headline-sm font-bold text-on-surface">Emergency Operations</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/20 text-amber-400">HIGH</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-surface-container-high text-on-surface-variant font-medium">PENDING</span>
+          </div>
+          <p class="text-body-sm text-primary font-semibold mt-0.5">Needs +1 MW Operational Capacity</p>
+        </div>
+      </div>
+      <button class="select-review-request-btn px-space-md py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md font-semibold text-center transition-all flex items-center justify-center gap-1 flex-shrink-0 cursor-pointer" data-request-id="demo-ops">
+        <span>REVIEW</span>
+        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- REVIEW SCREEN: FOCUSED OPERATIONAL DECISION CONSOLE -->
+<!-- ============================================================ -->
+<div class="rounded-2xl p-space-xl bg-surface-container-low border border-outline-variant/30 shadow-xl flex flex-col gap-space-lg relative overflow-hidden" id="authority-review-console">
+  <!-- Accent Border -->
+  <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-tertiary to-primary"></div>
+
+  <!-- Header Strip -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm border-b border-outline-variant/20">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-[24px]">gavel</span>
+      </div>
+      <div>
+        <span class="text-outline uppercase text-[11px] font-mono font-semibold tracking-wider">Fast-Track Authority Review Console</span>
+        <h2 class="text-headline-md font-bold text-on-surface flex items-center gap-2">
+          <span id="review-panel-org-name">BMS Hospital</span>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase bg-error-container/30 text-error" id="review-panel-urgency">CRITICAL</span>
+        </h2>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-mono text-outline">Status:</span>
+      <span class="px-2.5 py-1 rounded-full text-xs font-mono font-semibold uppercase bg-surface-container-high text-on-surface" id="review-panel-status">PENDING REVIEW</span>
+    </div>
+  </div>
+
+  <!-- Confirmation Banner (Visible after approval) -->
+  <div id="review-confirmation-banner" class="hidden p-space-md rounded-xl bg-tertiary-container/30 border border-tertiary/50 flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-tertiary text-on-tertiary flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-[24px]">verified</span>
+      </div>
+      <div>
+        <div class="font-headline-sm text-headline-sm font-bold text-tertiary" id="confirmation-banner-title">ALLOCATION APPROVED</div>
+        <p class="text-body-sm text-on-surface font-medium" id="confirmation-banner-desc">+3 MW allocated to BMS Hospital. Command Center updated immediately.</p>
+      </div>
+    </div>
+    <a href="/stitch_crisisgrid_emergency_command_platform/city_command_center/code.html" class="px-space-md py-2 rounded-lg bg-tertiary text-on-tertiary font-label-md font-semibold text-center hover:bg-tertiary/90 transition-colors shadow flex-shrink-0">
+      View in Command Center →
+    </a>
+  </div>
+
+  <!-- Essential Information Grid (Answers 1, 2, 3) -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+    <!-- 1. Who needs help? -->
+    <div class="p-space-lg rounded-xl bg-surface-container border border-outline-variant/30 flex flex-col justify-between">
+      <div>
+        <span class="text-[11px] font-mono uppercase tracking-wider text-primary font-bold flex items-center gap-1.5 mb-1.5">
+          <span class="material-symbols-outlined text-[16px]">domain</span>
+          1. WHO NEEDS HELP?
+        </span>
+        <div class="text-headline-sm font-bold text-on-surface" id="essential-who-title">BMS Hospital</div>
+        <p class="text-body-sm text-on-surface-variant mt-1" id="essential-who-type">Critical Healthcare &amp; Emergency Trauma Facility</p>
+      </div>
+      <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-xs font-mono text-outline">
+        <span>Sector Domain</span>
+        <span class="text-primary font-semibold" id="essential-who-sector">Hospital Network</span>
+      </div>
+    </div>
+
+    <!-- 2. What do they need? -->
+    <div class="p-space-lg rounded-xl bg-surface-container border border-outline-variant/30 flex flex-col justify-between">
+      <div>
+        <span class="text-[11px] font-mono uppercase tracking-wider text-error font-bold flex items-center gap-1.5 mb-1.5">
+          <span class="material-symbols-outlined text-[16px]">bolt</span>
+          2. WHAT DO THEY NEED?
+        </span>
+        <div class="text-headline-sm font-bold text-error" id="essential-need-title">+3 MW Emergency Power</div>
+        <p class="text-body-sm text-on-surface-variant mt-1" id="essential-need-desc">Emergency electricity for high-demand clinical life-support circuits.</p>
+      </div>
+      <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-xs font-mono text-outline">
+        <span>Requested Capacity</span>
+        <span class="text-error font-bold" id="essential-need-amount">+3.0 MW</span>
+      </div>
+    </div>
+
+    <!-- 3. Why? -->
+    <div class="p-space-lg rounded-xl bg-surface-container border border-outline-variant/30 flex flex-col justify-between">
+      <div>
+        <span class="text-[11px] font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5 mb-1.5">
+          <span class="material-symbols-outlined text-[16px]">help</span>
+          3. WHY DO THEY NEED IT?
+        </span>
+        <div class="text-headline-sm font-bold text-on-surface" id="essential-why-title">Emergency Capacity Surge</div>
+        <p class="text-body-sm text-on-surface-variant mt-1" id="essential-why-desc">ICU and emergency operations have increased capacity requirements.</p>
+      </div>
+      <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-xs font-mono text-outline">
+        <span>Urgency Level</span>
+        <span class="text-error font-bold" id="essential-why-urgency">CRITICAL PRIORITY</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. CRISISGRID RECOMMENDS (Simple Recommendation Card) -->
+  <div class="p-space-lg rounded-xl bg-tertiary-container/15 border border-tertiary/40 flex flex-col gap-3">
+    <div class="flex items-center justify-between">
+      <span class="text-xs font-mono uppercase tracking-wider text-tertiary font-bold flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[18px]">verified</span>
+        4. CRISISGRID RECOMMENDS
+      </span>
+      <span class="px-2.5 py-1 rounded bg-tertiary text-on-tertiary font-mono text-xs font-bold uppercase shadow-sm" id="recommendation-badge">APPROVE +3 MW</span>
+    </div>
+    
+    <div class="text-body-md text-on-surface font-semibold" id="recommendation-action-title">
+      Recommend Full Authorization of +3 MW Emergency Draw
+    </div>
+
+    <div class="flex flex-col gap-1.5 font-body-sm text-body-sm text-on-surface pt-1 border-t border-tertiary/20">
+      <span class="text-[11px] font-mono uppercase text-outline">Impact:</span>
+      <div class="flex items-center gap-2 text-on-surface">
+        <span class="text-tertiary font-bold">✓</span>
+        <span id="rec-impact-1">Protects critical medical operations and life-support suites</span>
+      </div>
+      <div class="flex items-center gap-2 text-on-surface">
+        <span class="text-tertiary font-bold">✓</span>
+        <span id="rec-impact-2">Emergency capacity remains available within 45.0 MW pooled reserves</span>
+      </div>
+      <div class="flex items-center gap-2 text-on-surface">
+        <span class="text-tertiary font-bold">✓</span>
+        <span id="rec-impact-3">No critical infrastructure safety threshold violated</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ACTIONS: APPROVE / MODIFY / REJECT -->
+  <div class="flex flex-col gap-3 pt-2 border-t border-outline-variant/30">
+    <div class="flex items-center justify-between">
+      <span class="text-[11px] font-mono uppercase text-outline tracking-wider font-semibold">5. AUTHORITY ACTION (DIRECTIVE 2026-B)</span>
+      <span class="text-xs font-mono text-outline">Single-Click Authorization</span>
+    </div>
+
+    <!-- Modify Inline Stepper Panel (Toggleable) -->
+    <div id="authority-modify-box" class="hidden p-space-md rounded-xl bg-surface-container border border-primary/40 flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+      <div class="flex flex-col">
+        <span class="text-xs text-outline font-mono uppercase">MODIFY REQUESTED ALLOCATION:</span>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="text-body-sm text-on-surface-variant">Requested: <strong class="text-on-surface" id="modify-requested-orig">+3.0 MW</strong></span>
+          <span class="text-outline">→</span>
+          <span class="text-body-sm text-primary font-bold">Authority approves: <strong class="text-headline-sm text-primary" id="modify-approved-val">2.5 MW</strong></span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="modify-decrement-btn" class="w-9 h-9 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-lg flex items-center justify-center cursor-pointer">-</button>
+        <input type="number" id="modify-amount-input" step="0.5" min="0.5" max="10" value="2.5" class="w-20 px-2 py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-center font-mono font-bold text-on-surface text-sm">
+        <button id="modify-increment-btn" class="w-9 h-9 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-lg flex items-center justify-center cursor-pointer">+</button>
+        <button id="modify-confirm-btn" class="px-space-md py-2 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md font-semibold text-center transition-all shadow active:scale-95 ml-2 cursor-pointer">
+          Confirm Modified [ 2.5 MW ]
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Action Buttons Strip -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+      <!-- APPROVE -->
+      <button id="review-approve-btn" class="px-space-xl py-3.5 rounded-xl bg-tertiary hover:bg-tertiary/90 text-on-tertiary font-headline-sm font-bold tracking-tight shadow-xl flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95">
+        <span class="material-symbols-outlined text-[22px]">check_circle</span>
+        <span>APPROVE</span>
+      </button>
+
+      <!-- MODIFY -->
+      <button id="review-modify-btn" class="px-space-xl py-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high border border-primary/40 text-primary font-headline-sm font-bold tracking-tight shadow flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">tune</span>
+        <span>MODIFY</span>
+      </button>
+
+      <!-- REJECT -->
+      <button id="review-reject-btn" class="px-space-xl py-3.5 rounded-xl bg-error-container/20 hover:bg-error-container/40 border border-error/30 text-error font-headline-sm font-bold tracking-tight shadow flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">cancel</span>
+        <span>REJECT</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= INCIDENT LIFECYCLE TIMELINE ================= -->
+<div class="rounded-2xl bg-surface-container-low p-space-lg shadow-md border border-outline-variant/30 flex flex-col gap-space-md" id="section-incident-timeline">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs pb-space-xs border-b border-outline-variant/20">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-primary/20 text-primary flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-[20px]">history_edu</span>
+      </div>
+      <div>
+        <h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Incident Lifecycle Timeline</h3>
+        <p class="text-body-sm text-on-surface-variant">Chronological lifecycle of crisis detection, CRISISGRID evaluation, and executive decisions</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="px-2.5 py-1 rounded-full bg-surface-container text-outline font-mono text-[11px] font-semibold uppercase">IST (UTC+5:30)</span>
+      <span class="px-2.5 py-1 rounded-full bg-tertiary-container/30 text-tertiary font-label-sm font-semibold uppercase flex items-center gap-1.5" id="timeline-status-badge">
+        <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+        <span id="timeline-status-text">Live Chronology</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Timeline Stream -->
+  <div class="relative pl-6 space-y-3 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-outline-variant/40" id="incident-timeline-container">
+    <!-- Populated dynamically by crisisgrid.js -->
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- EXPANDABLE: VIEW TECHNICAL ANALYSIS (COLLAPSED BY DEFAULT) -->
+<!-- ============================================================ -->
+<details class="group rounded-2xl bg-surface-container-low/80 border border-outline-variant/30 overflow-hidden" id="details-technical-analysis">
+  <summary class="flex items-center justify-between p-space-lg cursor-pointer hover:bg-surface-container transition-colors list-none select-none">
+    <div class="flex items-center gap-space-sm">
+      <span class="material-symbols-outlined text-outline group-open:text-primary transition-colors">analytics</span>
+      <div>
+        <span class="font-headline-sm text-headline-sm font-semibold text-on-surface">View Technical Analysis</span>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Detailed sector load shifts, safe operating floors, algorithmic rationale, compliance, and ledger hashes</p>
+      </div>
+    </div>
+    <span class="material-symbols-outlined text-[24px] text-outline group-open:rotate-180 transition-transform">expand_more</span>
+  </summary>
+
+  <div class="p-space-xl border-t border-outline-variant/30 flex flex-col gap-space-xl">
+    
+    <!-- KEY METRICS TELEMETRY STRIP -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+      <!-- 1. Central Primary Metric Card -->
+      <div class="sm:col-span-2 xl:col-span-1 rounded-xl p-space-lg bg-surface-container shadow-sm flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-space-sm">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Available Emergency Capacity</span>
+          <span class="material-symbols-outlined text-[18px] text-primary">bolt</span>
+        </div>
+        <div class="flex items-baseline gap-space-xs my-space-xs">
+          <span class="font-display text-display font-semibold tracking-tight text-on-surface" id="telemetry-emergency-capacity">45</span>
+          <span class="font-headline-md text-headline-md text-primary font-medium">MW</span>
+        </div>
+        <div class="flex flex-col gap-0.5 pt-space-xs">
+          <div class="flex items-center justify-between text-outline font-label-sm text-label-sm">
+            <span>Grid Reserve Envelope</span>
+            <span class="font-mono text-on-surface" id="telemetry-reserve-envelope">315 MW Total</span>
+          </div>
+          <div class="flex items-center justify-between text-tertiary font-label-sm text-label-sm">
+            <span>Net Reallocation Delta</span>
+            <span class="font-mono font-medium" id="telemetry-reallocation-delta">0.0 MW (Equilibrium)</span>
+          </div>
+        </div>
+      </div>
+      <!-- 2. Crisis Load Factor Metric -->
+      <div class="rounded-xl p-space-lg bg-surface-container shadow-sm flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-space-sm">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Active Crisis Load Factor</span>
+          <span class="material-symbols-outlined text-[18px] text-on-surface-variant">speed</span>
+        </div>
+        <div class="flex items-baseline gap-space-xs my-space-xs">
+          <span class="font-display text-display font-semibold tracking-tight text-on-surface" id="telemetry-load-factor">78</span>
+          <span class="font-headline-md text-headline-md text-outline font-medium">%</span>
+        </div>
+        <div class="flex flex-col gap-1.5 pt-space-xs">
+          <div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+            <div class="h-full bg-primary rounded-full transition-all duration-500" id="telemetry-load-factor-bar" style="width: 78%;"></div>
+          </div>
+          <div class="flex justify-between text-outline font-label-sm text-label-sm font-mono">
+            <span id="telemetry-base-load">Base Load: 245.7 MW</span>
+            <span class="text-primary font-medium" id="telemetry-load-delta">+12% vs. Normal</span>
+          </div>
+        </div>
+      </div>
+      <!-- 3. Affected Municipal Sectors -->
+      <div class="rounded-xl p-space-lg bg-surface-container shadow-sm flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-space-sm">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Affected Sectors</span>
+          <span class="material-symbols-outlined text-[18px] text-on-surface-variant">domain</span>
+        </div>
+        <div class="flex items-baseline gap-space-xs my-space-xs">
+          <span class="font-display text-display font-semibold tracking-tight text-on-surface" id="telemetry-affected-count">4</span>
+          <span class="font-headline-md text-headline-md text-outline font-medium">Domains</span>
+        </div>
+        <div class="flex items-center gap-1.5 pt-space-xs" id="telemetry-affected-list">
+          <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Hospitals</span>
+          <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Water</span>
+          <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Telecom</span>
+          <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">EOC</span>
+        </div>
+      </div>
+      <!-- 4. Stabilization Window -->
+      <div class="rounded-xl p-space-lg bg-surface-container shadow-sm flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-space-sm">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Est. Stabilization Window</span>
+          <span class="material-symbols-outlined text-[18px] text-tertiary">update</span>
+        </div>
+        <div class="flex items-baseline gap-space-xs my-space-xs">
+          <span class="font-display text-display font-semibold tracking-tight text-on-surface" id="telemetry-stabilization-minutes">18</span>
+          <span class="font-headline-md text-headline-md text-tertiary font-medium">Minutes</span>
+        </div>
+        <div class="flex items-center justify-between text-outline font-label-sm text-label-sm pt-space-xs">
+          <span>Thermal Equilibrium</span>
+          <span class="font-mono text-on-surface" id="telemetry-stabilization-eta">ETA 15:00:30 IST</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 SECTOR ALLOCATION CARDS -->
+    <div class="flex flex-col gap-space-md">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+        <div>
+          <div class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Automated Triage Proposal</div>
+          <h3 class="font-headline-md text-headline-md font-semibold text-on-surface">Dynamic Sector Load-Shift Specifications</h3>
+        </div>
+        <span class="font-label-sm text-label-sm text-outline font-mono">Safe Floors Strictly Enforced</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md" id="sector-cards-grid">
+        <!-- Card 1: Hospital Network -->
+        <div class="rounded-xl p-space-lg bg-surface-container shadow-sm flex flex-col justify-between relative overflow-hidden group" data-sector-id="hospital_network">
+          <div class="flex items-start justify-between gap-space-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[22px]">local_hospital</span>
+              </div>
+              <div>
+                <div class="font-headline-sm text-headline-sm font-semibold text-on-surface">Hospital Network</div>
+                <span class="font-label-sm text-label-sm text-outline">Metro Cluster (Manipal, Chinmaya, Bowring)</span>
+              </div>
+            </div>
+            <div class="sector-status-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high">
+              <span class="w-2 h-2 rounded-full bg-tertiary"></span>
+              <span class="sector-status-text font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-medium">Stable / Protected</span>
+            </div>
+          </div>
+          <div class="my-space-md p-space-sm rounded-lg bg-surface-container-high flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm text-outline uppercase">Previous Allocation</span>
+              <span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface-variant"><span class="sector-prev-mw">18.0</span> <span class="font-body-sm text-body-sm text-outline">MW</span></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline">arrow_forward</span>
+              <div class="sector-delta-badge flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest font-mono font-label-sm text-label-sm text-secondary">
+                <span class="sector-delta-icon material-symbols-outlined text-[14px]">remove</span>
+                <span class="sector-delta-mw">1.0 MW</span>
+              </div>
+            </div>
+            <div class="flex flex-col text-right">
+              <span class="font-label-sm text-label-sm text-primary uppercase font-semibold">Recommended</span>
+              <span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface"><span class="sector-rec-mw">17.0</span> <span class="font-body-sm text-body-sm text-primary">MW</span></span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-space-xs text-body-sm font-body-sm text-on-surface-variant">
+            <p class="sector-rationale">Trauma bays, ventilators &amp; surgical suites 100% safeguarded. Load decrement isolated to tertiary non-emergency cooling &amp; administrative HVAC towers.</p>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-outline font-label-sm text-label-sm">Safe Operating Floor: <strong class="sector-floor-val text-on-surface font-mono">15.5 MW</strong></span>
+              <span class="sector-margin-val text-tertiary font-label-sm text-label-sm font-mono">+1.5 MW Safety Margin</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden mt-1">
+              <div class="sector-progress-bar h-full bg-primary rounded-full transition-all duration-500" style="width: 82%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Water Infrastructure -->
+        <div class="rounded-xl p-space-lg bg-surface-container shadow-sm flex flex-col justify-between relative overflow-hidden group" data-sector-id="water_infrastructure">
+          <div class="flex items-start justify-between gap-space-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-error">
+                <span class="material-symbols-outlined text-[22px]">water_damage</span>
+              </div>
+              <div>
+                <div class="font-headline-sm text-headline-sm font-semibold text-on-surface">Water Infrastructure</div>
+                <span class="font-label-sm text-label-sm text-outline">Indiranagar &amp; Domlur Booster Reservoirs</span>
+              </div>
+            </div>
+            <div class="sector-status-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container/20">
+              <span class="w-2 h-2 rounded-full bg-error"></span>
+              <span class="sector-status-text font-label-sm text-label-sm uppercase tracking-wider text-error font-medium">Critical Surge Active</span>
+            </div>
+          </div>
+          <div class="my-space-md p-space-sm rounded-lg bg-surface-container-high flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm text-outline uppercase">Previous Allocation</span>
+              <span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface-variant"><span class="sector-prev-mw">10.0</span> <span class="font-body-sm text-body-sm text-outline">MW</span></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline">arrow_forward</span>
+              <div class="sector-delta-badge flex items-center gap-1 px-2 py-0.5 rounded bg-error-container/30 font-mono font-label-sm text-label-sm text-error">
+                <span class="sector-delta-icon material-symbols-outlined text-[14px]">add</span>
+                <span class="sector-delta-mw">2.0 MW</span>
+              </div>
+            </div>
+            <div class="flex flex-col text-right">
+              <span class="font-label-sm text-label-sm text-error uppercase font-semibold">Recommended</span>
+              <span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface"><span class="sector-rec-mw">12.0</span> <span class="font-body-sm text-body-sm text-error">MW</span></span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-space-xs text-body-sm font-body-sm text-on-surface-variant">
+            <p class="sector-rationale">Surge required to sustain 14.2 bar manifold pressure across 8 high-output municipal foam lines for industrial hazmat containment.</p>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-outline font-label-sm text-label-sm">Safe Operating Floor: <strong class="sector-floor-val text-on-surface font-mono">8.0 MW</strong></span>
+              <span class="sector-margin-val text-primary font-label-sm text-label-sm font-mono">+4.0 MW Safety Margin</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden mt-1">
+              <div class="sector-progress-bar h-full bg-error rounded-full transition-all duration-500" style="width: 86%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Telecommunications -->
+        <div class="rounded-xl p-space-lg bg-surface-container shadow-sm flex flex-col justify-between relative overflow-hidden group" data-sector-id="telecommunications">
+          <div class="flex items-start justify-between gap-space-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary">
+                <span class="material-symbols-outlined text-[22px]">cell_tower</span>
+              </div>
+              <div>
+                <div class="font-headline-sm text-headline-sm font-semibold text-on-surface">Telecommunications</div>
+                <span class="font-label-sm text-label-sm text-outline">Sector 4 Towers &amp; Base Station Nodes</span>
+              </div>
+            </div>
+            <div class="sector-status-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high">
+              <span class="w-2 h-2 rounded-full bg-secondary"></span>
+              <span class="sector-status-text font-label-sm text-label-sm uppercase tracking-wider text-secondary font-medium">Throttled Non-Essential</span>
+            </div>
+          </div>
+          <div class="my-space-md p-space-sm rounded-lg bg-surface-container-high flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm text-outline uppercase">Previous Allocation</span>
+              <span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface-variant"><span class="sector-prev-mw">07.0</span> <span class="font-body-sm text-body-sm text-outline">MW</span></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline">arrow_forward</span>
+              <div class="sector-delta-badge flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest font-mono font-label-sm text-label-sm text-secondary">
+                <span class="sector-delta-icon material-symbols-outlined text-[14px]">remove</span>
+                <span class="sector-delta-mw">2.0 MW</span>
+              </div>
+            </div>
+            <div class="flex flex-col text-right">
+              <span class="font-label-sm text-label-sm text-secondary uppercase font-semibold">Recommended</span>
+              <span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface"><span class="sector-rec-mw">05.0</span> <span class="font-body-sm text-body-sm text-secondary">MW</span></span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-space-xs text-body-sm font-body-sm text-on-surface-variant">
+            <p class="sector-rationale">Commercial streaming/data restricted. First responder 700MHz digital tactical radio &amp; public SMS emergency beacon retain 100% priority queue.</p>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-outline font-label-sm text-label-sm">Safe Operating Floor: <strong class="sector-floor-val text-on-surface font-mono">4.5 MW</strong></span>
+              <span class="sector-margin-val text-secondary font-label-sm text-label-sm font-mono">+0.5 MW Safety Margin</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden mt-1">
+              <div class="sector-progress-bar h-full bg-secondary rounded-full transition-all duration-500" style="width: 71%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Emergency Operations -->
+        <div class="rounded-xl p-space-lg bg-surface-container shadow-sm flex flex-col justify-between relative overflow-hidden group" data-sector-id="emergency_operations">
+          <div class="flex items-start justify-between gap-space-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[22px]">shield</span>
+              </div>
+              <div>
+                <div class="font-headline-sm text-headline-sm font-semibold text-on-surface">Emergency Operations</div>
+                <span class="font-label-sm text-label-sm text-outline">Mobile EOC, Field Hospital, Drone Stations</span>
+              </div>
+            </div>
+            <div class="sector-status-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10">
+              <span class="w-2 h-2 rounded-full bg-primary"></span>
+              <span class="sector-status-text font-label-sm text-label-sm uppercase tracking-wider text-primary font-medium">Expanded Dispatch</span>
+            </div>
+          </div>
+          <div class="my-space-md p-space-sm rounded-lg bg-surface-container-high flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm text-outline uppercase">Previous Allocation</span>
+              <span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface-variant"><span class="sector-prev-mw">10.0</span> <span class="font-body-sm text-body-sm text-outline">MW</span></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline">arrow_forward</span>
+              <div class="sector-delta-badge flex items-center gap-1 px-2 py-0.5 rounded bg-primary/20 font-mono font-label-sm text-label-sm text-primary">
+                <span class="sector-delta-icon material-symbols-outlined text-[14px]">add</span>
+                <span class="sector-delta-mw">1.0 MW</span>
+              </div>
+            </div>
+            <div class="flex flex-col text-right">
+              <span class="font-label-sm text-label-sm text-primary uppercase font-semibold">Recommended</span>
+              <span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface"><span class="sector-rec-mw">11.0</span> <span class="font-body-sm text-body-sm text-primary">MW</span></span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-space-xs text-body-sm font-body-sm text-on-surface-variant">
+            <p class="sector-rationale">Powers mobile command post, thermal hazmat scrubbers, field triage lighting masts, and quadcopter perimeter surveillance relay hubs.</p>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-outline font-label-sm text-label-sm">Safe Operating Floor: <strong class="sector-floor-val text-on-surface font-mono">8.0 MW</strong></span>
+              <span class="sector-margin-val text-primary font-label-sm text-label-sm font-mono">+3.0 MW Safety Margin</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden mt-1">
+              <div class="sector-progress-bar h-full bg-primary rounded-full transition-all duration-500" style="width: 91%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DECISION FACTORS & STATUTORY COMPLIANCE -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md items-start">
+      <!-- Decision Factors List (8 cols) -->
+      <div class="lg:col-span-8 rounded-xl p-space-lg bg-surface-container shadow-sm flex flex-col gap-space-md">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px] text-primary">receipt_long</span>
+            <h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Decision Factors &amp; Algorithmic Rationale</h4>
+          </div>
+          <span class="font-label-sm text-label-sm text-outline font-mono" id="model-version-tag">MODEL: RESIL-OPT-V4.2</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant font-mono" id="overall-algorithmic-rationale">Dynamic triage proposal generated by CRISISGRID allocation engine based on active crisis load factor and statutory municipal safety floors.</p>
+        <div class="flex flex-col gap-space-xs" id="decision-factors-list">
+          <!-- Factor 1 -->
+          <div class="p-space-md rounded-lg bg-surface-container-high flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-primary font-mono font-label-sm text-label-sm mt-0.5">01</div>
+            <div class="flex-1 flex flex-col">
+              <div class="font-label-md text-label-md font-semibold text-on-surface">Critical Chemical Surge Trigger</div>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Emergency demand increased following confirmed Tier-3 chemical fire incident in Sector 4 (Indiranagar), threatening secondary electrical substation 4B.</p>
+            </div>
+            <span class="font-label-sm text-label-sm text-error uppercase font-medium">Critical</span>
+          </div>
+          <!-- Factor 2 -->
+          <div class="p-space-md rounded-lg bg-surface-container-high flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-primary font-mono font-label-sm text-label-sm mt-0.5">02</div>
+            <div class="flex-1 flex flex-col">
+              <div class="font-label-md text-label-md font-semibold text-on-surface">Hydraulic Pressure Floor Compliance</div>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Water pumping capacity escalated +2.0 MW to sustain 8 high-velocity hydrants and rapid hazmat containment foam delivery over 1.2 sq km.</p>
+            </div>
+            <span class="font-label-sm text-label-sm text-primary uppercase font-medium">Verified</span>
+          </div>
+          <!-- Factor 3 -->
+          <div class="p-space-md rounded-lg bg-surface-container-high flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-primary font-mono font-label-sm text-label-sm mt-0.5">03</div>
+            <div class="flex-1 flex flex-col">
+              <div class="font-label-md text-label-md font-semibold text-on-surface">Bandwidth Throttling Safety Window</div>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Civilian telecommunications load lowered -2.0 MW; remains safely +0.5 MW above municipal critical broadcast floor (4.5 MW floor maintained).</p>
+            </div>
+            <span class="font-label-sm text-label-sm text-tertiary uppercase font-medium">Safe</span>
+          </div>
+          <!-- Factor 4 -->
+          <div class="p-space-md rounded-lg bg-surface-container-high flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-primary font-mono font-label-sm text-label-sm mt-0.5">04</div>
+            <div class="flex-1 flex flex-col">
+              <div class="font-label-md text-label-md font-semibold text-on-surface">Life-Support &amp; Trauma ICU Shielding</div>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Hospital critical surgical suites, ventilators, and emergency trauma bays remain 100% shielded; load adjustment strictly isolated to secondary non-critical HVAC.</p>
+            </div>
+            <span class="font-label-sm text-label-sm text-tertiary uppercase font-medium">Protected</span>
+          </div>
+        </div>
+      </div>
+      <!-- Statutory Compliance (4 cols) -->
+      <div class="lg:col-span-4 flex flex-col gap-space-md">
+        <div class="rounded-xl p-space-lg bg-surface-container shadow-sm flex flex-col gap-space-md" id="statutory-compliance-card">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px] text-tertiary">gavel</span>
+            <h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Statutory Compliance</h4>
+          </div>
+          <p class="font-body-sm text-body-sm text-on-surface-variant" id="compliance-summary">
+            Fully compliant with <strong class="text-on-surface">Municipal Code Section 9</strong> (Emergency Infrastructure Powers Act) &amp; <strong class="text-on-surface">Disaster Governance Directive 2026-B</strong>.
           </p>
-</div>
-<!-- Live Status Pills Stack -->
-<div class="flex flex-wrap md:flex-col lg:flex-row items-start md:items-end lg:items-center gap-space-xs self-start md:self-center">
-<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high" id="plan-status-pill">
-<span class="w-2 h-2 rounded-full bg-error" id="plan-status-dot"></span>
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-error font-medium" id="plan-status-text">Pending Executive Clearance</span>
-</div>
-<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high" id="plan-quorum-pill">
-<span class="material-symbols-outlined text-[14px] text-tertiary" id="plan-quorum-icon">verified_user</span>
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-medium">Quorum: <strong class="text-on-surface" id="plan-quorum-text">1 of 2 Signed</strong></span>
-</div>
-<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high font-mono">
-<span class="material-symbols-outlined text-[14px] text-outline">timer</span>
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Cooldown:</span>
-<span class="font-label-sm text-label-sm font-semibold text-primary" id="countdown-timer">04:12</span>
-</div>
-</div>
-</div>
-<!-- KEY METRICS TELEMETRY STRIP -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
-<!-- Central Primary Metric Card -->
-<div class="sm:col-span-2 xl:col-span-1 rounded-xl p-space-lg bg-surface-container-low shadow-sm flex flex-col justify-between">
-<div class="flex items-center justify-between mb-space-sm">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Available Emergency Capacity</span>
-<span class="material-symbols-outlined text-[18px] text-primary">bolt</span>
-</div>
-<div class="flex items-baseline gap-space-xs my-space-xs">
-<span class="font-display text-display font-semibold tracking-tight text-on-surface" id="telemetry-emergency-capacity">45</span>
-<span class="font-headline-md text-headline-md text-primary font-medium">MW</span>
-</div>
-<div class="flex flex-col gap-0.5 pt-space-xs">
-<div class="flex items-center justify-between text-outline font-label-sm text-label-sm">
-<span>Grid Reserve Envelope</span>
-<span class="font-mono text-on-surface" id="telemetry-reserve-envelope">315 MW Total</span>
-</div>
-<div class="flex items-center justify-between text-tertiary font-label-sm text-label-sm">
-<span>Net Reallocation Delta</span>
-<span class="font-mono font-medium" id="telemetry-reallocation-delta">0.0 MW (Equilibrium)</span>
-</div>
-</div>
-</div>
-<!-- Crisis Load Factor Metric -->
-<div class="rounded-xl p-space-lg bg-surface-container-low shadow-sm flex flex-col justify-between">
-<div class="flex items-center justify-between mb-space-sm">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Active Crisis Load Factor</span>
-<span class="material-symbols-outlined text-[18px] text-on-surface-variant">speed</span>
-</div>
-<div class="flex items-baseline gap-space-xs my-space-xs">
-<span class="font-display text-display font-semibold tracking-tight text-on-surface" id="telemetry-load-factor">78</span>
-<span class="font-headline-md text-headline-md text-outline font-medium">%</span>
-</div>
-<div class="flex flex-col gap-1.5 pt-space-xs">
-<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
-<div class="h-full bg-primary rounded-full transition-all duration-500" id="telemetry-load-factor-bar" style="width: 78%;"></div>
-</div>
-<div class="flex justify-between text-outline font-label-sm text-label-sm font-mono">
-<span id="telemetry-base-load">Base Load: 245.7 MW</span>
-<span class="text-primary font-medium" id="telemetry-load-delta">+12% vs. Normal</span>
-</div>
-</div>
-</div>
-<!-- Affected Municipal Sectors -->
-<div class="rounded-xl p-space-lg bg-surface-container-low shadow-sm flex flex-col justify-between">
-<div class="flex items-center justify-between mb-space-sm">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Affected Sectors</span>
-<span class="material-symbols-outlined text-[18px] text-on-surface-variant">domain</span>
-</div>
-<div class="flex items-baseline gap-space-xs my-space-xs">
-<span class="font-display text-display font-semibold tracking-tight text-on-surface" id="telemetry-affected-count">4</span>
-<span class="font-headline-md text-headline-md text-outline font-medium">Domains</span>
-</div>
-<div class="flex items-center gap-1.5 pt-space-xs" id="telemetry-affected-list">
-<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Hospitals</span>
-<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Water</span>
-<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Telecom</span>
-<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">EOC</span>
-</div>
-</div>
-<!-- Stabilization Window -->
-<div class="rounded-xl p-space-lg bg-surface-container-low shadow-sm flex flex-col justify-between">
-<div class="flex items-center justify-between mb-space-sm">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Est. Stabilization Window</span>
-<span class="material-symbols-outlined text-[18px] text-tertiary">update</span>
-</div>
-<div class="flex items-baseline gap-space-xs my-space-xs">
-<span class="font-display text-display font-semibold tracking-tight text-on-surface" id="telemetry-stabilization-minutes">18</span>
-<span class="font-headline-md text-headline-md text-tertiary font-medium">Minutes</span>
-</div>
-<div class="flex items-center justify-between text-outline font-label-sm text-label-sm pt-space-xs">
-<span>Thermal Equilibrium</span>
-<span class="font-mono text-on-surface" id="telemetry-stabilization-eta">ETA 15:00:30 IST</span>
-</div>
-</div>
-</div>
-<!-- CORE SECTION 1: ALLOCATION RECOMMENDATION (Before vs Recommended Grid) -->
-<div class="flex flex-col gap-space-md">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
-<div>
-<div class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Automated Triage Proposal</div>
-<h2 class="font-headline-md text-headline-md font-semibold text-on-surface">Dynamic Load-Shift Specifications</h2>
-</div>
-<div class="flex items-center gap-2">
-<span class="font-label-sm text-label-sm text-outline">Simulated at 14:41:05 IST</span>
-<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface-variant text-label-sm font-label-sm flex items-center gap-1 transition-colors">
-<span class="material-symbols-outlined text-[14px]">refresh</span>
-              Re-run Model
-            </button>
-</div>
-</div>
-<!-- 4 Infrastructure Sector Allocation Cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md" id="sector-cards-grid">
-<!-- Card 1: Hospital Network -->
-<div class="rounded-xl p-space-lg bg-surface-container-low shadow-sm flex flex-col justify-between relative overflow-hidden group" data-sector-id="hospital_network">
-<div class="flex items-start justify-between gap-space-sm">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-[22px]">local_hospital</span>
-</div>
-<div>
-<div class="font-headline-sm text-headline-sm font-semibold text-on-surface">Hospital Network</div>
-<span class="font-label-sm text-label-sm text-outline">Metro Cluster (Manipal, Chinmaya, Bowring)</span>
-</div>
-</div>
-<!-- Status Pill -->
-<div class="sector-status-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high">
-<span class="w-2 h-2 rounded-full bg-tertiary"></span>
-<span class="sector-status-text font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-medium">Stable / Protected</span>
-</div>
-</div>
-<!-- Allocation Numbers Shift Bar -->
-<div class="my-space-md p-space-sm rounded-lg bg-surface-container flex items-center justify-between">
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-outline uppercase">Previous Allocation</span>
-<span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface-variant"><span class="sector-prev-mw">18.0</span> <span class="font-body-sm text-body-sm text-outline">MW</span></span>
-</div>
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[18px] text-outline">arrow_forward</span>
-<div class="sector-delta-badge flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest font-mono font-label-sm text-label-sm text-secondary">
-<span class="sector-delta-icon material-symbols-outlined text-[14px]">remove</span>
-<span class="sector-delta-mw">1.0 MW</span>
-</div>
-</div>
-<div class="flex flex-col text-right">
-<span class="font-label-sm text-label-sm text-primary uppercase font-semibold">Recommended</span>
-<span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface"><span class="sector-rec-mw">17.0</span> <span class="font-body-sm text-body-sm text-primary">MW</span></span>
-</div>
-</div>
-<!-- Load Protection & Details -->
-<div class="flex flex-col gap-space-xs text-body-sm font-body-sm text-on-surface-variant">
-<p class="sector-rationale">Trauma bays, ventilators &amp; surgical suites 100% safeguarded. Load decrement isolated to tertiary non-emergency cooling &amp; administrative HVAC towers.</p>
-<div class="flex items-center justify-between pt-1">
-<span class="text-outline font-label-sm text-label-sm">Safe Operating Floor: <strong class="sector-floor-val text-on-surface font-mono">15.5 MW</strong></span>
-<span class="sector-margin-val text-tertiary font-label-sm text-label-sm font-mono">+1.5 MW Safety Margin</span>
-</div>
-<!-- Progress indicator -->
-<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden mt-1">
-<div class="sector-progress-bar h-full bg-primary rounded-full transition-all duration-500" style="width: 82%;"></div>
-</div>
-</div>
-</div>
-<!-- Card 2: Water Infrastructure -->
-<div class="rounded-xl p-space-lg bg-surface-container-low shadow-sm flex flex-col justify-between relative overflow-hidden group" data-sector-id="water_infrastructure">
-<div class="flex items-start justify-between gap-space-sm">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-error">
-<span class="material-symbols-outlined text-[22px]">water_damage</span>
-</div>
-<div>
-<div class="font-headline-sm text-headline-sm font-semibold text-on-surface">Water Infrastructure</div>
-<span class="font-label-sm text-label-sm text-outline">Indiranagar &amp; Domlur Booster Reservoirs</span>
-</div>
-</div>
-<!-- Status Pill -->
-<div class="sector-status-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container/20">
-<span class="w-2 h-2 rounded-full bg-error"></span>
-<span class="sector-status-text font-label-sm text-label-sm uppercase tracking-wider text-error font-medium">Critical Surge Active</span>
-</div>
-</div>
-<!-- Allocation Numbers Shift Bar -->
-<div class="my-space-md p-space-sm rounded-lg bg-surface-container flex items-center justify-between">
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-outline uppercase">Previous Allocation</span>
-<span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface-variant"><span class="sector-prev-mw">10.0</span> <span class="font-body-sm text-body-sm text-outline">MW</span></span>
-</div>
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[18px] text-outline">arrow_forward</span>
-<div class="sector-delta-badge flex items-center gap-1 px-2 py-0.5 rounded bg-error-container/30 font-mono font-label-sm text-label-sm text-error">
-<span class="sector-delta-icon material-symbols-outlined text-[14px]">add</span>
-<span class="sector-delta-mw">2.0 MW</span>
-</div>
-</div>
-<div class="flex flex-col text-right">
-<span class="font-label-sm text-label-sm text-error uppercase font-semibold">Recommended</span>
-<span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface"><span class="sector-rec-mw">12.0</span> <span class="font-body-sm text-body-sm text-error">MW</span></span>
-</div>
-</div>
-<!-- Load Protection & Details -->
-<div class="flex flex-col gap-space-xs text-body-sm font-body-sm text-on-surface-variant">
-<p class="sector-rationale">Surge required to sustain 14.2 bar manifold pressure across 8 high-output municipal foam lines for industrial hazmat containment.</p>
-<div class="flex items-center justify-between pt-1">
-<span class="text-outline font-label-sm text-label-sm">Safe Operating Floor: <strong class="sector-floor-val text-on-surface font-mono">8.0 MW</strong></span>
-<span class="sector-margin-val text-primary font-label-sm text-label-sm font-mono">+4.0 MW Safety Margin</span>
-</div>
-<!-- Progress indicator -->
-<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden mt-1">
-<div class="sector-progress-bar h-full bg-error rounded-full transition-all duration-500" style="width: 86%;"></div>
-</div>
-</div>
-</div>
-<!-- Card 3: Telecommunications -->
-<div class="rounded-xl p-space-lg bg-surface-container-low shadow-sm flex flex-col justify-between relative overflow-hidden group" data-sector-id="telecommunications">
-<div class="flex items-start justify-between gap-space-sm">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
-<span class="material-symbols-outlined text-[22px]">cell_tower</span>
-</div>
-<div>
-<div class="font-headline-sm text-headline-sm font-semibold text-on-surface">Telecommunications</div>
-<span class="font-label-sm text-label-sm text-outline">Sector 4 Towers &amp; Base Station Nodes</span>
-</div>
-</div>
-<!-- Status Pill -->
-<div class="sector-status-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high">
-<span class="w-2 h-2 rounded-full bg-secondary"></span>
-<span class="sector-status-text font-label-sm text-label-sm uppercase tracking-wider text-secondary font-medium">Throttled Non-Essential</span>
-</div>
-</div>
-<!-- Allocation Numbers Shift Bar -->
-<div class="my-space-md p-space-sm rounded-lg bg-surface-container flex items-center justify-between">
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-outline uppercase">Previous Allocation</span>
-<span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface-variant"><span class="sector-prev-mw">07.0</span> <span class="font-body-sm text-body-sm text-outline">MW</span></span>
-</div>
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[18px] text-outline">arrow_forward</span>
-<div class="sector-delta-badge flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest font-mono font-label-sm text-label-sm text-secondary">
-<span class="sector-delta-icon material-symbols-outlined text-[14px]">remove</span>
-<span class="sector-delta-mw">2.0 MW</span>
-</div>
-</div>
-<div class="flex flex-col text-right">
-<span class="font-label-sm text-label-sm text-secondary uppercase font-semibold">Recommended</span>
-<span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface"><span class="sector-rec-mw">05.0</span> <span class="font-body-sm text-body-sm text-secondary">MW</span></span>
-</div>
-</div>
-<!-- Load Protection & Details -->
-<div class="flex flex-col gap-space-xs text-body-sm font-body-sm text-on-surface-variant">
-<p class="sector-rationale">Commercial streaming/data restricted. First responder 700MHz digital tactical radio &amp; public SMS emergency beacon retain 100% priority queue.</p>
-<div class="flex items-center justify-between pt-1">
-<span class="text-outline font-label-sm text-label-sm">Safe Operating Floor: <strong class="sector-floor-val text-on-surface font-mono">4.5 MW</strong></span>
-<span class="sector-margin-val text-secondary font-label-sm text-label-sm font-mono">+0.5 MW Safety Margin</span>
-</div>
-<!-- Progress indicator -->
-<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden mt-1">
-<div class="sector-progress-bar h-full bg-secondary rounded-full transition-all duration-500" style="width: 71%;"></div>
-</div>
-</div>
-</div>
-<!-- Card 4: Emergency Operations -->
-<div class="rounded-xl p-space-lg bg-surface-container-low shadow-sm flex flex-col justify-between relative overflow-hidden group" data-sector-id="emergency_operations">
-<div class="flex items-start justify-between gap-space-sm">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-[22px]">shield</span>
-</div>
-<div>
-<div class="font-headline-sm text-headline-sm font-semibold text-on-surface">Emergency Operations</div>
-<span class="font-label-sm text-label-sm text-outline">Mobile EOC, Field Hospital, Drone Stations</span>
-</div>
-</div>
-<!-- Status Pill -->
-<div class="sector-status-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10">
-<span class="w-2 h-2 rounded-full bg-primary"></span>
-<span class="sector-status-text font-label-sm text-label-sm uppercase tracking-wider text-primary font-medium">Expanded Dispatch</span>
-</div>
-</div>
-<!-- Allocation Numbers Shift Bar -->
-<div class="my-space-md p-space-sm rounded-lg bg-surface-container flex items-center justify-between">
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-outline uppercase">Previous Allocation</span>
-<span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface-variant"><span class="sector-prev-mw">10.0</span> <span class="font-body-sm text-body-sm text-outline">MW</span></span>
-</div>
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[18px] text-outline">arrow_forward</span>
-<div class="sector-delta-badge flex items-center gap-1 px-2 py-0.5 rounded bg-primary/20 font-mono font-label-sm text-label-sm text-primary">
-<span class="sector-delta-icon material-symbols-outlined text-[14px]">add</span>
-<span class="sector-delta-mw">1.0 MW</span>
-</div>
-</div>
-<div class="flex flex-col text-right">
-<span class="font-label-sm text-label-sm text-primary uppercase font-semibold">Recommended</span>
-<span class="font-headline-md text-headline-md font-mono font-semibold text-on-surface"><span class="sector-rec-mw">11.0</span> <span class="font-body-sm text-body-sm text-primary">MW</span></span>
-</div>
-</div>
-<!-- Load Protection & Details -->
-<div class="flex flex-col gap-space-xs text-body-sm font-body-sm text-on-surface-variant">
-<p class="sector-rationale">Powers mobile command post, thermal hazmat scrubbers, field triage lighting masts, and quadcopter perimeter surveillance relay hubs.</p>
-<div class="flex items-center justify-between pt-1">
-<span class="text-outline font-label-sm text-label-sm">Safe Operating Floor: <strong class="sector-floor-val text-on-surface font-mono">8.0 MW</strong></span>
-<span class="sector-margin-val text-primary font-label-sm text-label-sm font-mono">+3.0 MW Safety Margin</span>
-</div>
-<!-- Progress indicator -->
-<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden mt-1">
-<div class="sector-progress-bar h-full bg-primary rounded-full transition-all duration-500" style="width: 91%;"></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- CORE SECTION 2: DECISION FACTORS & AUDIT RATIONALE -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md items-start">
-<!-- Decision Factors List (8 cols) -->
-<div class="lg:col-span-8 rounded-xl p-space-lg bg-surface-container-low shadow-sm flex flex-col gap-space-md">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[20px] text-primary">receipt_long</span>
-<h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Decision Factors &amp; Algorithmic Rationale</h3>
-</div>
-<span class="font-label-sm text-label-sm text-outline font-mono" id="model-version-tag">MODEL: RESIL-OPT-V4.2</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant font-mono" id="overall-algorithmic-rationale">Dynamic triage proposal generated by CRISISGRID allocation engine based on active crisis load factor and statutory municipal safety floors.</p>
-<div class="flex flex-col gap-space-xs" id="decision-factors-list">
-<!-- Factor 1 -->
-<div class="p-space-md rounded-lg bg-surface-container flex items-start gap-3">
-<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-mono font-label-sm text-label-sm mt-0.5">01</div>
-<div class="flex-1 flex flex-col">
-<div class="font-label-md text-label-md font-semibold text-on-surface">Critical Chemical Surge Trigger</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Emergency demand increased following confirmed Tier-3 chemical fire incident in Sector 4 (Indiranagar), threatening secondary electrical substation 4B.</p>
-</div>
-<span class="font-label-sm text-label-sm text-error uppercase font-medium">Critical</span>
-</div>
-<!-- Factor 2 -->
-<div class="p-space-md rounded-lg bg-surface-container flex items-start gap-3">
-<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-mono font-label-sm text-label-sm mt-0.5">02</div>
-<div class="flex-1 flex flex-col">
-<div class="font-label-md text-label-md font-semibold text-on-surface">Hydraulic Pressure Floor Compliance</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Water pumping capacity escalated +2.0 MW to sustain 8 high-velocity hydrants and rapid hazmat containment foam delivery over 1.2 sq km.</p>
-</div>
-<span class="font-label-sm text-label-sm text-primary uppercase font-medium">Verified</span>
-</div>
-<!-- Factor 3 -->
-<div class="p-space-md rounded-lg bg-surface-container flex items-start gap-3">
-<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-mono font-label-sm text-label-sm mt-0.5">03</div>
-<div class="flex-1 flex flex-col">
-<div class="font-label-md text-label-md font-semibold text-on-surface">Bandwidth Throttling Safety Window</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Civilian telecommunications load lowered -2.0 MW; remains safely +0.5 MW above municipal critical broadcast floor (4.5 MW floor maintained).</p>
-</div>
-<span class="font-label-sm text-label-sm text-tertiary uppercase font-medium">Safe</span>
-</div>
-<!-- Factor 4 -->
-<div class="p-space-md rounded-lg bg-surface-container flex items-start gap-3">
-<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-mono font-label-sm text-label-sm mt-0.5">04</div>
-<div class="flex-1 flex flex-col">
-<div class="font-label-md text-label-md font-semibold text-on-surface">Life-Support &amp; Trauma ICU Shielding</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Hospital critical surgical suites, ventilators, and emergency trauma bays remain 100% shielded; load adjustment strictly isolated to secondary non-critical HVAC.</p>
-</div>
-<span class="font-label-sm text-label-sm text-tertiary uppercase font-medium">Protected</span>
-</div>
-</div>
-</div>
-<!-- Statutory Compliance & Dual Verification Sidebar (4 cols) -->
-<div class="lg:col-span-4 flex flex-col gap-space-md">
-<div class="rounded-xl p-space-lg bg-surface-container-low shadow-sm flex flex-col gap-space-md" id="statutory-compliance-card">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[20px] text-tertiary">gavel</span>
-<h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Statutory Compliance</h3>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant" id="compliance-summary">
-              Fully compliant with <strong class="text-on-surface">Municipal Code Section 9</strong> (Emergency Infrastructure Powers Act) &amp; <strong class="text-on-surface">Disaster Governance Directive 2026-B</strong>.
-            </p>
-<div class="flex flex-col gap-2 pt-1 font-label-sm text-label-sm">
-<div class="flex items-center justify-between text-on-surface-variant py-1">
-<span>Civilian Impact Classification</span>
-<span class="font-semibold text-secondary" id="compliance-civilian-impact">Tier-2 (Moderate)</span>
-</div>
-<div class="flex items-center justify-between text-on-surface-variant py-1">
-<span>Statutory Override Threshold</span>
-<span class="font-semibold text-tertiary" id="compliance-override-threshold">Permitted &lt; 24h</span>
-</div>
-<div class="flex items-center justify-between text-on-surface-variant py-1">
-<span>Automatic Sunset Trigger</span>
-<span class="font-semibold text-on-surface" id="compliance-sunset">06:00:00 Max</span>
-</div>
-</div>
-</div>
-<!-- Dual Quorum Status Card -->
-<div class="rounded-xl p-space-lg bg-surface-container-low shadow-sm flex flex-col gap-space-sm" id="dual-quorum-card">
-<div class="flex items-center justify-between">
-<div class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Dual-Key Validation</div>
-<span class="font-mono font-label-sm text-label-sm text-primary font-semibold" id="quorum-summary-count">1 OF 2 SIGNED</span>
-</div>
-<div class="flex flex-col gap-2 pt-1" id="signers-list">
-<!-- Signer 1: Gov. Operations Lead -->
-<div class="flex items-center justify-between p-2 rounded bg-surface-container" id="signer-gov-row">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[16px] text-tertiary" id="signer-gov-icon">check_circle</span>
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-on-surface font-medium">Gov. Operations Lead</span>
-<span class="text-[10px] text-outline font-mono" id="signer-gov-meta">S. Mukherjee (SIG: 0x9F4C...B2)</span>
-</div>
-</div>
-<span class="px-2 py-0.5 rounded bg-tertiary-container/30 text-tertiary-fixed font-label-sm text-label-sm font-semibold" id="signer-gov-badge">SIGNED</span>
-</div>
-<!-- Signer 2: Disaster Coordinator -->
-<div class="flex items-center justify-between p-2 rounded bg-surface-container" id="signer-disaster-row">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[16px] text-error" id="signer-disaster-icon">pending</span>
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-on-surface font-medium">Disaster Coordinator</span>
-<span class="text-[10px] text-outline font-mono" id="signer-disaster-meta">Dr. Arvind Rao (Pending Key)</span>
-</div>
-</div>
-<span class="px-2 py-0.5 rounded bg-error-container/30 text-error font-label-sm text-label-sm font-semibold animate-pulse" id="signer-disaster-badge">AWAITING</span>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- CORE SECTION 3: AUTHORITY ACTION CONSOLE & EXECUTIVE SIGN-OFF -->
-<div class="rounded-2xl p-space-xl bg-surface-container-low shadow-lg flex flex-col gap-space-lg relative overflow-hidden">
-<!-- Visual Accent Line -->
-<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-tertiary to-primary"></div>
+          <div class="flex flex-col gap-2 pt-1 font-label-sm text-label-sm">
+            <div class="flex items-center justify-between text-on-surface-variant py-1">
+              <span>Civilian Impact Classification</span>
+              <span class="font-semibold text-secondary" id="compliance-civilian-impact">Tier-2 (Moderate)</span>
+            </div>
+            <div class="flex items-center justify-between text-on-surface-variant py-1">
+              <span>Statutory Override Threshold</span>
+              <span class="font-semibold text-tertiary" id="compliance-override-threshold">Permitted &lt; 24h</span>
+            </div>
+            <div class="flex items-center justify-between text-on-surface-variant py-1">
+              <span>Automatic Sunset Trigger</span>
+              <span class="font-semibold text-on-surface" id="compliance-sunset">06:00:00 Max</span>
+            </div>
+          </div>
+        </div>
+        <!-- Dual Quorum Internal Details Card -->
+        <div class="rounded-xl p-space-lg bg-surface-container shadow-sm flex flex-col gap-space-sm" id="dual-quorum-card">
+          <div class="flex items-center justify-between">
+            <div class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Dual-Key Validation</div>
+            <span class="font-mono text-outline text-[11px]" id="active-session-id">BLR-EOC-2026-X889</span>
+          </div>
+          <div class="flex flex-col gap-2 pt-1" id="signers-list">
+            <!-- Signer 1: Gov. Operations Lead -->
+            <div class="flex items-center justify-between p-2 rounded bg-surface-container-high" id="signer-gov-row">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-tertiary" id="signer-gov-icon">check_circle</span>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface font-medium">Gov. Operations Lead</span>
+                  <span class="text-[10px] text-outline font-mono" id="signer-gov-meta">S. Mukherjee (SIG: 0x9F4C...B2)</span>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-tertiary-container/30 text-tertiary-fixed font-label-sm text-label-sm font-semibold" id="signer-gov-badge">SIGNED</span>
+            </div>
+            <!-- Signer 2: Disaster Coordinator -->
+            <div class="flex items-center justify-between p-2 rounded bg-surface-container-high" id="signer-disaster-row">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-error" id="signer-disaster-icon">pending</span>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface font-medium">Disaster Coordinator</span>
+                  <span class="text-[10px] text-outline font-mono" id="signer-disaster-meta">Dr. Arvind Rao (Pending Key)</span>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-error-container/30 text-error font-label-sm text-label-sm font-semibold animate-pulse" id="signer-disaster-badge">AWAITING</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<!-- Demo RBAC & Signer Toolbar -->
-<div class="flex flex-wrap items-center justify-between gap-space-sm p-3 rounded-xl bg-surface-container/60 border border-outline-variant/30">
-<div class="flex flex-wrap items-center gap-space-md">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[18px] text-primary">badge</span>
-<label class="font-label-sm text-label-sm uppercase text-outline font-semibold" for="demo-role-select">User Role (RBAC):</label>
-<select class="bg-surface-container-low text-on-surface border border-outline-variant rounded-lg px-2.5 py-1 text-label-md font-medium focus:ring-1 focus:ring-primary" id="demo-role-select">
-<option selected value="AUTHORITY">AUTHORITY (Full Clearance)</option>
-<option value="OPERATOR">OPERATOR (Read &amp; Modify Only)</option>
-<option value="CITIZEN">CITIZEN (Public Read-Only)</option>
-</select>
-<span class="px-2 py-0.5 rounded font-label-sm text-label-sm uppercase font-semibold bg-tertiary-container/30 text-tertiary-fixed" id="demo-role-badge">AUTHORIZED</span>
-</div>
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[18px] text-tertiary">fingerprint</span>
-<label class="font-label-sm text-label-sm uppercase text-outline font-semibold" for="demo-signer-select">Sign As:</label>
-<select class="bg-surface-container-low text-on-surface border border-outline-variant rounded-lg px-2.5 py-1 text-label-md font-medium focus:ring-1 focus:ring-primary" id="demo-signer-select">
-<option selected value="Disaster Coordinator">Disaster Coordinator (Dr. Arvind Rao)</option>
-<option value="Gov. Operations Lead">Gov. Operations Lead (S. Mukherjee)</option>
-</select>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<span class="font-label-sm text-label-sm text-outline font-mono">Quorum Presets:</span>
-<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-[11px] font-mono text-on-surface-variant hover:text-on-surface transition-colors" id="demo-reset-0-btn" title="Reset plan signatures to 0 of 2 signed">Reset 0/2</button>
-<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-[11px] font-mono text-on-surface-variant hover:text-on-surface transition-colors" id="demo-reset-1-btn" title="Reset plan signatures to 1 of 2 signed">Reset 1/2</button>
+    <!-- Audit Footnote & Ledger Hash -->
+    <div class="p-space-sm rounded-lg bg-surface-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-xs text-outline font-label-sm text-label-sm">
+      <span>All actions logged to immutable municipal dispatch ledger UTC+05:30.</span>
+      <span class="font-mono text-primary font-semibold" id="active-ledger-hash">Ledger Hash: 0x8a92...e4a1f</span>
+    </div>
+
+  </div>
+</details>
+
 </div>
 </div>
 
-<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
-<!-- Signer Identity Profile -->
-<div class="flex items-center gap-space-md">
-<div class="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary" id="active-signer-avatar">
-<span class="material-symbols-outlined text-[32px]">shield_person</span>
-</div>
-<div class="flex flex-col">
-<div class="flex items-center gap-2">
-<span class="font-headline-md text-headline-md font-semibold text-on-surface" id="active-signer-name">Dr. Arvind Rao</span>
-<span class="px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm uppercase font-semibold" id="active-signer-badge">EOC-4 Key Holder</span>
-</div>
-<span class="font-body-md text-body-md text-on-surface-variant" id="active-signer-role">Municipal Disaster Coordinator • Civil Defense Infrastructure Wing</span>
-<div class="flex items-center gap-2 mt-1 text-tertiary font-label-sm text-label-sm font-mono" id="active-signer-token">
-<span class="material-symbols-outlined text-[14px]">lock_reset</span>
-<span>Cryptographic Hardware Token Verified (EOC-NET Secure Handshake Active)</span>
-</div>
-</div>
-</div>
-<!-- Fast Toggle/Security State Badge -->
-<div class="flex items-center gap-3 bg-surface-container p-space-sm rounded-xl">
-<span class="material-symbols-outlined text-[20px] text-tertiary">key</span>
-<div class="flex flex-col text-right">
-<span class="font-label-sm text-label-sm uppercase text-outline">Session Security ID</span>
-<span class="font-mono font-label-md text-label-md text-on-surface" id="active-session-id">BLR-EOC-2026-X889</span>
-</div>
-</div>
-</div>
-<!-- Action Control Center -->
-<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md pt-space-md">
-<!-- Secondary Contingency Actions -->
-<div class="flex flex-wrap items-center gap-space-sm">
-<button class="px-space-md py-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors flex items-center gap-2" id="open-modifier-btn">
-<span class="material-symbols-outlined text-[18px]">tune</span>
-              Modify Allocation Parameters
-            </button>
-<button class="px-space-md py-2.5 rounded-lg bg-error-container/20 hover:bg-error-container/40 text-error font-label-md text-label-md transition-colors flex items-center gap-2" id="reject-btn">
-<span class="material-symbols-outlined text-[18px]">block</span>
-              Reject &amp; Maintain Baseline
-            </button>
-</div>
-<!-- Primary Sign-Off Action Button -->
-<div class="flex flex-col items-end gap-1.5">
-<button class="w-full sm:w-auto px-space-xl py-3 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-headline-sm text-headline-sm font-semibold tracking-tight transition-all duration-200 shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95" id="authorize-btn">
-<span class="material-symbols-outlined text-[20px]">verified</span>
-              Authorize &amp; Dispatch Capacity Plan →
-            </button>
-<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
-<span class="material-symbols-outlined text-[12px] text-primary">sync</span>
-              Immediate Grid Re-indexing upon 2/2 signature quorum
-            </span>
-</div>
-</div>
-<!-- Audit Trail Footnote -->
-<div class="pt-space-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-xs text-outline font-label-sm text-label-sm">
-<span>All actions logged to immutable municipal dispatch ledger UTC+05:30. Dual-key authorization validated.</span>
-<span class="font-mono" id="active-ledger-hash">Ledger Hash: 0x8a92...e4a1f</span>
-</div>
-</div>
-</div>
-</div>
-<!-- Parameter Modification Drawer / Modal (Hidden by Default) -->
+<!-- ============================================================ -->
+<!-- PARAMETER MODIFICATION MODAL (Hidden by Default) -->
+<!-- ============================================================ -->
 <div class="fixed inset-0 z-50 bg-surface-container-lowest/80 backdrop-blur-md hidden flex items-center justify-center p-space-md overflow-y-auto" id="modifier-modal">
-<div class="w-full max-w-2xl bg-surface-container-low rounded-2xl p-space-xl shadow-2xl flex flex-col gap-space-lg relative max-h-[90vh] overflow-y-auto">
+<div class="w-full max-w-2xl bg-surface-container-low rounded-2xl p-space-xl shadow-2xl flex flex-col gap-space-lg relative max-h-[90vh] overflow-y-auto border border-outline-variant/30">
 <div class="flex items-center justify-between">
 <div class="flex items-center gap-2">
 <span class="material-symbols-outlined text-primary">tune</span>
 <h3 class="font-headline-md text-headline-md font-semibold text-on-surface">Fine-Tune Capacity Limits &amp; Parameters</h3>
 </div>
-<button class="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors" id="close-modifier-btn">
+<button class="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors cursor-pointer" id="close-modifier-btn">
 <span class="material-symbols-outlined text-[18px]">close</span>
 </button>
 </div>
@@ -631,15 +917,16 @@
 </div>
 
 <div class="flex items-center justify-end gap-space-sm pt-space-sm border-t border-outline-variant/30">
-<button class="px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors" id="cancel-modifier-btn">
-          Discard Changes
-        </button>
-<button class="px-space-lg py-2 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold transition-colors" id="apply-modifier-btn">
-          Apply Parameter Shift &amp; Rerun Engine
-        </button>
+<button class="px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors cursor-pointer" id="cancel-modifier-btn">
+Discard Changes
+</button>
+<button class="px-space-lg py-2 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold transition-colors cursor-pointer" id="apply-modifier-btn">
+Apply Parameter Shift &amp; Rerun Engine
+</button>
 </div>
 </div>
 </div>
+
 <!-- Sign-off Confirmation Notification Toast -->
 <div class="fixed bottom-6 right-6 z-50 hidden bg-surface-container-high rounded-xl p-space-md shadow-2xl flex items-center gap-space-md" id="signature-toast">
 <div class="w-10 h-10 rounded-full bg-tertiary-container/30 flex items-center justify-center text-tertiary">
@@ -650,40 +937,40 @@
 <span class="font-body-sm text-body-sm text-on-surface-variant font-mono" id="signature-toast-meta">Ledger block sealed and dispatched</span>
 </div>
 </div>
+
 <!-- Inline Logic for Interactions -->
 <script>
-    (function initAuthorityConsole() {
-      // Cooldown timer simulation
-      let timeLeft = 252; // 04:12 in seconds
-      const timerDisplay = document.getElementById('countdown-timer');
-      
-      const timerInterval = setInterval(() => {
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          if (timerDisplay) timerDisplay.textContent = 'EXPIRED';
-          return;
-        }
-        timeLeft--;
-        const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-        const secs = (timeLeft % 60).toString().padStart(2, '0');
-        if (timerDisplay) timerDisplay.textContent = `${mins}:${secs}`;
-      }, 1000);
+(function initAuthorityConsole() {
+  let timeLeft = 252; // 04:12 in seconds
+  const timerDisplay = document.getElementById('countdown-timer');
+  
+  const timerInterval = setInterval(() => {
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (timerDisplay) timerDisplay.textContent = 'EXPIRED';
+      return;
+    }
+    timeLeft--;
+    const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+    const secs = (timeLeft % 60).toString().padStart(2, '0');
+    if (timerDisplay) timerDisplay.textContent = `${mins}:${secs}`;
+  }, 1000);
 
-      // Modal Controls
-      const modal = document.getElementById('modifier-modal');
-      const openBtn = document.getElementById('open-modifier-btn');
-      const closeBtn = document.getElementById('close-modifier-btn');
-      const cancelBtn = document.getElementById('cancel-modifier-btn');
+  // Modal Controls
+  const modal = document.getElementById('modifier-modal');
+  const openBtn = document.getElementById('open-modifier-btn');
+  const closeBtn = document.getElementById('close-modifier-btn');
+  const cancelBtn = document.getElementById('cancel-modifier-btn');
 
-      if (openBtn && modal) {
-        openBtn.addEventListener('click', () => modal.classList.remove('hidden'));
-      }
-      if (closeBtn && modal) {
-        closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
-      }
-      if (cancelBtn && modal) {
-        cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
-      }
-    })();
-  </script>
+  if (openBtn && modal) {
+    openBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+  }
+  if (closeBtn && modal) {
+    closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+  }
+  if (cancelBtn && modal) {
+    cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+  }
+})();
+</script>
 </div></main></div></body></html>

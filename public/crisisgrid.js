@@ -1,6 +1,27 @@
 (function () {
   "use strict";
 
+  // Role-Based Access Control Guard
+  const isAuth =
+    sessionStorage.getItem("crisisgrid_auth") === "authenticated" ||
+    localStorage.getItem("crisisgrid_auth") === "authenticated";
+  const activeUserRole =
+    sessionStorage.getItem("crisisgrid_user_role") ||
+    localStorage.getItem("crisisgrid_user_role");
+  const pathNow = window.location.pathname;
+  const isGovernmentPage =
+    pathNow.includes("city_command_center") ||
+    pathNow.includes("live_incidents_system_impact") ||
+    pathNow.includes("authority_review_authorization") ||
+    pathNow.includes("allocation_confirmed_dispatched");
+
+  if (isGovernmentPage) {
+    if (!isAuth || activeUserRole !== "government") {
+      window.location.replace("/login?auth=required");
+      return;
+    }
+  }
+
   const BASE_PATH = "/stitch_crisisgrid_emergency_command_platform";
   const PAGE_PATHS = {
     allocation_confirmed_dispatched:
@@ -1228,6 +1249,66 @@
     }
   }
 
+  function updateHeaderStatus(data) {
+    const isStable = data.cityStatus === "STABLE" || data.activeIncidentsCount === 0;
+    const badge = document.getElementById("header-crisis-status-badge");
+
+    if (badge) {
+      if (window.location.pathname.includes("allocation_confirmed_dispatched")) {
+        badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tertiary-container/20 border border-tertiary/30 text-tertiary";
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span><span id="header-crisis-status-text" class="font-mono text-[11px] font-semibold uppercase tracking-wider">ALLOCATION COMMITTED</span>';
+      } else if (isStable) {
+        badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tertiary/10 border border-tertiary/30 text-tertiary";
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span><span id="header-crisis-status-text" class="font-mono text-[11px] font-semibold uppercase tracking-wider">CITY STABLE</span>';
+      } else {
+        badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container/20 border border-error/30 text-error";
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span><span id="header-crisis-status-text" class="font-mono text-[11px] font-semibold uppercase tracking-wider">CRISIS ACTIVE</span>';
+      }
+    }
+
+    const clock = document.getElementById("header-live-clock");
+    if (clock) {
+      const now = new Date();
+      const istTime = new Intl.DateTimeFormat("en-IN", {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      }).format(now);
+      clock.textContent = istTime;
+    }
+
+    // Role Indicator & Switch Access Mode in Top Header
+    const headerRight = document.querySelector("header .flex.items-center.gap-2.sm\\:gap-3") ||
+                        document.querySelector("header .flex.items-center.gap-2") ||
+                        document.querySelector("header .flex.items-center.gap-space-md");
+    if (headerRight && !document.getElementById("header-role-indicator")) {
+      const roleBadge = document.createElement("div");
+      roleBadge.id = "header-role-indicator";
+      roleBadge.className = "hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/15 border border-primary/30 text-primary font-mono text-[11px]";
+      roleBadge.innerHTML = '<span class="material-symbols-outlined text-[14px]">account_balance</span><span class="font-semibold uppercase tracking-wider">GOVERNMENT COMMAND</span>';
+
+      const switchBtn = document.createElement("a");
+      switchBtn.id = "header-switch-access-btn";
+      switchBtn.href = "/access";
+      switchBtn.className = "flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/40 text-on-surface-variant hover:text-primary font-mono text-[11px] transition-colors cursor-pointer shadow-sm";
+      switchBtn.title = "Switch Access Mode";
+      switchBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">swap_horiz</span><span class="hidden sm:inline">Switch Mode</span>';
+
+      const avatar = headerRight.querySelector(".rounded-full.bg-primary") ||
+                     headerRight.querySelector(".rounded-full.bg-primary\\/15") ||
+                     headerRight.lastElementChild;
+      if (avatar) {
+        headerRight.insertBefore(roleBadge, avatar);
+        headerRight.insertBefore(switchBtn, avatar);
+      } else {
+        headerRight.appendChild(roleBadge);
+        headerRight.appendChild(switchBtn);
+      }
+    }
+  }
+
   function updateSectorCards(data) {
     updateHeaderStatus(data);
     const page = window.location.pathname;
@@ -2215,15 +2296,298 @@
   }
 
   function wireNavigation() {
-    for (const anchor of document.querySelectorAll('a[href="#"]')) {
-      const label = anchor.textContent.replace(/\s+/g, " ").trim();
-      if (/Command Overview|Command Center|Return to Command Center/i.test(label)) {
+    for (const anchor of document.querySelectorAll("a")) {
+      const dataPath = (anchor.getAttribute("data-path") || "").toLowerCase();
+      const label = anchor.textContent.replace(/\s+/g, " ").trim().toLowerCase();
+      const currentHref = anchor.getAttribute("href") || "";
+
+      if (dataPath === "command-overview" || /command overview|command center|return to command center/i.test(label)) {
         anchor.href = PAGE_PATHS.city_command_center;
-      } else if (/Live Incidents & Impact|Incident Management Hub/i.test(label)) {
+      } else if (
+        dataPath === "live-incidents-impact" ||
+        /live incidents|incident management hub|incidents/i.test(label)
+      ) {
         anchor.href = PAGE_PATHS.live_incidents_system_impact;
-      } else if (/Authority Review/i.test(label)) {
+      } else if (
+        dataPath === "authority-review" ||
+        /authority review|review & authorize|review and authorize/i.test(label)
+      ) {
         anchor.href = PAGE_PATHS.authority_review_authorization;
+      } else if (
+        dataPath === "capacity-history" ||
+        /capacity & telemetry|capacity history/i.test(label)
+      ) {
+        if (currentHref === "#" || currentHref === "") {
+          anchor.href = "#";
+          anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            const target = document.getElementById("section-infrastructure-sectors") || document.getElementById("command-center-top-metrics");
+            if (target) {
+              target.scrollIntoView({ behavior: "smooth" });
+            } else {
+              window.location.assign(PAGE_PATHS.city_command_center);
+            }
+          });
+        }
+      } else if (
+        dataPath === "resource-allocations" ||
+        /resource units|resource allocations/i.test(label)
+      ) {
+        if (currentHref === "#" || currentHref === "") {
+          anchor.href = "#";
+          anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            openLiveNegotiationModal();
+          });
+        }
+      } else if (
+        dataPath === "comms-broadcast" ||
+        /civic broadcast/i.test(label)
+      ) {
+        anchor.href = "#";
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          openCivicBroadcastModal();
+        });
       }
+    }
+
+    // Wire header utility buttons
+    document.querySelectorAll("#header-reset-demo-btn").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        openResetDemoModal();
+      });
+    });
+
+    // Wire user profile dropdown and logout
+    const avatarBtn = document.getElementById("header-user-avatar-btn");
+    const menuDropdown = document.getElementById("header-user-menu-dropdown");
+    if (avatarBtn && menuDropdown) {
+      avatarBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        menuDropdown.classList.toggle("hidden");
+      });
+
+      document.addEventListener("click", function (e) {
+        if (!menuDropdown.contains(e.target) && e.target !== avatarBtn) {
+          menuDropdown.classList.add("hidden");
+        }
+      });
+    }
+
+    const logoutBtn = document.getElementById("btn-header-logout");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        sessionStorage.removeItem("crisisgrid_auth");
+        sessionStorage.removeItem("crisisgrid_user_role");
+        sessionStorage.removeItem("crisisgrid_user_email");
+        sessionStorage.removeItem("crisisgrid_user_name");
+        localStorage.removeItem("crisisgrid_auth");
+        localStorage.removeItem("crisisgrid_user_role");
+        localStorage.removeItem("crisisgrid_user_email");
+        window.location.replace("/login");
+      });
+    }
+
+    // Populate user profile info in dropdown if present
+    const userNameEl = document.getElementById("menu-user-name");
+    const userEmailEl = document.getElementById("menu-user-email");
+    const storedEmail = sessionStorage.getItem("crisisgrid_user_email") || localStorage.getItem("crisisgrid_user_email");
+    const storedName = sessionStorage.getItem("crisisgrid_user_name") || "Authorized Official";
+    if (userNameEl && storedName) userNameEl.textContent = storedName;
+    if (userEmailEl && storedEmail) userEmailEl.textContent = storedEmail;
+
+    // Style primary top navigation items and sidebar nodes based on active page
+    const currentPath = window.location.pathname;
+    const isCommand = currentPath.includes("city_command_center");
+    const isIncidents = currentPath.includes("live_incidents_system_impact");
+    const isAuthority = currentPath.includes("authority_review_authorization") || currentPath.includes("allocation_confirmed_dispatched");
+
+    document.querySelectorAll(".nav-tab-link").forEach(function (tab) {
+      const dPath = tab.getAttribute("data-path");
+      const isActive = (dPath === "command-overview" && isCommand) ||
+                       (dPath === "live-incidents-impact" && isIncidents) ||
+                       (dPath === "authority-review" && isAuthority);
+      if (isActive) {
+        tab.className = "nav-tab-link px-3 py-1.5 rounded-lg text-[13px] font-semibold transition-all bg-primary/20 text-primary border border-primary/40 shadow-sm";
+        tab.setAttribute("aria-current", "page");
+      } else {
+        tab.className = "nav-tab-link px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high";
+        tab.removeAttribute("aria-current");
+      }
+    });
+
+    // Style sidebar nodes
+    document.querySelectorAll("aside nav a").forEach(function (node) {
+      const dPath = node.getAttribute("data-path");
+      const isNodeActive = (dPath === "command-overview" && isCommand) ||
+                           (dPath === "live-incidents-impact" && isIncidents) ||
+                           (dPath === "authority-review" && isAuthority);
+      if (isNodeActive) {
+        node.classList.remove("text-on-surface-variant", "hover:bg-surface-container-high", "hover:text-on-surface");
+        node.classList.add("bg-primary-container", "text-on-primary-container", "font-medium");
+        node.setAttribute("aria-current", "page");
+      } else if (dPath !== "resource-allocations") {
+        node.classList.remove("bg-primary-container", "text-on-primary-container", "font-medium");
+        node.classList.add("text-on-surface-variant", "hover:bg-surface-container-high", "hover:text-on-surface");
+        node.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  function openCivicBroadcastModal() {
+    let modal = document.getElementById("civic-broadcast-modal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "civic-broadcast-modal";
+      modal.className =
+        "fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4";
+      document.body.appendChild(modal);
+    }
+
+    modal.classList.remove("hidden");
+    const activeInc = dashboard?.activeIncident || dashboard?.incidents?.find(function (i) { return i.status === "active"; });
+    const isStable = dashboard?.cityStatus === "STABLE" || !activeInc;
+
+    const currentHeadline = isStable
+      ? "NO ACTIVE EMERGENCY"
+      : (activeInc.title || "EMERGENCY ALERT").toUpperCase();
+    const currentLoc = isStable
+      ? "Bengaluru Metropolitan Region"
+      : (activeInc.address || activeInc.location || "Indiranagar — Sector 4");
+    const currentSeverity = isStable ? "NORMAL" : (activeInc.severity || "CRITICAL").toUpperCase();
+
+    modal.innerHTML = `
+      <div class="bg-surface-container-low border border-outline-variant/40 rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-8 flex flex-col gap-5 text-on-surface max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-outline-variant/30 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-inner">
+              <span class="material-symbols-outlined text-[24px]">campaign</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-xl font-bold tracking-tight text-on-surface">CIVIC BROADCAST MANAGEMENT</h3>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-primary/20 text-primary border border-primary/30">
+                  GOV CLEARANCE
+                </span>
+              </div>
+              <p class="text-xs text-on-surface-variant font-mono">
+                Prepare, review, and authorize official public emergency alerts.
+              </p>
+            </div>
+          </div>
+          <button id="close-civic-broadcast-btn" class="w-8 h-8 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-outline hover:text-on-surface cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <!-- Incident Context Box -->
+        <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/30 flex items-center justify-between gap-4">
+          <div class="space-y-0.5">
+            <div class="text-[10px] font-mono uppercase text-outline">Target Emergency Context</div>
+            <div class="text-sm font-semibold text-on-surface flex items-center gap-2">
+              <span>${escapeHtml(currentHeadline)}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${isStable ? 'bg-tertiary/20 text-tertiary' : 'bg-error/20 text-error'}">${escapeHtml(currentSeverity)}</span>
+            </div>
+            <div class="text-xs text-on-surface-variant font-mono">${escapeHtml(currentLoc)}</div>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <span class="text-[10px] font-mono uppercase text-outline">Target Audience</span>
+            <div class="text-xs font-mono font-semibold text-tertiary">All 8 Municipal Zones</div>
+          </div>
+        </div>
+
+        <!-- Alert Draft Fields -->
+        <div class="space-y-3 font-sans">
+          <div>
+            <label class="block text-xs font-mono uppercase text-outline mb-1 font-semibold">Official Alert Headline</label>
+            <input id="broadcast-headline-input" type="text" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-on-surface text-sm font-semibold focus:outline-none focus:border-primary" value="${escapeHtml(currentHeadline)}" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-mono uppercase text-outline mb-1 font-semibold">Public Directive Message</label>
+            <textarea id="broadcast-message-input" rows="3" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-on-surface text-xs leading-relaxed focus:outline-none focus:border-primary">${isStable ? 'All municipal infrastructure, power grids, water supply, and public transit corridors in Bengaluru are operating within normal baseline parameters.' : 'Official emergency directive active. Citizens are advised to follow municipal safety perimeters and yield right of way to emergency services.'}</textarea>
+          </div>
+
+          <!-- Broadcast Status Pill -->
+          <div class="p-3 rounded-xl bg-surface-container flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-tertiary animate-pulse"></span>
+              <span id="broadcast-status-label" class="text-xs font-mono font-semibold text-on-surface">BROADCAST SYNCHRONIZED WITH PUBLIC PORTAL</span>
+            </div>
+            <span class="text-[10px] font-mono text-outline">SEC-9 VERIFIED</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-outline-variant/20">
+          <a href="/public" target="_blank" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/50 text-on-surface text-xs font-mono font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+            <span class="material-symbols-outlined text-[16px] text-tertiary">open_in_new</span>
+            <span>PREVIEW PUBLIC PORTAL →</span>
+          </a>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button id="cancel-civic-broadcast-btn" type="button" class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface text-xs font-mono transition-colors cursor-pointer">
+              Cancel
+            </button>
+            <button id="approve-civic-broadcast-btn" type="button" class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-xs font-mono tracking-wide transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
+              <span class="material-symbols-outlined text-[16px]">send</span>
+              <span>APPROVE &amp; BROADCAST ALERT</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const closeBtn = modal.querySelector("#close-civic-broadcast-btn");
+    const cancelBtn = modal.querySelector("#cancel-civic-broadcast-btn");
+    const approveBtn = modal.querySelector("#approve-civic-broadcast-btn");
+    const headlineInput = modal.querySelector("#broadcast-headline-input");
+    const msgInput = modal.querySelector("#broadcast-message-input");
+    const statusLabel = modal.querySelector("#broadcast-status-label");
+
+    function closeModal() {
+      modal.classList.add("hidden");
+    }
+
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+
+    if (approveBtn) {
+      approveBtn.addEventListener("click", async function () {
+        const headline = headlineInput ? headlineInput.value.trim() : currentHeadline;
+        const message = msgInput ? msgInput.value.trim() : "";
+        approveBtn.disabled = true;
+        approveBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Publishing...</span>';
+
+        try {
+          await request("/api/public/broadcast", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              headline,
+              message,
+              publishedBy: "State EOC Executive (Cleared Role)",
+            }),
+          });
+
+          if (statusLabel) {
+            statusLabel.textContent = "ALERT OFFICIALLY PUBLISHED & COMMITTED";
+            statusLabel.className = "text-xs font-mono font-bold text-tertiary";
+          }
+          approveBtn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span><span>Published!</span>';
+          showNotice("Civic Broadcast approved & published immediately to Public Information Portal.", false, false);
+          setTimeout(function () {
+            closeModal();
+          }, 1500);
+        } catch (err) {
+          showNotice(err instanceof Error ? err.message : "Failed to publish broadcast", true, true);
+          approveBtn.disabled = false;
+          approveBtn.innerHTML = '<span class="material-symbols-outlined text-[16px]">send</span><span>APPROVE &amp; BROADCAST ALERT</span>';
+        }
+      });
     }
   }
 

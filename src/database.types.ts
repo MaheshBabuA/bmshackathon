@@ -51,6 +51,7 @@ export type IncidentRow = {
   perimeter_details: string;
   is_simulation?: boolean;
   scenario_type?: string | null;
+  affected_area?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -145,6 +146,25 @@ export type AuthorityReviewRow = {
   created_at: string;
 };
 
+export type ResourceRequestRow = {
+  id: string;
+  incident_id: string;
+  organization_name: string;
+  organization_type: string;
+  resource_type: string;
+  requested_amount: number;
+  unit: string;
+  reason: string;
+  urgency: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+  status: "PENDING" | "APPROVED" | "MODIFIED" | "REJECTED";
+  allocated_amount?: number | undefined;
+  reviewed_by?: string | undefined;
+  reviewed_at?: string | undefined;
+  review_decision?: "APPROVE" | "MODIFY" | "REJECT" | undefined;
+  review_notes?: string | undefined;
+  created_at: string;
+};
+
 export type AuditLogRow = {
   id: string;
   actor: string;
@@ -203,6 +223,7 @@ export interface Database {
       audit_logs: Table<AuditLogRow>;
       telemetry_snapshots: Table<TelemetrySnapshotRow>;
       command_center_state: Table<CommandCenterStateRow>;
+      resource_requests: Table<ResourceRequestRow>;
     };
     Views: Record<string, never>;
     Functions: {

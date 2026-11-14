@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>CRISISGRID — Secure Emergency Operations Access</title>
+  <link rel="icon" type="image/png" href="/crisisgrid_logo.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            background: "#0f131d",
+            surface: "#0f131d",
+            "surface-container-lowest": "#0a0e17",
+            "surface-container-low": "#171c25",
+            "surface-container": "#1b2029",
+            "surface-container-high": "#262a34",
+            "surface-container-highest": "#31353f",
+            "on-surface": "#dfe2f0",
+            "on-surface-variant": "#c2c6d6",
+            outline: "#8c909f",
+            "outline-variant": "#424754",
+            primary: "#adc6ff",
+            "primary-container": "#004395",
+            "on-primary": "#002e6a",
+            tertiary: "#4ae176",
+            "tertiary-container": "#003915",
+            error: "#ffb4ab",
+            "error-container": "#93000a",
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+</head>
+<body class="bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-primary selection:text-on-primary">
+  <!-- Minimal Top Header -->
+  <header class="w-full border-b border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-md">
+    <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="/access" class="flex items-center gap-3 group">
+        <img alt="CRISISGRID Logo" class="h-8 w-auto object-contain rounded-md bg-white/95 p-0.5 shadow-sm group-hover:scale-105 transition-transform" src="/crisisgrid_logo.png"/>
+        <div class="flex flex-col">
+          <span class="font-bold tracking-tight text-on-surface text-base">CRISISGRID</span>
+          <span class="text-[10px] text-outline font-mono leading-none">SECURE COMMAND GATEWAY</span>
+        </div>
+      </a>
+      <a href="/public" class="flex items-center gap-1.5 text-xs font-mono text-outline hover:text-primary transition-colors">
+        <span>Public Portal</span>
+        <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Central Authentication Card -->
+  <main class="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-10 max-w-lg mx-auto w-full">
+    <div class="w-full bg-surface-container-low border border-outline-variant/40 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
+      <!-- Title & Branding -->
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-mono font-semibold">
+          <span class="material-symbols-outlined text-[14px]">shield</span>
+          <span>Authorized Personnel Only</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-on-surface">
+          CRISISGRID
+        </h1>
+        <p class="text-sm font-medium text-primary">
+          Secure Emergency Operations Access
+        </p>
+        <p class="text-xs text-on-surface-variant font-mono">
+          Access is restricted to verified emergency operations personnel.
+        </p>
+      </div>
+
+      <!-- Error / Alert Message Container -->
+      <div id="login-error-box" class="hidden p-3.5 rounded-xl bg-error-container/20 border border-error/40 text-error text-xs font-mono flex items-start gap-2.5">
+        <span class="material-symbols-outlined text-[18px] flex-shrink-0">error</span>
+        <span id="login-error-text">Authentication failed. Verify your authorized credentials and try again.</span>
+      </div>
+
+      <!-- Login Form -->
+      <form id="government-login-form" class="space-y-4" novalidate>
+        <!-- Official ID / Email -->
+        <div class="space-y-1.5">
+          <label for="login-email" class="block text-xs font-mono uppercase tracking-wider text-outline font-semibold">
+            Official ID / Email
+          </label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-outline">
+              badge
+            </span>
+            <input
+              id="login-email"
+              type="email"
+              autocomplete="username"
+              required
+              placeholder="official@crisisgrid.gov"
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 text-on-surface text-sm placeholder:text-outline/50 focus:outline-none focus:border-primary font-mono transition-colors"
+            />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label for="login-password" class="block text-xs font-mono uppercase tracking-wider text-outline font-semibold">
+              Password
+            </label>
+          </div>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-outline">
+              key
+            </span>
+            <input
+              id="login-password"
+              type="password"
+              autocomplete="current-password"
+              required
+              placeholder="••••••••••••"
+              class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 text-on-surface text-sm placeholder:text-outline/50 focus:outline-none focus:border-primary font-mono transition-colors"
+            />
+            <button
+              id="toggle-password-btn"
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors cursor-pointer"
+              title="Show/Hide Password"
+            >
+              <span class="material-symbols-outlined text-[18px]">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          id="btn-submit-login"
+          type="submit"
+          class="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-sm tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer mt-2"
+        >
+          <span class="material-symbols-outlined text-[18px]">lock_open</span>
+          <span>Secure Sign In</span>
+        </button>
+
+        <!-- Secondary Security Text -->
+        <p class="text-[11px] text-center text-outline font-mono">
+          Emergency command access is monitored and logged.
+        </p>
+      </form>
+
+      <!-- Subtle Demo Credentials Box for Hackathon Reviewers -->
+      <div class="p-3.5 rounded-xl bg-surface-container border border-outline-variant/30 space-y-2">
+        <div class="flex items-center justify-between text-xs font-mono">
+          <span class="text-on-surface-variant font-semibold flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[15px] text-primary">info</span>
+            <span>Demo Credentials</span>
+          </span>
+          <button
+            id="btn-autofill-demo"
+            type="button"
+            class="text-[11px] text-primary hover:underline cursor-pointer font-medium"
+          >
+            Auto-Fill
+          </button>
+        </div>
+        <div class="grid grid-cols-1 gap-1 text-[11px] font-mono text-outline">
+          <div>Email: <strong class="text-on-surface">official@crisisgrid.gov</strong></div>
+          <div>Password: <strong class="text-on-surface">CrisisGrid2026!</strong></div>
+        </div>
+      </div>
+
+      <!-- Link back to public view -->
+      <div class="text-center pt-1 border-t border-outline-variant/20">
+        <a href="/public" class="text-xs font-mono text-outline hover:text-primary transition-colors">
+          Civilians &amp; General Public: View Public Alerts →
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Enterprise Footer -->
+  <footer class="w-full border-t border-outline-variant/30 py-5 px-4 bg-surface-container-lowest/80 text-center font-mono text-xs text-outline space-y-1">
+    <div class="text-on-surface-variant font-semibold tracking-wider uppercase">
+      CRISISGRID EMERGENCY COMMAND INFRASTRUCTURE
+    </div>
+    <div class="text-[11px] text-outline/70">
+      Authorized Government Operations Platform • Karnataka Disaster Management Authority
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("government-login-form");
+      const emailInput = document.getElementById("login-email");
+      const passInput = document.getElementById("login-password");
+      const togglePassBtn = document.getElementById("toggle-password-btn");
+      const errorBox = document.getElementById("login-error-box");
+      const errorText = document.getElementById("login-error-text");
+      const submitBtn = document.getElementById("btn-submit-login");
+      const autoFillBtn = document.getElementById("btn-autofill-demo");
+
+      // Password visibility toggle
+      if (togglePassBtn && passInput) {
+        togglePassBtn.addEventListener("click", function () {
+          const isPassword = passInput.type === "password";
+          passInput.type = isPassword ? "text" : "password";
+          togglePassBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">${isPassword ? 'visibility_off' : 'visibility'}</span>`;
+        });
+      }
+
+      // Auto-fill demo credentials
+      if (autoFillBtn && emailInput && passInput) {
+        autoFillBtn.addEventListener("click", function () {
+          emailInput.value = "official@crisisgrid.gov";
+          passInput.value = "CrisisGrid2026!";
+          if (errorBox) errorBox.classList.add("hidden");
+        });
+      }
+
+      // Check if redirected with notice
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("auth") === "required") {
+        if (errorBox && errorText) {
+          errorText.textContent = "Authorized government session required. Please sign in.";
+          errorBox.classList.remove("hidden");
+        }
+      }
+
+      // Login submission
+      if (form) {
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          const email = (emailInput.value || "").trim().toLowerCase();
+          const password = (passInput.value || "").trim();
+
+          // Validate credentials
+          const isValid = (email === "official@crisisgrid.gov" && password === "CrisisGrid2026!");
+
+          if (isValid) {
+            // Success
+            if (errorBox) errorBox.classList.add("hidden");
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Verifying credentials...</span>`;
+
+            sessionStorage.setItem("crisisgrid_auth", "authenticated");
+            sessionStorage.setItem("crisisgrid_user_role", "government");
+            sessionStorage.setItem("crisisgrid_user_email", "official@crisisgrid.gov");
+            sessionStorage.setItem("crisisgrid_user_name", "Authorized Official");
+
+            localStorage.setItem("crisisgrid_auth", "authenticated");
+            localStorage.setItem("crisisgrid_user_role", "government");
+            localStorage.setItem("crisisgrid_user_email", "official@crisisgrid.gov");
+
+            setTimeout(function () {
+              window.location.href = "/stitch_crisisgrid_emergency_command_platform/city_command_center/code.html";
+            }, 500);
+          } else {
+            // Invalid credentials
+            if (errorBox && errorText) {
+              errorText.textContent = "Authentication failed. Verify your authorized credentials and try again.";
+              errorBox.classList.remove("hidden");
+            }
+            passInput.value = "";
+            passInput.focus();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

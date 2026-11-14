@@ -1,11 +1,27 @@
+import http from "node:http";
 import "dotenv/config";
 import { createApp } from "./app.js";
 import { loadConfig } from "./config.js";
 
 const { port } = loadConfig();
 const app = createApp();
+const server = http.createServer(app);
 
-const server = app.listen(port, () => {
+server.on("error", (error: NodeJS.ErrnoException) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(`\n❌ [PORT IN USE] Port ${port} is already being used by another process.`);
+    console.error(`To free port ${port} in PowerShell, run:`);
+    console.error(`   Stop-Process -Id (Get-NetTCPConnection -LocalPort ${port}).OwningProcess -Force`);
+    console.error(`Or start CRISISGRID on another port:`);
+    console.error(`   $env:PORT=3001; npm run dev\n`);
+    process.exit(1);
+  } else {
+    console.error("Server error:", error);
+    process.exit(1);
+  }
+});
+
+server.listen(port, () => {
   console.log(`CRISISGRID simulation server listening on http://localhost:${port}`);
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     console.error(

@@ -164,7 +164,7 @@ test("initiating simulation transitions to CRISIS ACTIVE and creates INC-SIM-XXX
 
   const state = repo.getCommandCenterState();
   assert.equal(state.city_status, "CRISIS ACTIVE");
-  assert.equal(state.active_crisis, "Industrial Fire");
+  assert.equal(state.active_crisis, "Large-Scale Industrial Fire");
 
   const incidents = repo.listIncidents();
   assert.equal(incidents.length, 1);

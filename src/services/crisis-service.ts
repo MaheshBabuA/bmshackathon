@@ -7,6 +7,7 @@ import type {
   Database,
   IncidentImpactRow,
   IncidentRow,
+  ResourceRequestRow,
   SectorRow,
   TelemetrySnapshotRow,
   Json,
@@ -29,7 +30,16 @@ import {
   triageCitizenReport,
   type ConfirmationStatus,
 } from "../domain/citizen-reporting.js";
-import { inMemoryCrisisRepository } from "./in-memory-crisis-repository.js";
+import {
+  CRISIS_SCENARIOS,
+  inMemoryCrisisRepository,
+  type ScenarioDecisionFactor,
+  type ScenarioTelemetryMetric,
+} from "./in-memory-crisis-repository.js";
+import {
+  buildLiveResourceNegotiation,
+  type LiveNegotiationResult,
+} from "../domain/resource-negotiation.js";
 import type {
   CreateEmergencyReport,
   CreateReview,
@@ -113,7 +123,25 @@ function formatIncident(
   row: IncidentRow,
   impacts: readonly IncidentImpactRow[],
   report?: EmergencyReportSummary,
+  telemetry?: ScenarioTelemetryMetric[],
+  affectedArea?: string,
 ): IncidentView {
+  const scenarioKey = row.scenario_type;
+  const scenario =
+    scenarioKey && CRISIS_SCENARIOS[scenarioKey]
+      ? CRISIS_SCENARIOS[scenarioKey]
+      : null;
+  const resolvedAffectedArea =
+    row.affected_area ||
+    affectedArea ||
+    scenario?.affectedArea ||
+    row.location;
+  const resolvedTelemetry =
+    telemetry ??
+    (scenario
+      ? scenario.telemetry
+      : inMemoryCrisisRepository.getTelemetryForIncident(row.id));
+
   return {
     id: row.id,
     incidentCode: row.incident_code,
@@ -125,6 +153,8 @@ function formatIncident(
     status: row.status,
     location: row.location,
     address: row.address,
+    affectedArea: resolvedAffectedArea,
+    scenarioType: row.scenario_type ?? undefined,
     latitude: row.latitude,
     longitude: row.longitude,
     responseUnits: row.response_units,
@@ -144,6 +174,7 @@ function formatIncident(
       ? confirmationLabel(report.confirmationStatus)
       : null,
     reportId: report?.id ?? null,
+    telemetry: resolvedTelemetry,
     impacts: impacts.map((impact) => ({
       sectorId: impact.sector_id,
       demandDeltaMw: impact.demand_delta_mw,
@@ -218,6 +249,8 @@ export interface IncidentView {
   status: string;
   location: string;
   address: string;
+  affectedArea?: string | undefined;
+  scenarioType?: string | undefined;
   latitude: number | null;
   longitude: number | null;
   responseUnits: number;
@@ -232,6 +265,7 @@ export interface IncidentView {
   confirmationStatus: ConfirmationStatus | null;
   confirmationLabel: string | null;
   reportId: string | null;
+  telemetry?: ScenarioTelemetryMetric[] | undefined;
   impacts: {
     sectorId: string;
     demandDeltaMw: number;
@@ -252,6 +286,7 @@ export interface PlanSignature {
 export interface PlanItemDetail {
   sectorId: string;
   sectorName: string;
+  subsectorLabel?: string | undefined;
   allocatedCapacityMw: number;
   previousAllocationMw: number;
   recommendedAllocationMw: number;
@@ -303,6 +338,11 @@ export interface StatutoryComplianceDetail {
 export interface DetailedPlanView {
   id: string;
   title: string;
+  incidentId?: string | null | undefined;
+  incidentTitle?: string | null | undefined;
+  incidentLocation?: string | null | undefined;
+  affectedArea?: string | null | undefined;
+  scenarioType?: string | null | undefined;
   status: string;
   totalCapacityMw: number;
   totalAvailableCapacityMw: number;
@@ -327,6 +367,48 @@ export interface DetailedPlanView {
   affectedSectorsList: string[];
   stabilizationWindowMinutes: number;
   stabilizationEta: string;
+}
+
+export interface ActiveCrisisState {
+  id: string;
+  incidentCode: string;
+  type: string;
+  scenarioType: string;
+  title: string;
+  location: string;
+  address: string;
+  city: string;
+  severity: string;
+  status: string;
+  detectedAt: string;
+  detectedAtIst: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+    formatted: string;
+  };
+  affectedArea: {
+    name: string;
+    zone: string;
+    radiusM: number;
+    radiusFormatted: string;
+    residentsAlerted: number;
+  };
+  visual: {
+    scenarioType: string;
+    title: string;
+    description: string;
+    riskLevel: string;
+    immediateEffects: string[];
+    mapPin: { x: number; y: number; name: string; color: string };
+  };
+  impacts: {
+    sectorId: string;
+    demandDeltaMw: number;
+    reason: string;
+  }[];
+  telemetry: ScenarioTelemetryMetric[];
+  resourceRequests: ResourceRequestRow[];
 }
 
 export interface DashboardData {
@@ -367,6 +449,44 @@ export interface DashboardData {
     allocatedCapacityMw: number;
     sectorDemandMw: Json;
   } | null;
+  activeIncident?: IncidentView | null | undefined;
+  activeIncidentTelemetry?: ScenarioTelemetryMetric[] | undefined;
+  zoneThreatTopography?: {
+    latitude: number;
+    longitude: number;
+    label: string;
+    affectedArea: string;
+    address: string;
+    status: string;
+    riskLevel: string;
+  } | undefined;
+  activeResponseStream?: {
+    id: string;
+    incidentCode: string;
+    title: string;
+    location: string;
+    address: string;
+    severity: string;
+    status: string;
+    responseUnits: number;
+    dispatchDetails: string;
+    createdAt: string;
+  }[] | undefined;
+  resourceRequests?: ResourceRequestRow[] | undefined;
+  incidentTimeline?: IncidentTimelineEvent[] | undefined;
+  activeCrisisState?: ActiveCrisisState | null | undefined;
+  liveNegotiation?: LiveNegotiationResult | null | undefined;
+}
+
+export interface IncidentTimelineEvent {
+  id: string;
+  timeIst: string;
+  timestamp: string;
+  title: string;
+  description: string;
+  category: "crisis" | "crisisgrid" | "authority";
+  categoryLabel: string;
+  status: "completed" | "active" | "pending";
 }
 
 export interface SubmittedReportResult {
@@ -796,15 +916,19 @@ export async function getIncidentAnalysis(
   }[];
   simulation: DynamicAllocationResult;
 }> {
-  if (!databaseValue) {
+  if (
+    !databaseValue ||
+    inMemoryCrisisRepository.hasIncident(incidentId) ||
+    inMemoryCrisisRepository.isSimulationActive()
+  ) {
     const incident = inMemoryCrisisRepository
       .listIncidents()
-      .find((i) => i.id === incidentId);
+      .find((i) => i.id === incidentId) ?? inMemoryCrisisRepository.getActiveIncident();
     if (!incident) throw new ServiceError("Incident not found.", 404);
-    const impacts = inMemoryCrisisRepository.getIncidentImpacts(incidentId);
+    const impacts = inMemoryCrisisRepository.getIncidentImpacts(incident.id);
     const sectors = inMemoryCrisisRepository.getSectors();
     const reports = inMemoryCrisisRepository.getEmergencyReports();
-    const report = reports.find((r) => r.incident_id === incidentId);
+    const report = reports.find((r) => r.incident_id === incident.id);
     const view = formatIncident(
       incident,
       impacts,
@@ -984,13 +1108,13 @@ function formatPlan(
         role: "Gov. Operations Lead",
         signerName: "S. Mukherjee",
         signatureHash: "0x9F4C7A1B8E2D9914F6B2C8E4A01234B2",
-        signedAt: "2026-03-30T14:38:22+05:30",
+        signedAt: row.created_at || new Date().toISOString(),
       },
       {
         role: "Disaster Coordinator",
         signerName: "Dr. Arvind Rao",
         signatureHash: "0x8A92E4A1F67B4092C4D3E2A100984A12",
-        signedAt: row.approved_at || "2026-03-30T14:42:18+05:30",
+        signedAt: row.approved_at || row.updated_at || new Date().toISOString(),
       },
     ];
   } else {
@@ -1000,7 +1124,7 @@ function formatPlan(
         role: "Gov. Operations Lead",
         signerName: "S. Mukherjee",
         signatureHash: "0x9F4C7A1B8E2D9914F6B2C8E4A01234B2",
-        signedAt: "2026-03-30T14:38:22+05:30",
+        signedAt: row.created_at || new Date().toISOString(),
       },
     ];
   }
@@ -1020,6 +1144,23 @@ function formatPlan(
     row.status === "recommended" || row.status === "pending_review"
       ? "PENDING_REVIEW"
       : row.status.toUpperCase();
+
+  const scenarioKey =
+    typeof rawRationale?.scenario_type === "string"
+      ? rawRationale.scenario_type
+      : null;
+  const activeIncident = inMemoryCrisisRepository.getActiveIncident();
+  const fallbackScenarioKey =
+    activeIncident?.scenario_type || "industrial_fire";
+  const activeScenario =
+    (scenarioKey && CRISIS_SCENARIOS[scenarioKey]) ||
+    CRISIS_SCENARIOS[fallbackScenarioKey] ||
+    CRISIS_SCENARIOS.industrial_fire!;
+
+  const subsectorLabels: Record<string, string> =
+    (rawRationale?.subsector_labels as Record<string, string> | undefined) ||
+    activeScenario.subsectorLabels ||
+    {};
 
   const sectorNameMap: Record<string, string> = {
     hospital_network: "Hospital Network",
@@ -1068,10 +1209,13 @@ function formatPlan(
           ? "secondary"
           : "primary";
 
+    const subsectorLabel = subsectorLabels[item.sector_id] || undefined;
+
     return {
       sectorId: item.sector_id,
       sectorName:
         sector?.name ?? sectorNameMap[item.sector_id] ?? item.sector_id,
+      subsectorLabel,
       allocatedCapacityMw: item.allocated_capacity_mw,
       previousAllocationMw: item.previous_allocation_mw,
       recommendedAllocationMw: item.recommended_allocation_mw,
@@ -1092,44 +1236,15 @@ function formatPlan(
     detailedItems[pItem.sectorId] = pItem;
   }
 
-  const decisionFactors: DecisionFactorItem[] = [
-    {
-      id: "01",
-      number: "01",
-      title: "Critical Chemical Surge Trigger",
-      description:
-        "Emergency demand increased following confirmed Tier-3 chemical fire incident in Sector 4 (Indiranagar), threatening secondary electrical substation 4B.",
-      status: "Critical",
-      badgeTone: "error",
-    },
-    {
-      id: "02",
-      number: "02",
-      title: "Hydraulic Pressure Floor Compliance",
-      description:
-        "Water pumping capacity escalated +2.0 MW to sustain 8 high-velocity hydrants and rapid hazmat containment foam delivery over 1.2 sq km.",
-      status: "Verified",
-      badgeTone: "primary",
-    },
-    {
-      id: "03",
-      number: "03",
-      title: "Bandwidth Throttling Safety Window",
-      description:
-        "Civilian telecommunications load lowered -2.0 MW; remains safely +0.5 MW above municipal critical broadcast floor (4.5 MW floor maintained).",
-      status: "Safe",
-      badgeTone: "tertiary",
-    },
-    {
-      id: "04",
-      number: "04",
-      title: "Life-Support & Trauma ICU Shielding",
-      description:
-        "Hospital critical surgical suites, ventilators, and emergency trauma bays remain 100% shielded; load adjustment strictly isolated to secondary non-critical HVAC.",
-      status: "Protected",
-      badgeTone: "tertiary",
-    },
-  ];
+  let decisionFactors: DecisionFactorItem[] = [];
+  if (
+    Array.isArray(rawRationale?.decision_factors) &&
+    rawRationale.decision_factors.length > 0
+  ) {
+    decisionFactors = rawRationale.decision_factors as unknown as DecisionFactorItem[];
+  } else {
+    decisionFactors = activeScenario.decisionFactors;
+  }
 
   const complianceStatus: StatutoryComplianceInfo = {
     standard:
@@ -1156,9 +1271,30 @@ function formatPlan(
       Math.round(((baseLoad + row.total_capacity_mw) / gridCap) * 100),
     ) || 78;
 
+  const algorithmicRationale =
+    (typeof rawRationale?.algorithmic_rationale === "string"
+      ? rawRationale.algorithmic_rationale
+      : null) ||
+    activeScenario.algorithmicRationale ||
+    "Dynamic reallocation model RESIL-OPT-V4.2 evaluated active incident surge parameters against municipal infrastructure safety envelopes.";
+
   return {
     id: row.id,
     title: row.title,
+    incidentId: row.incident_id,
+    incidentTitle:
+      (typeof rawRationale?.scenario_title === "string"
+        ? rawRationale.scenario_title
+        : null) ||
+      activeScenario.title ||
+      null,
+    affectedArea:
+      (typeof rawRationale?.affected_area === "string"
+        ? rawRationale.affected_area
+        : null) ||
+      activeScenario.affectedArea ||
+      null,
+    scenarioType: scenarioKey || activeScenario.key,
     status: statusDisplay,
     totalCapacityMw: row.total_capacity_mw,
     totalAvailableCapacityMw: row.total_available_capacity_mw,
@@ -1174,8 +1310,7 @@ function formatPlan(
     requiredSignatures,
     quorum,
     decisionFactors,
-    algorithmicRationale:
-      "Dynamic reallocation model RESIL-OPT-V4.2 evaluated active incident surge parameters against municipal infrastructure safety envelopes. Emergency capacity prioritized to life-critical and hazmat suppression sectors while civilian non-essential load was throttled within statutory safety floors.",
+    algorithmicRationale,
     complianceStatus,
     statutoryCompliance,
     activeCrisisLoadFactor: loadFactor,
@@ -1209,10 +1344,227 @@ async function loadPlan(
   return data;
 }
 
+export function formatTimeIst(dateInput: string | Date | number): string {
+  const date =
+    typeof dateInput === "string" || typeof dateInput === "number"
+      ? new Date(dateInput)
+      : dateInput;
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+export function generateIncidentTimeline(
+  incident: IncidentRow | IncidentView | null | undefined,
+  impacts:
+    | IncidentImpactRow[]
+    | { sectorId?: string; sector_id?: string; demandDeltaMw?: number; demand_delta_mw?: number; reason?: string }[],
+  resourceRequests: ResourceRequestRow[],
+  activePlan: AllocationPlanRow | DetailedPlanView | null | undefined,
+): IncidentTimelineEvent[] {
+  if (!incident || incident.status !== "active") {
+    const baseTime = Date.now() - 30 * 60 * 1000;
+    return [
+      {
+        id: "tl-norm-1",
+        timeIst: formatTimeIst(baseTime),
+        timestamp: new Date(baseTime).toISOString(),
+        title: "Municipal Grid Baseline Active",
+        description: "All 4 municipal sectors operating within statutory safety envelopes (45.0 MW pool reserve).",
+        category: "crisisgrid",
+        categoryLabel: "CRISISGRID ACTION",
+        status: "completed",
+      },
+      {
+        id: "tl-norm-2",
+        timeIst: formatTimeIst(baseTime + 10 * 60 * 1000),
+        timestamp: new Date(baseTime + 10 * 60 * 1000).toISOString(),
+        title: "Telemetry Synchronized",
+        description: "100% of municipal field telemetry nodes reporting nominal grid frequency and thermal stability.",
+        category: "crisisgrid",
+        categoryLabel: "CRISISGRID ACTION",
+        status: "completed",
+      },
+      {
+        id: "tl-norm-3",
+        timeIst: formatTimeIst(Date.now()),
+        timestamp: new Date().toISOString(),
+        title: "Normal Operations Confirmed",
+        description: "Zero active crisis vectors detected. Metropolitan grid in stable equilibrium.",
+        category: "crisis",
+        categoryLabel: "WHAT HAPPENED",
+        status: "completed",
+      },
+    ];
+  }
+
+  const createdDate = new Date(
+    ("createdAt" in incident ? incident.createdAt : (incident as any).created_at) || Date.now()
+  );
+  const createdMs = createdDate.getTime();
+  const timeline: IncidentTimelineEvent[] = [];
+
+  // 1. Crisis Detected
+  timeline.push({
+    id: `tl-${incident.id}-detected`,
+    timeIst: formatTimeIst(createdMs),
+    timestamp: new Date(createdMs).toISOString(),
+    title: "Crisis Detected",
+    description: `${incident.title} registered at ${incident.address || incident.location}. Priority response units dispatched.`,
+    category: "crisis",
+    categoryLabel: "WHAT HAPPENED",
+    status: "completed",
+  });
+
+  // 2. Impact Assessment Completed
+  const totalSurge = impacts.reduce((sum, imp) => {
+    const delta = (imp as any).demandDeltaMw ?? (imp as any).demand_delta_mw ?? 0;
+    return sum + Math.max(0, delta);
+  }, 0);
+  const surgeStr = totalSurge > 0 ? `+${totalSurge.toFixed(1)} MW` : "emergency surge";
+  const impactTimeMs = createdMs + 60 * 1000;
+  timeline.push({
+    id: `tl-${incident.id}-impact`,
+    timeIst: formatTimeIst(impactTimeMs),
+    timestamp: new Date(impactTimeMs).toISOString(),
+    title: "Impact Assessment Completed",
+    description: `Analyzed municipal water, power, and medical demand. Calculated ${surgeStr} required to stabilize incident.`,
+    category: "crisisgrid",
+    categoryLabel: "CRISISGRID ACTION",
+    status: "completed",
+  });
+
+  // 3. Critical Infrastructure Identified
+  const infraTimeMs = createdMs + 2 * 60 * 1000;
+  timeline.push({
+    id: `tl-${incident.id}-infra`,
+    timeIst: formatTimeIst(infraTimeMs),
+    timestamp: new Date(infraTimeMs).toISOString(),
+    title: "Critical Infrastructure Identified",
+    description: "Mapped sector dependencies; verified statutory safety floors for Hospital Network and Water Infrastructure.",
+    category: "crisisgrid",
+    categoryLabel: "CRISISGRID ACTION",
+    status: "completed",
+  });
+
+  // 4. Resource Request(s)
+  const sortedReqs = resourceRequests.slice().sort((a, b) => {
+    const weights: Record<string, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+    const diff = (weights[a.urgency] ?? 9) - (weights[b.urgency] ?? 9);
+    if (diff !== 0) return diff;
+    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+  });
+
+  const primaryReq = sortedReqs[0];
+  if (primaryReq) {
+    const reqTimeMs = primaryReq.created_at
+      ? new Date(primaryReq.created_at).getTime()
+      : createdMs + 3 * 60 * 1000;
+    timeline.push({
+      id: `tl-${primaryReq.id}-requested`,
+      timeIst: formatTimeIst(reqTimeMs),
+      timestamp: new Date(reqTimeMs).toISOString(),
+      title: `${primaryReq.organization_name} Requested +${primaryReq.requested_amount} ${primaryReq.unit}`,
+      description: `${primaryReq.reason} (${primaryReq.urgency} Priority).`,
+      category: "crisis",
+      categoryLabel: "WHAT HAPPENED",
+      status: "completed",
+    });
+  }
+
+  // 5. Authority Review Started
+  const reviewStartTimeMs = createdMs + 4 * 60 * 1000;
+  timeline.push({
+    id: `tl-${incident.id}-review-start`,
+    timeIst: formatTimeIst(reviewStartTimeMs),
+    timestamp: new Date(reviewStartTimeMs).toISOString(),
+    title: "Authority Review Started",
+    description: "Allocation recommendation dossier delivered to Municipal Authority and Disaster Coordinator for fast-track clearance.",
+    category: "authority",
+    categoryLabel: "AUTHORITY ACTION",
+    status: "completed",
+  });
+
+  // 6. Authority Decision
+  const approvedReq = sortedReqs.find((r) => r.status === "APPROVED" || r.status === "MODIFIED");
+  const rejectedReq = sortedReqs.find((r) => r.status === "REJECTED");
+
+  if (approvedReq) {
+    const decTimeMs = approvedReq.reviewed_at
+      ? new Date(approvedReq.reviewed_at).getTime()
+      : createdMs + 5 * 60 * 1000;
+    const isModified = approvedReq.status === "MODIFIED";
+    timeline.push({
+      id: `tl-${approvedReq.id}-decision`,
+      timeIst: formatTimeIst(decTimeMs),
+      timestamp: new Date(decTimeMs).toISOString(),
+      title: isModified ? "Allocation Modified & Approved" : "Allocation Approved",
+      description: `Authority approved +${approvedReq.allocated_amount || approvedReq.requested_amount} ${approvedReq.unit} to ${approvedReq.organization_name} (${approvedReq.reviewed_by || "Disaster Coordinator"}).`,
+      category: "authority",
+      categoryLabel: "AUTHORITY DECISION",
+      status: "completed",
+    });
+
+    // 7. Emergency Capacity Activated
+    const actTimeMs = decTimeMs + 60 * 1000;
+    timeline.push({
+      id: `tl-${incident.id}-activated`,
+      timeIst: formatTimeIst(actTimeMs),
+      timestamp: new Date(actTimeMs).toISOString(),
+      title: "Emergency Capacity Activated",
+      description: `Transformers dynamically synchronized; +${approvedReq.allocated_amount || approvedReq.requested_amount} ${approvedReq.unit} capacity dispatched to target sectors.`,
+      category: "crisisgrid",
+      categoryLabel: "CRISISGRID ACTION",
+      status: "completed",
+    });
+  } else if (rejectedReq) {
+    const decTimeMs = rejectedReq.reviewed_at
+      ? new Date(rejectedReq.reviewed_at).getTime()
+      : createdMs + 5 * 60 * 1000;
+    timeline.push({
+      id: `tl-${rejectedReq.id}-decision`,
+      timeIst: formatTimeIst(decTimeMs),
+      timestamp: new Date(decTimeMs).toISOString(),
+      title: "Request Rejected by Authority",
+      description: `Authority rejected additional capacity request to safeguard municipal safety floors (${rejectedReq.reviewed_by || "Disaster Coordinator"}). Baseline allocations locked.`,
+      category: "authority",
+      categoryLabel: "AUTHORITY DECISION",
+      status: "completed",
+    });
+  } else {
+    timeline.push({
+      id: `tl-${incident.id}-awaiting`,
+      timeIst: formatTimeIst(Date.now()),
+      timestamp: new Date().toISOString(),
+      title: "Awaiting Authority Decision",
+      description: `CRISISGRID recommends approving +${primaryReq ? primaryReq.requested_amount : 3} MW. Pending executive sign-off in Authority Review.`,
+      category: "authority",
+      categoryLabel: "AUTHORITY DECISION",
+      status: "active",
+    });
+
+    timeline.push({
+      id: `tl-${incident.id}-pending-activation`,
+      timeIst: "--:--",
+      timestamp: new Date(Date.now() + 60 * 1000).toISOString(),
+      title: "Emergency Capacity Activation",
+      description: "Standby. Scheduled immediately upon authority sign-off.",
+      category: "crisisgrid",
+      categoryLabel: "CRISISGRID ACTION",
+      status: "pending",
+    });
+  }
+
+  return timeline;
+}
+
 export async function getDashboard(
   databaseValue: SupabaseClient<Database> | null,
 ): Promise<DashboardData> {
-  if (!databaseValue) {
+  if (!databaseValue || inMemoryCrisisRepository.isSimulationActive()) {
     const sectorRows = inMemoryCrisisRepository.getSectors();
     const incidents = inMemoryCrisisRepository.listIncidents();
     const activePlanRow =
@@ -1309,6 +1661,136 @@ export async function getDashboard(
       emergency_operations: "READY",
     };
 
+    const activeIncidentRow = inMemoryCrisisRepository.getActiveIncident();
+    const activeIncidentView = activeIncidentRow
+      ? enrichedIncidents.find((i) => i.id === activeIncidentRow.id) ?? null
+      : enrichedIncidents[0] ?? null;
+
+    const activeIncidentTelemetry = inMemoryCrisisRepository.getActiveTelemetry();
+
+    const activeScenarioKey = (activeIncidentRow?.scenario_type || activeIncidentView?.scenarioType || "industrial_fire") as string;
+    const activeScenarioObj = CRISIS_SCENARIOS[activeScenarioKey] || CRISIS_SCENARIOS.industrial_fire!;
+
+    const scenarioPinMap: Record<string, { x: number; y: number; name: string; color: string }> = {
+      industrial_fire: { x: 260, y: 95, name: "INDIRANAGAR (SEC-4)", color: "#ef4444" },
+      urban_flood: { x: 190, y: 115, name: "K.R. MARKET (BASIN)", color: "#38bdf8" },
+      power_failure: { x: 110, y: 55, name: "PEENYA (220kV)", color: "#f59e0b" },
+      hazmat: { x: 330, y: 98, name: "WHITEFIELD (CORRIDOR)", color: "#84cc16" },
+    };
+
+    const scenarioEffectsMap: Record<string, string[]> = {
+      industrial_fire: [
+        "High emergency water demand (+2 MW surge for foam suppression lines)",
+        "Increased hospital emergency activity & trauma ward readiness",
+        "Fire response units & aerial ladder trucks deployed to perimeter",
+        "Local electrical infrastructure throttled to prevent secondary flashover",
+      ],
+      urban_flood: [
+        "Critical stormwater drainage pumping demand (+3 MW surge)",
+        "Electrical isolation of submerged subway & transit corridors",
+        "Civil defense inflatable rescue boats deployed to low-lying sectors",
+        "Hospital emergency casualty wards on standby for intake",
+      ],
+      power_failure: [
+        "Major 220kV transmission feeder trip (-10.0 MW capacity loss)",
+        "Hospital network automatically switched to isolated priority feeder",
+        "Water treatment facilities running on auxiliary emergency power",
+        "High-voltage utility linemen and mobile generator trucks deployed",
+      ],
+      hazmat: [
+        "Chemical containment vapor perimeter established",
+        "High-velocity mist scrubbers & water deluge active (+1.0 MW)",
+        "Emergency responders in Level-A hazmat suits deployed",
+        "Public SMS beacon broadcasting shelter-in-place instructions",
+      ],
+    };
+
+    const activeCrisisState: ActiveCrisisState | null = isNormalOps || !activeIncidentView ? null : {
+      id: activeIncidentView.id,
+      incidentCode: activeIncidentView.incidentCode,
+      type: activeScenarioKey,
+      scenarioType: activeScenarioKey,
+      title: activeScenarioObj.title || activeIncidentView.title,
+      location: activeScenarioObj.location || activeIncidentView.location,
+      address: activeScenarioObj.address || activeIncidentView.address || activeIncidentView.location,
+      city: "Bengaluru",
+      severity: activeIncidentView.severity,
+      status: activeIncidentView.status,
+      detectedAt: activeIncidentView.createdAt,
+      detectedAtIst: formatTimeIst(activeIncidentView.createdAt),
+      coordinates: {
+        latitude: activeScenarioObj.latitude,
+        longitude: activeScenarioObj.longitude,
+        formatted: `${activeScenarioObj.latitude}° N, ${activeScenarioObj.longitude}° E`,
+      },
+      affectedArea: {
+        name: activeScenarioObj.affectedArea,
+        zone: activeScenarioObj.affectedArea,
+        radiusM: activeScenarioObj.evacuationRadius,
+        radiusFormatted: `${activeScenarioObj.evacuationRadius}m Exclusion Zone`,
+        residentsAlerted: activeScenarioObj.residentsAlerted,
+      },
+      visual: {
+        scenarioType: activeScenarioKey,
+        title: `${activeScenarioObj.title} — ${activeScenarioObj.location}`,
+        description: activeScenarioObj.description,
+        riskLevel: activeScenarioKey === "industrial_fire"
+          ? "Level-3 Industrial Fire Alert"
+          : activeScenarioKey === "urban_flood"
+            ? "Severe Inundation & Infrastructure Waterlogging"
+            : activeScenarioKey === "power_failure"
+              ? "Substation Arc Flash & Grid Feeder Disconnect"
+              : "Level-2 Hazardous Chemical Vapor Dispersion",
+        immediateEffects: scenarioEffectsMap[activeScenarioKey] ?? scenarioEffectsMap.industrial_fire!,
+        mapPin: scenarioPinMap[activeScenarioKey] ?? scenarioPinMap.industrial_fire!,
+      },
+      impacts: activeScenarioObj.impacts.map((imp) => ({
+        sectorId: imp.sectorId,
+        demandDeltaMw: imp.demandDeltaMw,
+        reason: imp.reason,
+      })),
+      telemetry: activeScenarioObj.telemetry,
+      resourceRequests: inMemoryCrisisRepository.listResourceRequests(activeIncidentRow?.id),
+    };
+
+    const zoneThreatTopography = activeCrisisState
+      ? {
+          latitude: activeCrisisState.coordinates.latitude,
+          longitude: activeCrisisState.coordinates.longitude,
+          label: `${activeCrisisState.affectedArea.name} (${activeCrisisState.title})`,
+          affectedArea: activeCrisisState.affectedArea.name,
+          address: activeCrisisState.address,
+          status: activeCrisisState.severity.toUpperCase(),
+          riskLevel:
+            activeCrisisState.severity === "critical"
+              ? "High Risk"
+              : "Elevated Risk",
+        }
+      : {
+          latitude: 12.9716,
+          longitude: 77.5946,
+          label: "Bengaluru Central (Nominal)",
+          affectedArea: "Bengaluru Central",
+          address: "Command Center Grid Operations",
+          status: "NOMINAL",
+          riskLevel: "Low Risk",
+        };
+
+    const activeResponseStream = isNormalOps
+      ? []
+      : enrichedIncidents.map((inc) => ({
+          id: inc.id,
+          incidentCode: inc.incidentCode,
+          title: inc.title,
+          location: inc.location,
+          address: inc.address,
+          severity: inc.severity,
+          status: inc.status,
+          responseUnits: inc.responseUnits,
+          dispatchDetails: inc.dispatchDetails,
+          createdAt: inc.createdAt,
+        }));
+
     return {
       cityStatus,
       activeCrisis,
@@ -1396,6 +1878,21 @@ export async function getDashboard(
           demandBySector.map((s) => [s.id, s.demandMw]),
         ),
       },
+      activeIncident: activeIncidentView,
+      activeIncidentTelemetry,
+      activeCrisisState,
+      zoneThreatTopography,
+      activeResponseStream,
+      resourceRequests: inMemoryCrisisRepository.listResourceRequests(activeIncidentRow?.id),
+      incidentTimeline: generateIncidentTimeline(
+        activeIncidentRow,
+        activeImpacts,
+        inMemoryCrisisRepository.listResourceRequests(activeIncidentRow?.id),
+        activePlanRow,
+      ),
+      liveNegotiation: isNormalOps
+        ? null
+        : buildLiveResourceNegotiation(activeScenarioKey),
     };
   }
 
@@ -1584,6 +2081,126 @@ export async function getDashboard(
           sectorDemandMw: telemetry.global.sector_demand_mw,
         }
       : null,
+    activeIncident:
+      enrichedIncidents.find((i) => i.status === "active") ??
+      enrichedIncidents[0] ??
+      null,
+    activeIncidentTelemetry:
+      enrichedIncidents.find((i) => i.status === "active")?.telemetry ??
+      inMemoryCrisisRepository.getActiveTelemetry(),
+    zoneThreatTopography: enrichedIncidents.find((i) => i.status === "active")
+      ? {
+          latitude:
+            enrichedIncidents.find((i) => i.status === "active")!.latitude ??
+            12.9716,
+          longitude:
+            enrichedIncidents.find((i) => i.status === "active")!.longitude ??
+            77.5946,
+          label: `${enrichedIncidents.find((i) => i.status === "active")!.affectedArea || enrichedIncidents.find((i) => i.status === "active")!.location} (${enrichedIncidents.find((i) => i.status === "active")!.title})`,
+          affectedArea:
+            enrichedIncidents.find((i) => i.status === "active")!.affectedArea ||
+            enrichedIncidents.find((i) => i.status === "active")!.location,
+          address:
+            enrichedIncidents.find((i) => i.status === "active")!.address ||
+            enrichedIncidents.find((i) => i.status === "active")!.location,
+          status: enrichedIncidents
+            .find((i) => i.status === "active")!
+            .severity.toUpperCase(),
+          riskLevel:
+            enrichedIncidents.find((i) => i.status === "active")!.severity ===
+            "critical"
+              ? "High Risk"
+              : "Elevated Risk",
+        }
+      : {
+          latitude: 12.9716,
+          longitude: 77.5946,
+          label: "Bengaluru Central (Nominal)",
+          affectedArea: "Bengaluru Central",
+          address: "Command Center Grid Operations",
+          status: "NOMINAL",
+          riskLevel: "Low Risk",
+        },
+    activeResponseStream: isNormalOps
+      ? []
+      : enrichedIncidents.map((inc) => ({
+          id: inc.id,
+          incidentCode: inc.incidentCode,
+          title: inc.title,
+          location: inc.location,
+          address: inc.address,
+          severity: inc.severity,
+          status: inc.status,
+          responseUnits: inc.responseUnits,
+          dispatchDetails: inc.dispatchDetails,
+          createdAt: inc.createdAt,
+        })),
+    resourceRequests: inMemoryCrisisRepository.listResourceRequests(),
+    incidentTimeline: generateIncidentTimeline(
+      enrichedIncidents.find((i) => i.status === "active") ?? null,
+      activeImpacts,
+      inMemoryCrisisRepository.listResourceRequests(),
+      activePlanRow,
+    ),
+    activeCrisisState: (() => {
+      const activeIncRow = enrichedIncidents.find((i) => i.status === "active");
+      if (isNormalOps || !activeIncRow) return null;
+      return {
+        id: activeIncRow.id,
+        incidentCode: activeIncRow.incidentCode || "INC-8092",
+        type: activeIncRow.incidentType || "industrial_fire",
+        scenarioType: (activeIncRow.scenarioType || activeIncRow.incidentType || "industrial_fire") as any,
+        title: activeIncRow.title,
+        location: activeIncRow.location,
+        address: activeIncRow.address,
+        city: "Bengaluru",
+        severity: activeIncRow.severity as any,
+        status: activeIncRow.status as any,
+        detectedAt: activeIncRow.createdAt,
+        detectedAtIst: formatTimeIst(activeIncRow.createdAt),
+        coordinates: {
+          latitude: activeIncRow.latitude ?? 12.9784,
+          longitude: activeIncRow.longitude ?? 77.6408,
+          formatted: `${(activeIncRow.latitude ?? 12.9784).toFixed(4)}° N, ${(activeIncRow.longitude ?? 77.6408).toFixed(4)}° E`,
+        },
+        affectedArea: {
+          name: activeIncRow.affectedArea || activeIncRow.location,
+          zone: activeIncRow.affectedArea || activeIncRow.location,
+          radiusM: 450,
+          radiusFormatted: "450m Exclusion Zone",
+          residentsAlerted: activeIncRow.residentsAlerted || 1200,
+        },
+        visual: {
+          scenarioType: (activeIncRow.scenarioType || activeIncRow.incidentType || "industrial_fire") as any,
+          title: activeIncRow.title,
+          description: activeIncRow.title,
+          riskLevel: `${activeIncRow.severity.toUpperCase()} Priority Incident`,
+          immediateEffects: [
+            "Emergency water demand active",
+            "Emergency response units deployed to perimeter",
+            "Substation monitoring active",
+          ],
+          mapPin: {
+            x: 200,
+            y: 95,
+            name: activeIncRow.location,
+            color: "#ef4444",
+          },
+        },
+        impacts: activeImpacts.map((imp) => ({
+          sectorId: imp.sector_id,
+          demandDeltaMw: imp.demand_delta_mw,
+          reason: imp.reason || imp.rationale || "Emergency surge allocation",
+        })),
+        telemetry: inMemoryCrisisRepository.getActiveTelemetry(),
+        resourceRequests: inMemoryCrisisRepository.listResourceRequests(activeIncRow.id),
+      };
+    })(),
+    liveNegotiation: isNormalOps
+      ? null
+      : buildLiveResourceNegotiation(
+          enrichedIncidents.find((i) => i.status === "active")?.incidentType || "industrial_fire",
+        ),
   };
 }
 
@@ -2066,10 +2683,26 @@ export async function transferEmergencyReserve(
   dashboard: DashboardData;
 }> {
   if (!databaseValue) {
-    throw new ServiceError(
-      "The reserve transfer was denied: emergency pool is already at its 45 MW ceiling.",
-      409,
-    );
+    const hasSimulation = inMemoryCrisisRepository.isSimulationActive();
+    const activeIncidents = inMemoryCrisisRepository.listIncidents().filter((i) => i.status === "active");
+    if (!hasSimulation && activeIncidents.length === 0) {
+      throw new ServiceError(
+        "Emergency reserve transfer requires an active emergency crisis. Please simulate a crisis first.",
+        400,
+      );
+    }
+    const recommendation = await createRecommendation(null);
+    const dashboard = await getDashboard(null);
+    return {
+      transfer: {
+        transferred: true,
+        amount_mw: 1,
+        availableCapacityMw: AVAILABLE_CAPACITY_MW,
+        status: "Transferred 1.0 MW emergency reserve to priority response.",
+      },
+      recommendation,
+      dashboard,
+    };
   }
   const database = requireDatabase(databaseValue);
   const { data, error } = await database.rpc("transfer_emergency_reserve", {
@@ -2112,7 +2745,7 @@ export async function reviewAllocationPlan(
   signatures?: PlanSignature[];
   message: string;
 }> {
-  if (!databaseValue) {
+  if (!databaseValue || inMemoryCrisisRepository.hasAllocationPlan(planId)) {
     if (review.role !== "AUTHORITY") {
       throw new ServiceError(
         "Access Denied (403): Only AUTHORITY users can approve or reject plans.",
@@ -2405,7 +3038,7 @@ export async function reviewAllocationPlan(
         role: "Gov. Operations Lead",
         signerName: "S. Mukherjee",
         signatureHash: "0x9F4C7A1B8E2D9914F6B2C8E4A01234B2",
-        signedAt: "2026-03-30T14:38:22+05:30",
+        signedAt: plan.created_at || new Date().toISOString(),
       },
     ];
   }
@@ -2913,7 +3546,7 @@ export async function resetPlanSignatures(
             role: "Gov. Operations Lead",
             signerName: "S. Mukherjee",
             signatureHash: "0x9F4C7A1B8E2D9914F6B2C8E4A01234B2",
-            signedAt: "2026-03-30T14:38:22+05:30",
+            signedAt: new Date().toISOString(),
           },
         ]
       : [];
@@ -3075,4 +3708,107 @@ export async function resetCrisisSimulation(
 export function getSimulationScenarios() {
   return inMemoryCrisisRepository.getSimulationScenarios();
 }
+
+export async function listResourceRequests(
+  _databaseValue: SupabaseClient<Database> | null,
+  incidentId?: string,
+): Promise<ResourceRequestRow[]> {
+  return inMemoryCrisisRepository.listResourceRequests(incidentId);
+}
+
+export async function getResourceRequest(
+  _databaseValue: SupabaseClient<Database> | null,
+  id: string,
+): Promise<ResourceRequestRow> {
+  const req = inMemoryCrisisRepository.getResourceRequest(id);
+  if (!req) {
+    throw new ServiceError("Resource request not found.", 404);
+  }
+  return req;
+}
+
+export async function getResourceRequestRecommendation(
+  _databaseValue: SupabaseClient<Database> | null,
+  id: string,
+) {
+  try {
+    return inMemoryCrisisRepository.getResourceRequestRecommendation(id);
+  } catch (error) {
+    throw new ServiceError(
+      error instanceof Error ? error.message : "Resource request not found.",
+      404,
+    );
+  }
+}
+
+export async function reviewResourceRequest(
+  _databaseValue: SupabaseClient<Database> | null,
+  id: string,
+  review: {
+    decision: "APPROVE" | "MODIFY" | "REJECT";
+    allocatedAmount?: number | undefined;
+    notes?: string | undefined;
+    reviewerRole?: string | undefined;
+  },
+) {
+  try {
+    return inMemoryCrisisRepository.reviewResourceRequest(
+      id,
+      review.decision,
+      review.allocatedAmount,
+      review.notes,
+      review.reviewerRole,
+    );
+  } catch (error) {
+    throw new ServiceError(
+      error instanceof Error ? error.message : "Failed to review resource request.",
+      400,
+    );
+  }
+}
+
+export async function getLiveResourceNegotiation(
+  _databaseValue: SupabaseClient<Database> | null,
+  activeCrisisKey?: string,
+  optionalNewRequest?: {
+    organizationName: string;
+    resourceType: string;
+    requestedAmountMw: number;
+    reason: string;
+  },
+) {
+  const activeInc = inMemoryCrisisRepository.listIncidents().find((i) => i.status === "active");
+  const rawKey =
+    activeCrisisKey ||
+    (activeInc?.scenario_type as string) ||
+    (activeInc?.incident_type as string) ||
+    "industrial_fire";
+  const scenarioKey =
+    rawKey === "power_infrastructure_failure"
+      ? "power_failure"
+      : rawKey === "hazardous_material"
+        ? "hazmat"
+        : rawKey;
+  return buildLiveResourceNegotiation(scenarioKey, optionalNewRequest);
+}
+
+export async function getPublicAlerts(
+  _client: SupabaseClient<Database> | null,
+) {
+  return inMemoryCrisisRepository.getPublicAlerts();
+}
+
+export async function publishCivicBroadcast(
+  _client: SupabaseClient<Database> | null,
+  input: {
+    headline?: string;
+    message?: string;
+    safetyInstructions?: string[];
+    publishedBy?: string;
+  },
+) {
+  return inMemoryCrisisRepository.publishCivicBroadcast(input);
+}
+
+
 

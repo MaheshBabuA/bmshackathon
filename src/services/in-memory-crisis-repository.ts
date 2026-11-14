@@ -8,6 +8,8 @@ import type {
   EmergencyReportRow,
   IncidentImpactRow,
   IncidentRow,
+  Json,
+  ResourceRequestRow,
   SectorRow,
   TelemetrySnapshotRow,
 } from "../database.types.js";
@@ -35,6 +37,37 @@ import type {
 const DISPATCH_DISCLAIMER =
   "This simulation does not connect to police, ambulance, fire department, 112, or government dispatch systems.";
 
+export interface ScenarioTelemetryMetric {
+  id: string;
+  label: string;
+  value: string;
+  rawValue?: number | string;
+  unit?: string;
+  status: "normal" | "elevated" | "critical";
+  trend: "up" | "down" | "stable";
+  icon?: string;
+}
+
+export interface ScenarioDecisionFactor {
+  id: string;
+  number: string;
+  title: string;
+  description: string;
+  status: string;
+  badgeTone: "error" | "primary" | "secondary" | "tertiary";
+}
+
+export interface ScenarioResourceRequestTemplate {
+  organizationName: string;
+  organizationType: string;
+  resourceType: string;
+  requestedAmount: number;
+  unit: string;
+  reason: string;
+  urgency: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+  sectorId: string;
+}
+
 export interface CrisisScenario {
   key: string;
   title: string;
@@ -42,12 +75,23 @@ export interface CrisisScenario {
   severity: "critical" | "urgent" | "stable";
   location: string;
   address: string;
+  affectedArea: string;
+  latitude: number;
+  longitude: number;
   description: string;
   responseUnits: number;
   dispatchDetails: string;
   evacuationRadius: number;
   residentsAlerted: number;
   perimeterDetails: string;
+  gridDemand: string;
+  hazardLevelLabel: string;
+  mapMarkerIcon: string;
+  telemetry: ScenarioTelemetryMetric[];
+  subsectorLabels: Record<string, string>;
+  decisionFactors: ScenarioDecisionFactor[];
+  algorithmicRationale: string;
+  resourceRequests?: ScenarioResourceRequestTemplate[];
   impacts: {
     sectorId: string;
     demandDeltaMw: number;
@@ -61,17 +105,72 @@ export interface CrisisScenario {
 export const CRISIS_SCENARIOS: Record<string, CrisisScenario> = {
   industrial_fire: {
     key: "industrial_fire",
-    title: "Industrial Fire",
+    title: "Large-Scale Industrial Fire",
     incidentType: "fire_hazmat",
     severity: "critical",
     location: "Indiranagar Industrial Zone",
     address: "Indiranagar Industrial Complex, Sector 4",
+    affectedArea: "Indiranagar — Sector 4",
+    latitude: 12.9784,
+    longitude: 77.6408,
     description: "Large-scale industrial fire requiring coordinated emergency response.",
     responseUnits: 14,
     dispatchDetails: "8 Fire Engines · 3 HAZMAT · 3 ALS Units",
     evacuationRadius: 450,
     residentsAlerted: 1420,
     perimeterDetails: "450 m perimeter around Indiranagar Industrial Zone; hazardous-material response active.",
+    gridDemand: "Demand Spike: High Water & Emergency Grid",
+    hazardLevelLabel: "HAZMAT LEVEL 2",
+    mapMarkerIcon: "local_fire_department",
+    telemetry: [
+      { id: "water_press_drop", label: "Water Press. Drop", value: "-28%", status: "critical", trend: "down", icon: "water_drop" },
+      { id: "power_draw", label: "Power Draw", value: "+3.4 MW", status: "elevated", trend: "up", icon: "bolt" },
+      { id: "fire_intensity", label: "Core Fire Temp", value: "840° C", status: "critical", trend: "up", icon: "local_fire_department" },
+      { id: "containment", label: "Fire Containment", value: "32%", status: "elevated", trend: "up", icon: "shield" },
+      { id: "hydrant_flow", label: "Hydrant Flow Rate", value: "4,200 L/min", status: "normal", trend: "stable", icon: "waves" },
+      { id: "smoke_plume", label: "Smoke Particulate PM2.5", value: "310 µg/m³", status: "critical", trend: "down", icon: "air" },
+    ],
+    subsectorLabels: {
+      water_infrastructure: "Indiranagar & Domlur Booster Reservoirs",
+      telecommunications: "Sector 4 Towers & Base Station Nodes",
+      hospital_network: "Manipal & CMH Emergency Corridors",
+      emergency_operations: "East Zone Fire Command Post",
+    },
+    decisionFactors: [
+      {
+        id: "01",
+        number: "01",
+        title: "Critical Chemical Surge Trigger",
+        description: "Emergency demand increased following confirmed Tier-3 chemical fire incident in Sector 4 (Indiranagar), threatening secondary electrical substation 4B.",
+        status: "Critical",
+        badgeTone: "error",
+      },
+      {
+        id: "02",
+        number: "02",
+        title: "Hydraulic Pressure Floor Compliance",
+        description: "Water pumping capacity escalated +2.0 MW to sustain 8 high-velocity hydrants and rapid hazmat containment foam delivery over 1.2 sq km.",
+        status: "Verified",
+        badgeTone: "primary",
+      },
+      {
+        id: "03",
+        number: "03",
+        title: "Bandwidth Throttling Safety Window",
+        description: "Civilian telecommunications load lowered -2.0 MW; remains safely +0.5 MW above municipal critical broadcast floor (4.5 MW floor maintained).",
+        status: "Safe",
+        badgeTone: "tertiary",
+      },
+      {
+        id: "04",
+        number: "04",
+        title: "Life-Support & Trauma ICU Shielding",
+        description: "Hospital critical surgical suites, ventilators, and emergency trauma bays remain 100% shielded; load adjustment strictly isolated to secondary non-critical HVAC.",
+        status: "Protected",
+        badgeTone: "tertiary",
+      },
+    ],
+    algorithmicRationale: "Dynamic triage proposal generated by CRISISGRID allocation engine based on active crisis load factor and statutory municipal safety floors.",
     impacts: [
       {
         sectorId: "water_infrastructure",
@@ -106,20 +205,107 @@ export const CRISIS_SCENARIOS: Record<string, CrisisScenario> = {
         rationale: "Hospital Network: -1 MW available for reallocation from non-critical HVAC/facility systems.",
       },
     ],
+    resourceRequests: [
+      {
+        organizationName: "BMS Hospital",
+        organizationType: "Hospital",
+        resourceType: "Emergency Electricity",
+        requestedAmount: 3,
+        unit: "MW",
+        reason: "ICU and emergency operations have increased capacity requirements.",
+        urgency: "CRITICAL",
+        sectorId: "hospital_network",
+      },
+      {
+        organizationName: "Water Infrastructure",
+        organizationType: "Water Utility",
+        resourceType: "Pumping Capacity",
+        requestedAmount: 2,
+        unit: "MW",
+        reason: "High emergency water demand for containment pumping and high-pressure foam lines.",
+        urgency: "HIGH",
+        sectorId: "water_infrastructure",
+      },
+      {
+        organizationName: "Emergency Operations",
+        organizationType: "Emergency Response",
+        resourceType: "Operational Capacity",
+        requestedAmount: 1,
+        unit: "MW",
+        reason: "Command post, hazmat cordon lighting, and tactical rescue unit deployment.",
+        urgency: "HIGH",
+        sectorId: "emergency_operations",
+      },
+    ],
   },
   urban_flood: {
     key: "urban_flood",
-    title: "Urban Flood",
+    title: "Severe Urban Flooding",
     incidentType: "flood",
     severity: "critical",
     location: "Bellandur & Koramangala Drainage Basin",
     address: "Bellandur Outer Ring Road Corridor",
+    affectedArea: "Bellandur & Koramangala Basin",
+    latitude: 12.9345,
+    longitude: 77.6778,
     description: "Major flooding affecting infrastructure, transport and emergency access.",
     responseUnits: 18,
     dispatchDetails: "10 Rescue Boats · 4 High-Capacity Pumps · 4 NDRF Teams",
     evacuationRadius: 600,
     residentsAlerted: 2800,
     perimeterDetails: "Flood diversion active along Outer Ring Road.",
+    gridDemand: "Demand Spike: Auxiliary Pumping & Field Logistics",
+    hazardLevelLabel: "FLOOD LEVEL RED",
+    mapMarkerIcon: "water_damage",
+    telemetry: [
+      { id: "water_level", label: "Flood Basin Level", value: "+3.2 m", status: "critical", trend: "up", icon: "water" },
+      { id: "drainage_overload", label: "Drainage Overload", value: "185%", status: "critical", trend: "up", icon: "warning" },
+      { id: "pumping_draw", label: "Pumping Grid Draw", value: "+4.1 MW", status: "elevated", trend: "up", icon: "bolt" },
+      { id: "conduit_flow", label: "Stormwater Conduit Flow", value: "12,500 L/s", status: "critical", trend: "stable", icon: "waves" },
+      { id: "substation_bund", label: "Substation Bund Status", value: "Breach Alert", status: "critical", trend: "down", icon: "foundation" },
+      { id: "evac_progress", label: "Amphibious Evacuation", value: "64% Evacuated", status: "normal", trend: "up", icon: "sailing" },
+    ],
+    subsectorLabels: {
+      water_infrastructure: "Koramangala Valley Stormwater Lift Pumps",
+      telecommunications: "Bellandur ORR Fiber & Wireless Relays",
+      hospital_network: "Sakra World Hospital Trauma Access Road",
+      emergency_operations: "NDRF Amphibious Staging Ground",
+    },
+    decisionFactors: [
+      {
+        id: "01",
+        number: "01",
+        title: "Severe Stormwater Inundation Trigger",
+        description: "Emergency demand escalated after Bellandur Lake outflow breached drainage bunds, threatening 110kV line pylons and arterial ring roads.",
+        status: "Critical",
+        badgeTone: "error",
+      },
+      {
+        id: "02",
+        number: "02",
+        title: "High-Volume Dewatering Surge",
+        description: "+3.0 MW allocated for 4 high-capacity submersible pumps and mobile dewatering trailers to prevent substation yard submersion.",
+        status: "Verified",
+        badgeTone: "primary",
+      },
+      {
+        id: "03",
+        number: "03",
+        title: "Fiber Routing & Emergency Comm Throttling",
+        description: "-3.0 MW non-critical telecom load curtailed while retaining priority emergency VHF radio and cellular broadcast beacon channels.",
+        status: "Safe",
+        badgeTone: "tertiary",
+      },
+      {
+        id: "04",
+        number: "04",
+        title: "Hospital Access & Backup Grid Isolation",
+        description: "Sakra and St. John's hospital emergency corridors protected with auxiliary feed lines; non-emergency clinical facility demand adjusted -2.0 MW.",
+        status: "Protected",
+        badgeTone: "tertiary",
+      },
+    ],
+    algorithmicRationale: "Hydro-dynamic allocation proposal generated to prevent secondary substation inundation while guaranteeing hospital access corridors.",
     impacts: [
       {
         sectorId: "water_infrastructure",
@@ -154,20 +340,107 @@ export const CRISIS_SCENARIOS: Record<string, CrisisScenario> = {
         rationale: "Hospital Network: Emergency preparedness increase (-2 MW non-critical reallocated).",
       },
     ],
+    resourceRequests: [
+      {
+        organizationName: "Water Pumping Infrastructure",
+        organizationType: "Water Utility",
+        resourceType: "Pumping Capacity",
+        requestedAmount: 3,
+        unit: "MW",
+        reason: "Critical stormwater drainage and high-capacity submersible dewatering pumps active.",
+        urgency: "CRITICAL",
+        sectorId: "water_infrastructure",
+      },
+      {
+        organizationName: "BMS Hospital",
+        organizationType: "Hospital",
+        resourceType: "Emergency Backup Capacity",
+        requestedAmount: 2,
+        unit: "MW",
+        reason: "Basement power transfer to emergency backup generators and patient ward isolation.",
+        urgency: "HIGH",
+        sectorId: "hospital_network",
+      },
+      {
+        organizationName: "Telecommunications",
+        organizationType: "Telecommunications",
+        resourceType: "Emergency Communications Support",
+        requestedAmount: 1,
+        unit: "MW",
+        reason: "Cellular repeater and emergency civic broadcast beacons support.",
+        urgency: "MEDIUM",
+        sectorId: "telecommunications",
+      },
+    ],
   },
   power_failure: {
     key: "power_failure",
-    title: "Power Infrastructure Failure",
+    title: "Critical Substation Failure",
     incidentType: "infrastructure",
     severity: "urgent",
     location: "Peenya Substation 220kV Grid",
     address: "Peenya Industrial Area Stage 1",
+    affectedArea: "Peenya Industrial Substation — Stage 1 & 2",
+    latitude: 13.0285,
+    longitude: 77.5195,
     description: "Critical substation failure reducing available infrastructure capacity.",
     responseUnits: 10,
     dispatchDetails: "6 Mobile Transformers · 4 Technical Repair Crews",
     evacuationRadius: 200,
     residentsAlerted: 600,
     perimeterDetails: "Electrical containment perimeter around Peenya Substation.",
+    gridDemand: "Grid Deficit: Mobile Transformers & ICU Bypass",
+    hazardLevelLabel: "GRID ALERT STAGE-3",
+    mapMarkerIcon: "electrical_services",
+    telemetry: [
+      { id: "grid_voltage", label: "Grid Bus Voltage", value: "182 kV (-17%)", status: "critical", trend: "down", icon: "electrical_services" },
+      { id: "freq_deviation", label: "Grid Frequency", value: "48.9 Hz", status: "elevated", trend: "down", icon: "speed" },
+      { id: "reserve_dispatch", label: "Emergency Reserve Feed", value: "+5.0 MW", status: "elevated", trend: "up", icon: "bolt" },
+      { id: "transformer_temp", label: "Transformer Core Temp", value: "98° C", status: "elevated", trend: "up", icon: "thermostat" },
+      { id: "breaker_status", label: "Breakers Tripped", value: "3 of 8 Feeder Bays", status: "critical", trend: "stable", icon: "toggle_off" },
+      { id: "gen_capacity", label: "Mobile Genset Output", value: "8.5 MW Active", status: "normal", trend: "up", icon: "power" },
+    ],
+    subsectorLabels: {
+      water_infrastructure: "Peenya Industrial Water Reservoirs",
+      telecommunications: "Northwest Cellular & Fiber Switch Hub",
+      hospital_network: "ESI Hospital & Trauma Center Feeder Lines",
+      emergency_operations: "KPTCL Rapid Response Mobile Base",
+    },
+    decisionFactors: [
+      {
+        id: "01",
+        number: "01",
+        title: "220kV Substation Bus Failure Trigger",
+        description: "Immediate dynamic reallocation initiated following catastrophic insulation breakdown and breaker lockouts at Peenya 220kV Substation.",
+        status: "Critical",
+        badgeTone: "error",
+      },
+      {
+        id: "02",
+        number: "02",
+        title: "Emergency Generation & Grid Stabilization",
+        description: "+2.0 MW reserved for black-start diesel generators, transformer coolant circulating pumps, and technical repair trailers.",
+        status: "Verified",
+        badgeTone: "primary",
+      },
+      {
+        id: "03",
+        number: "03",
+        title: "Industrial Pumping Load Relief",
+        description: "-1.0 MW non-essential industrial water pumping deferred to off-peak nocturnal cycle while keeping gravity-fed reservoirs full.",
+        status: "Safe",
+        badgeTone: "tertiary",
+      },
+      {
+        id: "04",
+        number: "04",
+        title: "Hospital ICU Secondary Feeder Guarantee",
+        description: "+1.0 MW delivered directly to hospital network to energize redundant backup circuits for ESI Hospital intensive care wards.",
+        status: "Protected",
+        badgeTone: "tertiary",
+      },
+    ],
+    algorithmicRationale: "Grid fault stabilization plan: isolated failed 220kV bus, diverted emergency reserve to hospital trauma feeder circuits.",
     impacts: [
       {
         sectorId: "emergency_operations",
@@ -202,20 +475,107 @@ export const CRISIS_SCENARIOS: Record<string, CrisisScenario> = {
         rationale: "Hospital Network: +1 MW demand to maintain critical medical life-support circuits.",
       },
     ],
+    resourceRequests: [
+      {
+        organizationName: "BMS Hospital",
+        organizationType: "Hospital",
+        resourceType: "Emergency Backup Capacity",
+        requestedAmount: 4,
+        unit: "MW",
+        reason: "Total grid blackout; ICU, life support, and emergency trauma bays running on microgrid.",
+        urgency: "CRITICAL",
+        sectorId: "hospital_network",
+      },
+      {
+        organizationName: "Telecommunications",
+        organizationType: "Telecommunications",
+        resourceType: "Network Continuity Support",
+        requestedAmount: 2,
+        unit: "MW",
+        reason: "Substation drop; tower cell sites and emergency routing hubs operating on battery backup.",
+        urgency: "HIGH",
+        sectorId: "telecommunications",
+      },
+      {
+        organizationName: "Metro Water Utilities",
+        organizationType: "Water Utility",
+        resourceType: "Auxiliary Pumping Power",
+        requestedAmount: 1,
+        unit: "MW",
+        reason: "Water treatment aeration pumps and gravity feed valves operating on auxiliary generators.",
+        urgency: "MEDIUM",
+        sectorId: "water_infrastructure",
+      },
+    ],
   },
   hazmat: {
     key: "hazmat",
     title: "Hazardous Material Incident",
-    incidentType: "fire_hazmat",
+    incidentType: "hazmat",
     severity: "critical",
-    location: "Whitefield Chemical Corridor",
-    address: "Whitefield Export Promotion Industrial Park",
-    description: "Chemical or hazardous material incident requiring containment and evacuation.",
+    location: "Whitefield Chemical Corridor, Bengaluru",
+    address: "Whitefield Export Promotion Industrial Park, Bengaluru",
+    affectedArea: "Whitefield Chemical Processing Sector",
+    latitude: 12.9815,
+    longitude: 77.7289,
+    description: "Hazardous material incident requiring chemical containment and evacuation.",
     responseUnits: 16,
     dispatchDetails: "8 HAZMAT Containment Units · 4 Decon Teams · 4 ALS Ambulances",
     evacuationRadius: 500,
     residentsAlerted: 1950,
     perimeterDetails: "Chemical plume containment perimeter established.",
+    gridDemand: "Demand Spike: HAZMAT Washdown & Alert Beacon",
+    hazardLevelLabel: "TOXIC HAZARD LEVEL 4",
+    mapMarkerIcon: "science",
+    telemetry: [
+      { id: "toxic_vapor", label: "Toxic Vapor Concentration", value: "420 ppm (VOC)", status: "critical", trend: "up", icon: "science" },
+      { id: "plume_vector", label: "Plume Dispersion Vector", value: "0.8 km SSW", status: "elevated", trend: "stable", icon: "air" },
+      { id: "decon_washdown", label: "Decontamination Flow", value: "2,800 L/min", status: "elevated", trend: "up", icon: "cleaning_services" },
+      { id: "cordon_status", label: "Hot Zone Cordon", value: "500 m Secured", status: "normal", trend: "stable", icon: "health_and_safety" },
+      { id: "air_toxicity", label: "Ambient Hazard Index", value: "Index 8 / 10", status: "critical", trend: "down", icon: "masks" },
+      { id: "decon_readiness", label: "Chemical Neutralizer Bed", value: "92% Charged", status: "normal", trend: "stable", icon: "shield" },
+    ],
+    subsectorLabels: {
+      water_infrastructure: "EPIP Chemical Washdown & Mist Curtains",
+      telecommunications: "Whitefield Cordon Emergency Mesh Network",
+      hospital_network: "Vydehi & Manipal Whitefield Toxicological Units",
+      emergency_operations: "State HAZMAT Incident Command Center",
+    },
+    decisionFactors: [
+      {
+        id: "01",
+        number: "01",
+        title: "Toxic Chemical Vapor Release Trigger",
+        description: "Automated sensor alarms tripped after industrial solvent breach in EPIP Phase 2; atmospheric VOC levels exceeded 400 ppm threshold.",
+        status: "Critical",
+        badgeTone: "error",
+      },
+      {
+        id: "02",
+        number: "02",
+        title: "Mist Curtain Hydraulic Pressure Escalation",
+        description: "+1.0 MW assigned to high-pressure neutralization water mist nozzles to suppress airborne chemical plume migration.",
+        status: "Verified",
+        badgeTone: "primary",
+      },
+      {
+        id: "03",
+        number: "03",
+        title: "Evacuation Broadcast Priority",
+        description: "-2.0 MW reallocated from commercial cell nodes while dedicating full bandwidth to geo-fenced civilian evacuation alerts.",
+        status: "Safe",
+        badgeTone: "tertiary",
+      },
+      {
+        id: "04",
+        number: "04",
+        title: "Dedicated Toxicology & Trauma Readiness",
+        description: "-1.0 MW non-critical administrative hospital load dialed back to focus clean power on hyperbaric and decontamination air scrubbers.",
+        status: "Protected",
+        badgeTone: "tertiary",
+      },
+    ],
+    algorithmicRationale: "Chemical containment optimization: energized decontamination water curtain, prioritized broadcast beacons for downwind civilian evacuation.",
     impacts: [
       {
         sectorId: "emergency_operations",
@@ -250,6 +610,38 @@ export const CRISIS_SCENARIOS: Record<string, CrisisScenario> = {
         rationale: "Hospital Network: -1 MW non-critical load reallocation while trauma stays protected.",
       },
     ],
+    resourceRequests: [
+      {
+        organizationName: "Containment Operations",
+        organizationType: "Emergency Response",
+        resourceType: "Scrubbers & Ventilation",
+        requestedAmount: 3,
+        unit: "MW",
+        reason: "Industrial perimeter decontamination and high-volume toxic vapor scrubbers.",
+        urgency: "CRITICAL",
+        sectorId: "emergency_operations",
+      },
+      {
+        organizationName: "BMS Hospital",
+        organizationType: "Hospital",
+        resourceType: "Toxicology & Trauma Surge",
+        requestedAmount: 2,
+        unit: "MW",
+        reason: "Surge in chemical exposure patients and isolation ward ventilation systems.",
+        urgency: "HIGH",
+        sectorId: "hospital_network",
+      },
+      {
+        organizationName: "Emergency Operations",
+        organizationType: "Emergency Response",
+        resourceType: "Hazardous Perimeter Monitoring",
+        requestedAmount: 1,
+        unit: "MW",
+        reason: "Perimeter sensor grid, night illumination, and mobile decontamination showers.",
+        urgency: "HIGH",
+        sectorId: "emergency_operations",
+      },
+    ],
   },
 };
 
@@ -264,6 +656,16 @@ export class InMemoryCrisisRepository {
   private allocationPlanItems: AllocationPlanItemRow[] = [];
   private auditLogs: AuditLogRow[] = [];
   private telemetrySnapshots: TelemetrySnapshotRow[] = [];
+  private telemetryByIncident: Map<string, ScenarioTelemetryMetric[]> = new Map();
+  private resourceRequests: ResourceRequestRow[] = [];
+  private publicBroadcast: {
+    headline?: string;
+    message?: string;
+    safetyInstructions?: string[];
+    broadcastApproved: boolean;
+    publishedAt?: string;
+    publishedBy?: string;
+  } | null = null;
 
   constructor() {
     this.seed();
@@ -378,6 +780,7 @@ export class InMemoryCrisisRepository {
     this.incidentImpacts = [];
     this.emergencyReports = [];
     this.emergencyReportEvents = [];
+    this.resourceRequests = [];
 
     const baselinePlanId = "00000000-0000-4000-8000-000000000201";
 
@@ -535,10 +938,17 @@ export class InMemoryCrisisRepository {
     severity: string;
     status: string;
     location: string;
+    address?: string;
+    affectedArea?: string;
+    latitude?: number;
+    longitude?: number;
     affectedDomains: string[];
     cityStatus: string;
     activeIncidents: number;
     planId: string;
+    telemetry?: ScenarioTelemetryMetric[];
+    decisionFactors?: ScenarioDecisionFactor[];
+    subsectorLabels?: Record<string, string>;
   } {
     const normalizedKey =
       scenarioKey === "power_infrastructure_failure"
@@ -562,8 +972,9 @@ export class InMemoryCrisisRepository {
       status: "active",
       location: scenario.location,
       address: scenario.address,
-      latitude: 12.9719,
-      longitude: 77.6412,
+      affected_area: scenario.affectedArea,
+      latitude: scenario.latitude,
+      longitude: scenario.longitude,
       response_units: scenario.responseUnits,
       is_escalated: true,
       automated_triage: true,
@@ -577,7 +988,16 @@ export class InMemoryCrisisRepository {
       updated_at: now,
     };
 
+    // Close any previous active simulation incidents so only one scenario is active
+    for (const prev of this.incidents) {
+      if (prev.status === "active") {
+        prev.status = "resolved";
+        prev.updated_at = now;
+      }
+    }
+
     this.incidents.unshift(incident);
+    this.telemetryByIncident.set(incidentId, scenario.telemetry);
 
     for (const impact of scenario.impacts) {
       this.incidentImpacts.push({
@@ -621,6 +1041,25 @@ export class InMemoryCrisisRepository {
       },
       created_at: now,
     });
+
+    this.resourceRequests = [];
+    if (scenario.resourceRequests && scenario.resourceRequests.length > 0) {
+      for (const req of scenario.resourceRequests) {
+        this.resourceRequests.push({
+          id: randomUUID(),
+          incident_id: incidentId,
+          organization_name: req.organizationName,
+          organization_type: req.organizationType,
+          resource_type: req.resourceType,
+          requested_amount: req.requestedAmount,
+          unit: req.unit,
+          reason: req.reason,
+          urgency: req.urgency,
+          status: "PENDING",
+          created_at: now,
+        });
+      }
+    }
 
     const currentActivePlan =
       this.allocationPlans.find((p) => p.status === "approved") ??
@@ -672,6 +1111,11 @@ export class InMemoryCrisisRepository {
         model_version: "crisisgrid-rules-v2",
         simulation_only: true,
         scenario_type: scenario.key,
+        scenario_title: scenario.title,
+        affected_area: scenario.affectedArea,
+        decision_factors: scenario.decisionFactors,
+        subsector_labels: scenario.subsectorLabels,
+        algorithmic_rationale: scenario.algorithmicRationale,
         signatures: [
           {
             role: "Gov. Operations Lead",
@@ -680,7 +1124,7 @@ export class InMemoryCrisisRepository {
             signedAt: now,
           },
         ],
-      },
+      } as unknown as Json,
       approved_at: null,
       rejected_at: null,
       created_by: "crisisgrid-rules-v2",
@@ -722,6 +1166,15 @@ export class InMemoryCrisisRepository {
       });
     }
 
+    this.publicBroadcast = {
+      headline: scenario.title.toUpperCase(),
+      message: scenario.description,
+      safetyInstructions: this.getScenarioSafetyInstructions(scenario.key),
+      publishedAt: now,
+      publishedBy: "Karnataka State Emergency Operations Center",
+      broadcastApproved: true,
+    };
+
     return {
       success: true,
       incidentId,
@@ -730,10 +1183,17 @@ export class InMemoryCrisisRepository {
       severity: scenario.severity,
       status: "active",
       location: scenario.location,
+      address: scenario.address,
+      affectedArea: scenario.affectedArea,
+      latitude: scenario.latitude,
+      longitude: scenario.longitude,
       affectedDomains: scenario.impacts.map((i) => i.sectorId),
       cityStatus: "CRISIS ACTIVE",
       activeIncidents: this.incidents.filter((i) => i.status === "active").length,
       planId,
+      telemetry: scenario.telemetry,
+      decisionFactors: scenario.decisionFactors,
+      subsectorLabels: scenario.subsectorLabels,
     };
   }
 
@@ -744,10 +1204,18 @@ export class InMemoryCrisisRepository {
     message: string;
   } {
     const now = new Date().toISOString();
+    this.telemetryByIncident.clear();
 
     this.incidents = this.incidents.filter(
       (i) => !i.is_simulation && !i.incident_code.startsWith("INC-SIM-"),
     );
+
+    for (const inc of this.incidents) {
+      if (inc.status === "active") {
+        inc.status = "resolved";
+        inc.updated_at = now;
+      }
+    }
 
     const remainingIncidentIds = new Set(this.incidents.map((i) => i.id));
     this.incidentImpacts = this.incidentImpacts.filter((imp) =>
@@ -756,6 +1224,7 @@ export class InMemoryCrisisRepository {
     this.emergencyReports = this.emergencyReports.filter((r) =>
       remainingIncidentIds.has(r.incident_id),
     );
+    this.resourceRequests = [];
 
     this.allocationPlans = this.allocationPlans.filter(
       (p) => p.status === "approved" && p.incident_id === null,
@@ -867,11 +1336,195 @@ export class InMemoryCrisisRepository {
       created_at: now,
     });
 
+    this.publicBroadcast = null;
+
     return {
       success: true,
       cityStatus: "STABLE",
       activeIncidents: 0,
       message: "Demo reset complete. Normal operations restored.",
+    };
+  }
+
+  getScenarioSafetyInstructions(scenarioKey: string): string[] {
+    const key = scenarioKey.toLowerCase();
+    if (key.includes("flood")) {
+      return [
+        "Avoid low-lying corridors, drainage basins, and road underpasses along Bellandur Outer Ring Road.",
+        "Do not enter moving floodwater on foot or in vehicles; open conduits and submerged electrical lines present extreme hazard.",
+        "Follow municipal civil defense alerts to designated high-ground emergency shelters.",
+        "Boil all drinking water and immediately disconnect electrical mains in waterlogged basements.",
+      ];
+    }
+    if (key.includes("power") || key.includes("substation")) {
+      return [
+        "Major power outage active across Peenya Industrial Substation 220kV cluster.",
+        "Hospitals and emergency trauma centers are operating on prioritized islanded emergency circuits.",
+        "Exercise extreme caution at non-signaled traffic intersections and arterial corridors.",
+        "Individuals with home life-support medical devices requiring emergency power should dial 112 immediately.",
+      ];
+    }
+    if (key.includes("hazmat") || key.includes("chemical")) {
+      return [
+        "Hazardous chemical containment active in Whitefield Chemical Processing Sector.",
+        "Shelter in place indoors immediately; seal windows, doors, and exterior vents with wet cloths.",
+        "Do not consume unsealed water or open food exposed within the 800m containment perimeter.",
+        "Proceed to designated municipal decontamination units if experiencing eye stinging or skin irritation.",
+      ];
+    }
+    return [
+      "Avoid Indiranagar 100ft Road and surrounding Sector 4 industrial zones.",
+      "Close all windows and shut off air-conditioning/HVAC to prevent toxic smoke inhalation.",
+      "Yield right of way immediately to fire rescue tenders, aerial ladders, and water supply tankers.",
+      "For respiratory distress, burn treatment, or emergency medical aid, report to BMS Hospital Emergency Ward.",
+    ];
+  }
+
+  getPublicAlerts(): {
+    activeEmergency: boolean;
+    alertStatus: string;
+    cityStatus: string;
+    headline: string;
+    incidentCode?: string;
+    severity: string;
+    location: string;
+    address?: string;
+    affectedArea: string;
+    evacuationRadiusM: number;
+    residentsAlerted?: number;
+    message?: string;
+    safetyInstructions: string[];
+    emergencyContacts: { name: string; number: string; description: string }[];
+    publishedAt: string;
+    publishedBy: string;
+    broadcastApproved: boolean;
+  } {
+    const activeIncident = this.incidents.find((i) => i.status === "active");
+    const activeScenarioKey =
+      ((activeIncident as any)?.scenario_type as string) || "industrial_fire";
+    const scenario: CrisisScenario =
+      (activeScenarioKey && CRISIS_SCENARIOS[activeScenarioKey])
+        ? CRISIS_SCENARIOS[activeScenarioKey]!
+        : CRISIS_SCENARIOS.industrial_fire!;
+
+    const contacts = [
+      { name: "Unified Emergency Services", number: "112", description: "Police, Fire, Medical 24x7" },
+      { name: "Fire & Rescue Control", number: "101", description: "Municipal Fire Control Room" },
+      { name: "Ambulance & Trauma Dispatch", number: "108", description: "Emergency Medical & Trauma" },
+      { name: "BBMP Disaster Management", number: "080-22221188", description: "Civic Flooding & Tree Fall Helpline" },
+      { name: "State Disaster Authority (SEOC)", number: "1070", description: "Karnataka State Operations" },
+    ];
+
+    if (!activeIncident || this.commandCenterState.city_status === "STABLE") {
+      return {
+        activeEmergency: false,
+        alertStatus: "NOMINAL",
+        cityStatus: "STABLE",
+        headline: "NO ACTIVE EMERGENCY",
+        severity: "NORMAL",
+        location: "Bengaluru Metropolitan Region",
+        affectedArea: "None (Nominal citywide operations)",
+        evacuationRadiusM: 0,
+        residentsAlerted: 0,
+        message:
+          "All municipal infrastructure, power grids, water supply, and public transit corridors in Bengaluru are operating within normal baseline parameters. No emergency directives or evacuations are active.",
+        safetyInstructions: [
+          "All municipal civic infrastructure is operating within normal baseline parameters.",
+          "Report localized safety hazards, downed power cables, or pipe breaches to municipal dispatch at 112.",
+          "Monitor official CRISISGRID civic channels for real-time weather and infrastructure advisories.",
+        ],
+        emergencyContacts: contacts,
+        publishedAt: this.commandCenterState.updated_at || new Date().toISOString(),
+        publishedBy: "Karnataka State Emergency Operations Center",
+        broadcastApproved: true,
+      };
+    }
+
+    return {
+      activeEmergency: true,
+      alertStatus: "OFFICIAL_BROADCAST",
+      cityStatus: "CRISIS ACTIVE",
+      headline: this.publicBroadcast?.headline || scenario.title.toUpperCase(),
+      incidentCode: activeIncident.incident_code,
+      severity: activeIncident.severity.toUpperCase(),
+      location: scenario.address || scenario.location,
+      address: scenario.address,
+      affectedArea: scenario.affectedArea,
+      evacuationRadiusM: scenario.evacuationRadius,
+      residentsAlerted: scenario.residentsAlerted,
+      message: this.publicBroadcast?.message || scenario.description,
+      safetyInstructions:
+        this.publicBroadcast?.safetyInstructions ||
+        this.getScenarioSafetyInstructions(scenario.key),
+      emergencyContacts: contacts,
+      publishedAt: this.publicBroadcast?.publishedAt || activeIncident.created_at,
+      publishedBy:
+        this.publicBroadcast?.publishedBy ||
+        "Karnataka State Emergency Operations Center",
+      broadcastApproved: this.publicBroadcast?.broadcastApproved ?? true,
+    };
+  }
+
+  publishCivicBroadcast(input: {
+    headline?: string;
+    message?: string;
+    safetyInstructions?: string[];
+    publishedBy?: string;
+  }): {
+    success: boolean;
+    broadcast: {
+      headline: string;
+      message: string;
+      safetyInstructions: string[];
+      publishedAt: string;
+      publishedBy: string;
+      broadcastApproved: boolean;
+    };
+  } {
+    const activeIncident = this.incidents.find((i) => i.status === "active");
+    const activeScenarioKey =
+      ((activeIncident as any)?.scenario_type as string) || "industrial_fire";
+    const scenario: CrisisScenario =
+      (activeScenarioKey && CRISIS_SCENARIOS[activeScenarioKey])
+        ? CRISIS_SCENARIOS[activeScenarioKey]!
+        : CRISIS_SCENARIOS.industrial_fire!;
+    const now = new Date().toISOString();
+
+    const broadcast = {
+      headline: input.headline || scenario.title.toUpperCase(),
+      message: input.message || scenario.description,
+      safetyInstructions:
+        input.safetyInstructions && input.safetyInstructions.length > 0
+          ? input.safetyInstructions
+          : this.getScenarioSafetyInstructions(scenario.key),
+      publishedAt: now,
+      publishedBy:
+        input.publishedBy || "Karnataka State Emergency Operations Center",
+      broadcastApproved: true,
+    };
+
+    this.publicBroadcast = broadcast;
+
+    this.auditLogs.unshift({
+      id: randomUUID(),
+      actor: input.publishedBy || "State EOC Controller",
+      action: "CIVIC_BROADCAST_PUBLISHED",
+      entity_type: "public_broadcast",
+      entity_id: activeIncident?.id || "public_portal",
+      details: {
+        headline: broadcast.headline,
+        incident_code: activeIncident?.incident_code,
+        published_at: now,
+      },
+      event_type: "CIVIC_BROADCAST_PUBLISHED",
+      description: `Official public alert broadcast published: ${broadcast.headline}`,
+      metadata: { simulation_only: true },
+      created_at: now,
+    });
+
+    return {
+      success: true,
+      broadcast,
     };
   }
 
@@ -1395,6 +2048,223 @@ export class InMemoryCrisisRepository {
       plan,
       items,
       isApproved: true,
+    };
+  }
+
+  isSimulationActive(): boolean {
+    return (
+      this.commandCenterState?.city_status === "CRISIS ACTIVE" ||
+      this.incidents.some(
+        (i) =>
+          i.status === "active" &&
+          (i.is_simulation || i.incident_code.startsWith("INC-SIM-")),
+      )
+    );
+  }
+
+  getActiveIncident(): IncidentRow | null {
+    if (this.commandCenterState?.active_incident_id) {
+      const match = this.incidents.find(
+        (i) => i.id === this.commandCenterState.active_incident_id,
+      );
+      if (match) return match;
+    }
+    return this.incidents.find((i) => i.status === "active") ?? null;
+  }
+
+  getTelemetryForIncident(incidentId: string): ScenarioTelemetryMetric[] {
+    const custom = this.telemetryByIncident.get(incidentId);
+    if (custom && custom.length > 0) return custom;
+    const incident = this.incidents.find((i) => i.id === incidentId);
+    if (incident?.scenario_type && CRISIS_SCENARIOS[incident.scenario_type]) {
+      return CRISIS_SCENARIOS[incident.scenario_type]!.telemetry;
+    }
+    return CRISIS_SCENARIOS.industrial_fire!.telemetry;
+  }
+
+  getActiveTelemetry(): ScenarioTelemetryMetric[] {
+    const active = this.getActiveIncident();
+    if (active) {
+      return this.getTelemetryForIncident(active.id);
+    }
+    return [];
+  }
+
+  hasIncident(incidentId: string): boolean {
+    return this.incidents.some((i) => i.id === incidentId);
+  }
+
+  hasAllocationPlan(planId: string): boolean {
+    return this.allocationPlans.some((p) => p.id === planId);
+  }
+
+  getScenario(scenarioKey: string): CrisisScenario | null {
+    const normalizedKey =
+      scenarioKey === "power_infrastructure_failure"
+        ? "power_failure"
+        : scenarioKey === "hazardous_material"
+          ? "hazmat"
+          : scenarioKey;
+    return CRISIS_SCENARIOS[normalizedKey] ?? null;
+  }
+
+  listResourceRequests(incidentId?: string): ResourceRequestRow[] {
+    if (incidentId) {
+      return this.resourceRequests.filter((r) => r.incident_id === incidentId);
+    }
+    const active = this.getActiveIncident();
+    if (active) {
+      const activeRequests = this.resourceRequests.filter(
+        (r) => r.incident_id === active.id,
+      );
+      if (activeRequests.length > 0) return activeRequests;
+    }
+    return [...this.resourceRequests];
+  }
+
+  getResourceRequest(id: string): ResourceRequestRow | undefined {
+    return this.resourceRequests.find((r) => r.id === id);
+  }
+
+  getResourceRequestRecommendation(id: string): {
+    requestId: string;
+    recommendation: "APPROVE" | "MODIFY" | "REJECT";
+    recommendedAmount: number;
+    reason: string;
+    availableCapacity: string;
+    requestedCapacity: string;
+    priorityLevel: string;
+  } {
+    const request = this.getResourceRequest(id);
+    if (!request) {
+      throw new Error(`Resource request ${id} not found.`);
+    }
+
+    return {
+      requestId: request.id,
+      recommendation: "APPROVE",
+      recommendedAmount: request.requested_amount,
+      reason:
+        "Available emergency capacity can support the request while maintaining critical safety thresholds for other infrastructure.",
+      availableCapacity: "45.0 MW Total Pool",
+      requestedCapacity: `+${request.requested_amount} ${request.unit}`,
+      priorityLevel: request.urgency,
+    };
+  }
+
+  reviewResourceRequest(
+    id: string,
+    decision: "APPROVE" | "MODIFY" | "REJECT",
+    allocatedAmount?: number | undefined,
+    notes?: string | undefined,
+    reviewerRole?: string | undefined,
+  ): {
+    success: boolean;
+    request: ResourceRequestRow;
+    message: string;
+    updatedAllocations?: Record<string, number> | undefined;
+  } {
+    const request = this.resourceRequests.find((r) => r.id === id);
+    if (!request) {
+      throw new Error(`Resource request ${id} not found.`);
+    }
+
+    const now = new Date().toISOString();
+    const finalDecision = decision;
+    const finalAmount =
+      finalDecision === "REJECT"
+        ? 0
+        : typeof allocatedAmount === "number" && allocatedAmount > 0
+          ? allocatedAmount
+          : request.requested_amount;
+
+    request.status =
+      finalDecision === "APPROVE"
+        ? "APPROVED"
+        : finalDecision === "MODIFY"
+          ? "MODIFIED"
+          : "REJECTED";
+    request.review_decision = finalDecision;
+    request.allocated_amount = finalAmount;
+    request.reviewed_by = reviewerRole || "Authority EOC Lead";
+    request.reviewed_at = now;
+    request.review_notes = notes || "";
+
+    // If approved or modified, execute the allocation in the engine
+    let updatedAllocations: Record<string, number> | undefined;
+    if (finalDecision === "APPROVE" || finalDecision === "MODIFY") {
+      const orgLower = request.organization_name.toLowerCase();
+      const resLower = request.resource_type.toLowerCase();
+      const sectorId =
+        orgLower.includes("hospital")
+          ? "hospital_network"
+          : orgLower.includes("water") || resLower.includes("pumping")
+            ? "water_infrastructure"
+            : orgLower.includes("telecom") || resLower.includes("communication")
+              ? "telecommunications"
+              : "emergency_operations";
+
+      const sector = this.sectors.find((s) => s.id === sectorId);
+      if (sector) {
+        sector.current_allocation_mw = Math.min(
+          sector.maximum_capacity_mw,
+          sector.current_allocation_mw + finalAmount,
+        );
+      }
+
+      const approvedPlan =
+        this.allocationPlans.find((p) => p.status === "approved") ??
+        this.allocationPlans[0];
+      if (approvedPlan) {
+        const item = this.allocationPlanItems.find(
+          (i) => i.allocation_plan_id === approvedPlan.id && i.sector_id === sectorId,
+        );
+        if (item && sector) {
+          item.previous_allocation_mw = item.allocated_capacity_mw;
+          item.allocated_capacity_mw = sector.current_allocation_mw;
+          item.recommended_allocation_mw = sector.current_allocation_mw;
+          item.delta_mw = item.allocated_capacity_mw - item.previous_allocation_mw;
+          item.rationale = `Allocated +${finalAmount} ${request.unit} following Authority approval of request from ${request.organization_name}.`;
+        }
+      }
+
+      this.commandCenterState.updated_at = now;
+      updatedAllocations = Object.fromEntries(
+        this.sectors.map((s) => [s.id, s.current_allocation_mw]),
+      );
+    }
+
+    this.auditLogs.unshift({
+      id: randomUUID(),
+      actor: request.reviewed_by,
+      action: "RESOURCE_REQUEST_DECISION",
+      entity_type: "resource_request",
+      entity_id: request.id,
+      details: {
+        requestId: request.id,
+        organizationName: request.organization_name,
+        organizationType: request.organization_type,
+        resourceType: request.resource_type,
+        originalRequestedAmount: request.requested_amount,
+        finalAllocatedAmount: request.allocated_amount,
+        decision: finalDecision,
+        notes: request.review_notes,
+        timestamp: now,
+      },
+      event_type: `RESOURCE_REQUEST_${request.status}`,
+      description: `${finalDecision === "REJECT" ? "Rejected" : `Approved +${request.allocated_amount} ${request.unit} for`} ${request.organization_name} (${request.resource_type}).`,
+      metadata: {
+        simulation_only: true,
+        incident_id: request.incident_id,
+      },
+      created_at: now,
+    });
+
+    return {
+      success: true,
+      request,
+      message: `${request.organization_name} request has been ${request.status.toLowerCase()}.`,
+      updatedAllocations,
     };
   }
 }
