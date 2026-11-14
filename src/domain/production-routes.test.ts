@@ -166,4 +166,8 @@ test("CRISISGRID Production Routes — Static Asset and Access Mode Verification
     200,
     /crisisgrid\.js/,
   );
+
+  // Negotiation API endpoints return valid JSON for simulated crisis scenario
+  await testRoute("/api/negotiation?scenario=industrial_fire", 200, /negotiationStream/);
+  await testRoute("/api/negotiation/current?scenario=industrial_fire", 200, /negotiationStream/);
 });

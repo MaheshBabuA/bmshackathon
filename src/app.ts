@@ -604,6 +604,17 @@ export function createApp(
   );
 
   api.get(
+    "/negotiation",
+    asyncRoute(async (request, response) => {
+      const scenario =
+        typeof request.query?.scenario === "string"
+          ? request.query.scenario
+          : undefined;
+      response.json(await getLiveResourceNegotiation(database, scenario));
+    }),
+  );
+
+  api.get(
     "/negotiation/current",
     asyncRoute(async (request, response) => {
       const scenario =

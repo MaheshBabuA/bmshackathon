@@ -62,6 +62,7 @@ function throwDatabaseError(
   error: { code?: string; message: string },
   operation: string,
 ): never {
+  console.error(`[CRISISGRID Database Error] Operation: "${operation}", code: ${error.code || "UNKNOWN"}, error: ${error.message}`);
   if (
     error.code === "42P01" ||
     error.code === "42703" ||
@@ -3693,16 +3694,61 @@ export async function markIncidentStatus(
 }
 
 export async function initiateCrisisSimulation(
-  _databaseValue: SupabaseClient<Database> | null,
+  databaseValue: SupabaseClient<Database> | null,
   scenarioKey = "industrial_fire",
 ) {
-  return inMemoryCrisisRepository.initiateSimulation(scenarioKey);
+  const simResult = inMemoryCrisisRepository.initiateSimulation(scenarioKey);
+  if (databaseValue) {
+    try {
+      const activeInc = inMemoryCrisisRepository.getActiveIncident();
+      if (activeInc) {
+        await databaseValue.from("incidents").upsert({
+          id: activeInc.id,
+          incident_code: activeInc.incident_code,
+          title: activeInc.title,
+          description: activeInc.description,
+          incident_type: activeInc.incident_type,
+          severity: activeInc.severity,
+          status: activeInc.status,
+          location: activeInc.location,
+          address: activeInc.address,
+          latitude: activeInc.latitude,
+          longitude: activeInc.longitude,
+          response_units: activeInc.response_units,
+          is_escalated: activeInc.is_escalated,
+          automated_triage: activeInc.automated_triage,
+          dispatch_details: activeInc.dispatch_details,
+          evacuation_radius_m: activeInc.evacuation_radius_m,
+          residents_alerted: activeInc.residents_alerted,
+          perimeter_details: activeInc.perimeter_details,
+          scenario_type: activeInc.scenario_type ?? null,
+          affected_area: activeInc.affected_area ?? null,
+          created_at: activeInc.created_at,
+          updated_at: activeInc.updated_at,
+        } as any);
+      }
+    } catch (dbErr) {
+      console.warn("[CRISISGRID] Supabase sync warning during simulation:", dbErr instanceof Error ? dbErr.message : dbErr);
+    }
+  }
+  return simResult;
 }
 
 export async function resetCrisisSimulation(
-  _databaseValue: SupabaseClient<Database> | null,
+  databaseValue: SupabaseClient<Database> | null,
 ) {
-  return inMemoryCrisisRepository.resetDemo();
+  const resetResult = inMemoryCrisisRepository.resetDemo();
+  if (databaseValue) {
+    try {
+      await databaseValue
+        .from("incidents")
+        .update({ status: "resolved", updated_at: new Date().toISOString() })
+        .eq("status", "active");
+    } catch (dbErr) {
+      console.warn("[CRISISGRID] Supabase sync warning during reset:", dbErr instanceof Error ? dbErr.message : dbErr);
+    }
+  }
+  return resetResult;
 }
 
 export function getSimulationScenarios() {
