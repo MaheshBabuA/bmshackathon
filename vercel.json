@@ -2,20 +2,7 @@
   "version": 2,
   "functions": {
     "api/index.ts": {
-      "includeFiles": [
-        "stitch_crisisgrid_emergency_command_platform/**",
-        "public/**",
-        "dist/stitch_crisisgrid_emergency_command_platform/**",
-        "dist/public/**"
-      ]
-    },
-    "api/**": {
-      "includeFiles": [
-        "stitch_crisisgrid_emergency_command_platform/**",
-        "public/**",
-        "dist/stitch_crisisgrid_emergency_command_platform/**",
-        "dist/public/**"
-      ]
+      "includeFiles": "public/**"
     }
   },
   "rewrites": [

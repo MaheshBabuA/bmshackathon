@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link rel="icon" type="image/png" href="/crisisgrid_logo.png"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-primary-fixed-variant": "#004395", "on-secondary-fixed-variant": "#39485a", "secondary": "#b9c8de", "tertiary-container": "#00a74b", "on-tertiary": "#003915", "background": "#0f131d", "on-secondary-container": "#a7b6cc", "primary-fixed-dim": "#adc6ff", "on-primary-container": "#00285d", "error-container": "#93000a", "inverse-on-surface": "#2c303b", "surface-container-lowest": "#0a0e17", "on-surface-variant": "#c2c6d6", "surface": "#0f131d", "tertiary-fixed": "#6bff8f", "secondary-fixed-dim": "#b9c8de", "surface-container-high": "#262a34", "surface-tint": "#adc6ff", "on-error-container": "#ffdad6", "error": "#ffb4ab", "on-tertiary-fixed-variant": "#005321", "on-surface": "#dfe2f0", "primary": "#adc6ff", "surface-bright": "#353944", "inverse-primary": "#005ac2", "on-secondary-fixed": "#0d1c2d", "surface-variant": "#31353f", "secondary-container": "#39485a", "on-tertiary-container": "#003111", "on-tertiary-fixed": "#002109", "tertiary": "#4ae176", "surface-container-highest": "#31353f", "outline-variant": "#424754", "secondary-fixed": "#d4e4fa", "on-background": "#dfe2f0", "outline": "#8c909f", "surface-container-low": "#171c25", "primary-container": "#4d8eff", "surface-dim": "#0f131d", "on-primary-fixed": "#001a42", "primary-fixed": "#d8e2ff", "on-error": "#690005", "on-secondary": "#233143", "inverse-surface": "#dfe2f0", "on-primary": "#002e6a", "surface-container": "#1b2029", "tertiary-fixed-dim": "#4ae176" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "gutter-desktop": "1.5rem", "space-xl": "2rem", "space-xs": "0.25rem", "margin-desktop": "2rem", "gutter": "1rem", "space-md": "1rem", "space-sm": "0.5rem", "margin": "1rem", "space-lg": "1.5rem" }, fontFamily: { "label-md": ["Inter"], "body-lg": ["Inter"], "body-sm": ["Inter"], "headline-md": ["Inter"], "label-sm": ["Inter"], "headline-lg": ["Inter"], "display": ["Inter"], "body-md": ["Inter"], "headline-lg-mobile": ["Inter"], "display-mobile": ["Inter"], "headline-sm": ["Inter"] }, fontSize: { "label-md": ["0.8125rem", { "lineHeight": "1rem", "letterSpacing": "0.01em", "fontWeight": "500" }], "body-lg": ["1rem", { "lineHeight": "1.625rem", "letterSpacing": "-0.005em", "fontWeight": "400" }], "body-sm": ["0.75rem", { "lineHeight": "1.25rem", "letterSpacing": "0.01em", "fontWeight": "400" }], "headline-md": ["1.25rem", { "lineHeight": "1.75rem", "letterSpacing": "-0.01em", "fontWeight": "500" }], "label-sm": ["0.6875rem", { "lineHeight": "0.875rem", "letterSpacing": "0.06em", "fontWeight": "600" }], "headline-lg": ["2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "600" }], "display": ["3rem", { "lineHeight": "3.5rem", "letterSpacing": "-0.03em", "fontWeight": "600" }], "body-md": ["0.875rem", { "lineHeight": "1.5rem", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg-mobile": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-mobile": ["2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-sm": ["1rem", { "lineHeight": "1.5rem", "letterSpacing": "0em", "fontWeight": "500" }] } } } };</script><style>@layer base{html,body{width:100%;min-height:100%;margin:0;padding:0;background-color:#0f131d;color:#dfe2f0;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased flex flex-col selection:bg-primary selection:text-on-primary"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><button aria-label="Go back" class="min-w-[44px] min-h-[44px] flex items-center justify-center text-on-surface rounded-full hover:bg-surface-variant transition-colors flex-shrink-0" onclick="history.back()"><span class="material-symbols-outlined text-[20px]">arrow_back_ios_new</span></button><img alt="CRISISGRID Logo" class="h-9 w-auto object-contain flex-shrink-0 rounded-md bg-white/95 p-0.5 shadow-sm" src="/crisisgrid_logo.png"/><div class="flex flex-col min-w-0"><span class="font-label-sm text-label-sm tracking-wider uppercase text-on-surface-variant font-semibold truncate">CRISISGRID Emergency Assistance</span><h1 class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Emergency Incident Report</h1></div></div><div class="flex items-center gap-space-xs flex-shrink-0"><a class="min-w-[44px] min-h-[44px] px-space-sm rounded-full bg-error-container/40 text-error flex items-center justify-center gap-1 active:scale-95 transition-transform" href="tel:911"><span class="material-symbols-outlined text-[18px]">call</span><span class="font-label-sm text-label-sm font-semibold pr-1">SOS</span></a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-safe bg-surface min-h-screen"><div class="flex flex-col w-full px-gutter space-y-space-md pb-32">
+<!-- Status Context Ribbon -->
+<div class="flex items-center justify-between pt-space-xs">
+<div class="flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-high">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-tertiary uppercase tracking-wider">Priority Dispatch Channel Active</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">shield</span> SECURE
+    </span>
+</div>
+<!-- Incident Title & Calm Direct Prompt -->
+<div class="flex flex-col space-y-space-xs">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Medical Emergency</span>
+<span class="px-2 py-0.5 rounded-full bg-error-container/30 text-error font-label-sm text-label-sm font-medium">
+        Trauma / Immediate Care
+      </span>
+</div>
+<h2 class="font-display-mobile text-display-mobile text-on-surface font-semibold leading-tight">
+      Tell us what happened.
+    </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+      Provide details such as injuries, number of people affected, or immediate hazards nearby.
+    </p>
+</div>
+<!-- Glass Incident Free-form Input Area -->
+<div class="flex flex-col rounded-xl bg-surface-container-low p-space-md shadow-md space-y-space-sm">
+<label class="sr-only" for="incident-description">Incident Details</label>
+<textarea class="w-full bg-transparent resize-none text-on-surface placeholder:text-outline font-body-lg text-body-lg focus:outline-none leading-relaxed" id="incident-description" placeholder="Describe the situation, landmarks, or medical symptoms..." rows="4"></textarea>
+<div class="flex items-center justify-between pt-space-xs">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-tertiary">check_circle</span>
+<span class="font-label-sm text-label-sm">Offline Cache Ready</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline" id="char-counter">0 / 500</span>
+</div>
+</div>
+<!-- Voice Dictation Interactive Trigger with Audio Wave -->
+<div class="rounded-xl bg-surface-container-high/80 p-space-sm flex items-center justify-between shadow-sm">
+<button aria-label="Dictate emergency details" class="flex items-center gap-3 flex-1 text-left active:scale-[0.99] transition-transform" id="voice-dictate-btn" type="button">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0 text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-[20px]">mic</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface font-medium truncate">Tap to dictate details</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Real-time speech-to-text enabled</span>
+</div>
+</button>
+<!-- Sound Waveform visualizer -->
+<div aria-hidden="true" class="flex items-center gap-1 px-2 h-6">
+<span class="w-0.5 h-2 bg-primary/40 rounded-full"></span>
+<span class="w-0.5 h-4 bg-primary rounded-full animate-pulse"></span>
+<span class="w-0.5 h-5 bg-primary rounded-full"></span>
+<span class="w-0.5 h-3 bg-primary/70 rounded-full animate-pulse"></span>
+<span class="w-0.5 h-1.5 bg-primary/30 rounded-full"></span>
+</div>
+</div>
+<!-- Urgency Level Quick Selector -->
+<div class="flex flex-col space-y-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Triage Urgency Level</span>
+<span class="font-label-sm text-label-sm text-primary">Required</span>
+</div>
+<div aria-label="Incident Urgency Tier" class="grid grid-cols-3 gap-2" role="radiogroup">
+<!-- Critical -->
+<button aria-checked="true" class="urgency-option flex flex-col p-space-sm rounded-lg bg-error-container/20 text-left transition-all active:scale-95" data-urgency="critical" role="radio" type="button">
+<div class="flex items-center justify-between mb-1">
+<span class="w-2.5 h-2.5 rounded-full bg-error"></span>
+<span class="material-symbols-outlined text-[16px] text-error">priority_high</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Critical</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant line-clamp-1">Life Threatening</span>
+</button>
+<!-- Urgent -->
+<button aria-checked="false" class="urgency-option flex flex-col p-space-sm rounded-lg bg-surface-container text-left transition-all active:scale-95 opacity-70" data-urgency="urgent" role="radio" type="button">
+<div class="flex items-center justify-between mb-1">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-fixed"></span>
+<span class="material-symbols-outlined text-[16px] text-secondary">medical_services</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Urgent</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant line-clamp-1">Need Doctor</span>
+</button>
+<!-- Non-Immediate -->
+<button aria-checked="false" class="urgency-option flex flex-col p-space-sm rounded-lg bg-surface-container text-left transition-all active:scale-95 opacity-70" data-urgency="non-immediate" role="radio" type="button">
+<div class="flex items-center justify-between mb-1">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+<span class="material-symbols-outlined text-[16px] text-tertiary">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Stable</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant line-clamp-1">Non-immediate</span>
+</button>
+</div>
+</div>
+<!-- Location Verification Card -->
+<div class="rounded-xl bg-surface-container-low p-space-md shadow-md flex flex-col space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[18px]">near_me</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">Current Location Detected</span>
+</div>
+<div class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-container/30 text-tertiary font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>GPS High Precision (±3m)</span>
+</div>
+</div>
+<!-- Static Map Preview Thumbnail -->
+<div class="relative w-full h-28 rounded-lg overflow-hidden bg-surface-container-highest" data-location="Indiranagar, Bengaluru" style="">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 via-transparent to-transparent z-10"></div>
+<div class="absolute bottom-2 left-2 z-20 flex items-center gap-1.5 px-2 py-1 rounded-md bg-surface-container-lowest/90 backdrop-blur-md">
+<span class="material-symbols-outlined text-[14px] text-primary">my_location</span>
+<span class="font-label-sm text-label-sm text-on-surface font-mono">12.9716° N, 77.6412° E</span>
+</div>
+</div>
+<div class="flex flex-col space-y-1">
+<p class="font-body-md text-body-md text-on-surface font-medium">
+        Plot 42, 12th Main Road, HAL 2nd Stage, Indiranagar, Bengaluru
+      </p>
+<div class="flex items-center justify-between pt-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Landmark: Opp. Metro Pillar 184</span>
+<button class="font-label-md text-label-md text-primary font-semibold flex items-center gap-0.5 hover:underline" type="button">
+<span>Edit on map</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Incident Evidence Attachment Strip -->
+<div class="flex flex-col space-y-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Visual Evidence (Optional)</span>
+<div class="flex items-center gap-space-sm overflow-x-auto pb-1">
+<button class="w-20 h-20 rounded-xl bg-surface-container flex flex-col items-center justify-center gap-1 text-on-surface-variant active:scale-95 transition-transform flex-shrink-0" type="button">
+<span class="material-symbols-outlined text-[24px] text-primary">add_a_photo</span>
+<span class="font-label-sm text-label-sm">Add Photo</span>
+</button>
+<div class="relative w-20 h-20 rounded-xl overflow-hidden bg-surface-container flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Close-up of a damaged roadside sign and emergency responder tire marks on a wet asphalt city street in Bengaluru at twilight with moody cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMUBgAq3EXofX8nU6rnSCysRHeIXskXUSPOUOsrnF6XSh9pcNe6W2DDw05iDeamFKB1Oi05CnwHNDeriPSUdMHoaiRiSuov7JSE0Bt9HwL8Ma9gw2s89KjUmdXD6ELQtAxBdpwGgT-U7eB-Xmsy-WTMIojXuREO8vpFRVlbXlMPb_KEG93MbhdqvVmFWeJIWYEE_FFgUqxxSiUxR0otQDNgK2RNUsY7KAgzychPh63"/>
+<button aria-label="Remove photo" class="absolute top-1 right-1 w-5 h-5 rounded-full bg-surface-container-lowest/80 text-on-surface flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+</div>
+<div class="relative w-20 h-20 rounded-xl overflow-hidden bg-surface-container flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="First person perspective view looking toward a commercial avenue sidewalk with ambulance emergency flashers reflecting off storefront glass" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIRJlujRxsOKdqL_hQEGd3lUWYsSzYYh01uSekOs9eTF8-QPxAWSi-TDNVsb4PrHWUE35p3Yl1ngI3jDaSNjUqKbBPaXQGjnUujvh2xrs1yt2aO5xdqjXYUK8-JcA9uwF1xaYYn_qwgKtzTXQUSXn1S7qSL6GF7BmQPWMzM1FvWs1wGWtW1Umlv3waq5PHGcLSIURKZ4olkDvISvXb9juYvPwu33RC9YNEh3T5IupL"/>
+<button aria-label="Remove photo" class="absolute top-1 right-1 w-5 h-5 rounded-full bg-surface-container-lowest/80 text-on-surface flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Fixed Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-surface/90 backdrop-blur-xl px-gutter pb-6 pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.5)] flex flex-col items-center gap-2 max-w-screen-md mx-auto">
+<button class="w-full h-[52px] rounded-xl bg-primary text-on-primary font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-transform" id="submit-incident-btn" type="button">
+<span>Continue to Dispatch Review</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span class="font-label-sm text-label-sm text-center">
+        Location &amp; telemetry relayed directly to Central Command EOC
+      </span>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Dynamic text counter
+    const textarea = document.getElementById('incident-description');
+    const charCounter = document.getElementById('char-counter');
+    if (textarea && charCounter) {
+      textarea.addEventListener('input', (e) => {
+        const len = e.target.value.length;
+        charCounter.textContent = `${len} / 500`;
+      });
+    }
+
+    // Urgency toggle interaction
+    const urgencyButtons = document.querySelectorAll('.urgency-option');
+    urgencyButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        urgencyButtons.forEach(b => {
+          b.setAttribute('aria-checked', 'false');
+          b.classList.remove('bg-error-container/20', 'bg-primary-container/20', 'bg-tertiary-container/20');
+          b.classList.add('bg-surface-container', 'opacity-70');
+        });
+        btn.setAttribute('aria-checked', 'true');
+        btn.classList.remove('opacity-70', 'bg-surface-container');
+        
+        const type = btn.getAttribute('data-urgency');
+        if (type === 'critical') {
+          btn.classList.add('bg-error-container/20');
+        } else if (type === 'urgent') {
+          btn.classList.add('bg-primary-container/20');
+        } else {
+          btn.classList.add('bg-tertiary-container/20');
+        }
+      });
+    });
+
+    // Voice dictation state visual feedback
+    const dictateBtn = document.getElementById('voice-dictate-btn');
+    let isListening = false;
+    if (dictateBtn) {
+      dictateBtn.addEventListener('click', () => {
+        isListening = !isListening;
+        const icon = dictateBtn.querySelector('.material-symbols-outlined');
+        const title = dictateBtn.querySelector('.font-headline-sm');
+        if (isListening) {
+          icon.textContent = 'graphic_eq';
+          title.textContent = 'Listening to speech...';
+          dictateBtn.parentElement.classList.add('bg-primary/10');
+          if (textarea && textarea.value === '') {
+            textarea.value = 'Two casualties reported on sidewalk, alert breathing, need rapid response unit immediately.';
+            textarea.dispatchEvent(new Event('input'));
+          }
+        } else {
+          icon.textContent = 'mic';
+          title.textContent = 'Tap to dictate details';
+          dictateBtn.parentElement.classList.remove('bg-primary/10');
+        }
+      });
+    }
+  })();
+</script></main></body></html>

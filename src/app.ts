@@ -98,6 +98,8 @@ function findPublicDir(): string | null {
 function resolveScreenFile(screen: string, filename = "code.html"): string | null {
   for (const root of getCandidateRoots()) {
     const candidates = [
+      path.join(root, "public", "stitch_crisisgrid_emergency_command_platform", screen, filename),
+      path.join(root, "dist", "public", "stitch_crisisgrid_emergency_command_platform", screen, filename),
       path.join(root, "stitch_crisisgrid_emergency_command_platform", screen, filename),
       path.join(root, "dist", "stitch_crisisgrid_emergency_command_platform", screen, filename),
     ];
@@ -112,6 +114,8 @@ function resolveScreenFile(screen: string, filename = "code.html"): string | nul
 
 function findScreensDir(): string | null {
   for (const root of getCandidateRoots()) {
+    const pubCandidate = path.join(root, "public", "stitch_crisisgrid_emergency_command_platform");
+    if (existsSync(pubCandidate)) return pubCandidate;
     const candidate = path.join(root, "stitch_crisisgrid_emergency_command_platform");
     if (existsSync(candidate)) return candidate;
     const distCandidate = path.join(root, "dist", "stitch_crisisgrid_emergency_command_platform");
