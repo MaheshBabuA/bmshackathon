@@ -35,6 +35,224 @@ import type {
 const DISPATCH_DISCLAIMER =
   "This simulation does not connect to police, ambulance, fire department, 112, or government dispatch systems.";
 
+export interface CrisisScenario {
+  key: string;
+  title: string;
+  incidentType: string;
+  severity: "critical" | "urgent" | "stable";
+  location: string;
+  address: string;
+  description: string;
+  responseUnits: number;
+  dispatchDetails: string;
+  evacuationRadius: number;
+  residentsAlerted: number;
+  perimeterDetails: string;
+  impacts: {
+    sectorId: string;
+    demandDeltaMw: number;
+    impactScore: number;
+    rationale: string;
+    impactLevel: "high" | "medium" | "low";
+    reason: string;
+  }[];
+}
+
+export const CRISIS_SCENARIOS: Record<string, CrisisScenario> = {
+  industrial_fire: {
+    key: "industrial_fire",
+    title: "Industrial Fire",
+    incidentType: "fire_hazmat",
+    severity: "critical",
+    location: "Indiranagar Industrial Zone",
+    address: "Indiranagar Industrial Complex, Sector 4",
+    description: "Large-scale industrial fire requiring coordinated emergency response.",
+    responseUnits: 14,
+    dispatchDetails: "8 Fire Engines · 3 HAZMAT · 3 ALS Units",
+    evacuationRadius: 450,
+    residentsAlerted: 1420,
+    perimeterDetails: "450 m perimeter around Indiranagar Industrial Zone; hazardous-material response active.",
+    impacts: [
+      {
+        sectorId: "water_infrastructure",
+        demandDeltaMw: 2,
+        impactScore: 1.0,
+        impactLevel: "high",
+        reason: "Increase water infrastructure capacity by 2 MW for high-pressure fire suppression.",
+        rationale: "Water Infrastructure: +2 MW demand for fire suppression and hydrant pressure.",
+      },
+      {
+        sectorId: "emergency_operations",
+        demandDeltaMw: 1,
+        impactScore: 1.0,
+        impactLevel: "high",
+        reason: "Increase emergency operations capacity by 1 MW for command and rescue units.",
+        rationale: "Emergency Operations: +1 MW demand for mobile command and rescue operations.",
+      },
+      {
+        sectorId: "telecommunications",
+        demandDeltaMw: -2,
+        impactScore: 0.8,
+        impactLevel: "high",
+        reason: "Reduce telecommunications allocation by 2 MW; remaining 5 MW stays above safety floor.",
+        rationale: "Telecommunications: -2 MW available for reallocation from non-essential bandwidth.",
+      },
+      {
+        sectorId: "hospital_network",
+        demandDeltaMw: -1,
+        impactScore: 0.8,
+        impactLevel: "high",
+        reason: "Reduce non-critical hospital load by 1 MW; ICU, trauma, and surgical loads remain protected.",
+        rationale: "Hospital Network: -1 MW available for reallocation from non-critical HVAC/facility systems.",
+      },
+    ],
+  },
+  urban_flood: {
+    key: "urban_flood",
+    title: "Urban Flood",
+    incidentType: "flood",
+    severity: "critical",
+    location: "Bellandur & Koramangala Drainage Basin",
+    address: "Bellandur Outer Ring Road Corridor",
+    description: "Major flooding affecting infrastructure, transport and emergency access.",
+    responseUnits: 18,
+    dispatchDetails: "10 Rescue Boats · 4 High-Capacity Pumps · 4 NDRF Teams",
+    evacuationRadius: 600,
+    residentsAlerted: 2800,
+    perimeterDetails: "Flood diversion active along Outer Ring Road.",
+    impacts: [
+      {
+        sectorId: "water_infrastructure",
+        demandDeltaMw: 3,
+        impactScore: 1.0,
+        impactLevel: "high",
+        reason: "High-volume stormwater pumping and drainage operations require +3 MW.",
+        rationale: "Water Infrastructure: +3 MW demand for emergency dewatering and pumping arrays.",
+      },
+      {
+        sectorId: "emergency_operations",
+        demandDeltaMw: 2,
+        impactScore: 1.0,
+        impactLevel: "high",
+        reason: "Amphibious rescue, evacuation boats, and field operations require +2 MW.",
+        rationale: "Emergency Operations: +2 MW demand for rescue logistics and flood relief.",
+      },
+      {
+        sectorId: "telecommunications",
+        demandDeltaMw: -3,
+        impactScore: 0.8,
+        impactLevel: "high",
+        reason: "Throttling commercial bandwidth while maintaining emergency radio channels above safety floor.",
+        rationale: "Telecommunications: Priority communications required (-3 MW non-critical capacity reallocated).",
+      },
+      {
+        sectorId: "hospital_network",
+        demandDeltaMw: -2,
+        impactScore: 0.8,
+        impactLevel: "high",
+        reason: "Emergency preparedness surge with non-critical load reallocation (-2 MW).",
+        rationale: "Hospital Network: Emergency preparedness increase (-2 MW non-critical reallocated).",
+      },
+    ],
+  },
+  power_failure: {
+    key: "power_failure",
+    title: "Power Infrastructure Failure",
+    incidentType: "infrastructure",
+    severity: "urgent",
+    location: "Peenya Substation 220kV Grid",
+    address: "Peenya Industrial Area Stage 1",
+    description: "Critical substation failure reducing available infrastructure capacity.",
+    responseUnits: 10,
+    dispatchDetails: "6 Mobile Transformers · 4 Technical Repair Crews",
+    evacuationRadius: 200,
+    residentsAlerted: 600,
+    perimeterDetails: "Electrical containment perimeter around Peenya Substation.",
+    impacts: [
+      {
+        sectorId: "emergency_operations",
+        demandDeltaMw: 2,
+        impactScore: 1.0,
+        impactLevel: "high",
+        reason: "Auxiliary generation and rapid repair crews require +2 MW.",
+        rationale: "Emergency Operations: +2 MW demand for mobile generators and repair squads.",
+      },
+      {
+        sectorId: "telecommunications",
+        demandDeltaMw: -2,
+        impactScore: 0.8,
+        impactLevel: "high",
+        reason: "Cellular towers switched to emergency battery conservation mode (-2 MW).",
+        rationale: "Telecommunications: -2 MW available for reallocation within safety floor.",
+      },
+      {
+        sectorId: "water_infrastructure",
+        demandDeltaMw: -1,
+        impactScore: 0.6,
+        impactLevel: "medium",
+        reason: "Pumping schedules rebalanced to off-peak periods (-1 MW).",
+        rationale: "Water Infrastructure: -1 MW temporary reduction while protecting reservoir reserves.",
+      },
+      {
+        sectorId: "hospital_network",
+        demandDeltaMw: 1,
+        impactScore: 0.9,
+        impactLevel: "high",
+        reason: "Standby power feeds to regional hospital network reinforced (+1 MW).",
+        rationale: "Hospital Network: +1 MW demand to maintain critical medical life-support circuits.",
+      },
+    ],
+  },
+  hazmat: {
+    key: "hazmat",
+    title: "Hazardous Material Incident",
+    incidentType: "fire_hazmat",
+    severity: "critical",
+    location: "Whitefield Chemical Corridor",
+    address: "Whitefield Export Promotion Industrial Park",
+    description: "Chemical or hazardous material incident requiring containment and evacuation.",
+    responseUnits: 16,
+    dispatchDetails: "8 HAZMAT Containment Units · 4 Decon Teams · 4 ALS Ambulances",
+    evacuationRadius: 500,
+    residentsAlerted: 1950,
+    perimeterDetails: "Chemical plume containment perimeter established.",
+    impacts: [
+      {
+        sectorId: "emergency_operations",
+        demandDeltaMw: 2,
+        impactScore: 1.0,
+        impactLevel: "high",
+        reason: "HAZMAT response, decontamination protocols, and mobile command require +2 MW.",
+        rationale: "Emergency Operations: +2 MW demand for HAZMAT suppression and cordon logistics.",
+      },
+      {
+        sectorId: "water_infrastructure",
+        demandDeltaMw: 1,
+        impactScore: 0.9,
+        impactLevel: "high",
+        reason: "Decontamination water curtain and containment washdown require +1 MW.",
+        rationale: "Water Infrastructure: +1 MW demand for chemical washdown curtains.",
+      },
+      {
+        sectorId: "telecommunications",
+        demandDeltaMw: -2,
+        impactScore: 0.8,
+        impactLevel: "high",
+        reason: "Public alert broadcasting prioritized over general traffic (-2 MW).",
+        rationale: "Telecommunications: -2 MW available for reallocation to emergency services.",
+      },
+      {
+        sectorId: "hospital_network",
+        demandDeltaMw: -1,
+        impactScore: 0.8,
+        impactLevel: "high",
+        reason: "Toxicology and trauma ICU beds prepared; non-urgent facility loads dialed back (-1 MW).",
+        rationale: "Hospital Network: -1 MW non-critical load reallocation while trauma stays protected.",
+      },
+    ],
+  },
+};
+
 export class InMemoryCrisisRepository {
   private sectors: SectorRow[] = [];
   private commandCenterState!: CommandCenterStateRow;
@@ -148,159 +366,20 @@ export class InMemoryCrisisRepository {
       telemetry_online_percentage: 97.4,
       grid_stability_index: 0.94,
       ambient_temperature_c: 29.4,
-      dispatch_status: "active",
-      last_dispatched_at: now,
+      dispatch_status: "standby",
+      city_status: "STABLE",
+      active_crisis: "NONE",
+      active_incident_id: null,
+      last_dispatched_at: null,
       updated_at: now,
     };
 
-    const initialIncidentId = "00000000-0000-4000-8000-000000000101";
-    this.incidents = [
-      {
-        id: initialIncidentId,
-        incident_code: "INC-8092",
-        title: "3-Alarm Chemical & Structural Fire",
-        description:
-          "Critical fire and hazardous-material incident at the Indiranagar Industrial Complex. Emergency operations require additional capacity; hospital trauma and ICU services remain protected while non-critical load is reduced.",
-        incident_type: "fire_hazmat",
-        severity: "critical",
-        status: "active",
-        location:
-          "Indiranagar Industrial Complex / Indiranagar 100ft Road / Sector 4",
-        address:
-          "Indiranagar Industrial Complex / Indiranagar 100ft Road / Sector 4",
-        latitude: 12.9719,
-        longitude: 77.6412,
-        response_units: 15,
-        is_escalated: true,
-        automated_triage: true,
-        dispatch_details: "8 Fire Engines · 3 HAZMAT · 4 ALS",
-        evacuation_radius_m: 450,
-        residents_alerted: 1420,
-        perimeter_details:
-          "450 m perimeter around Indiranagar Industrial Complex; residents alerted for hazardous-material response.",
-        created_at: now,
-        updated_at: now,
-      },
-    ];
-
-    this.incidentImpacts = [
-      {
-        id: randomUUID(),
-        incident_id: initialIncidentId,
-        sector_id: "hospital_network",
-        demand_delta_mw: -1,
-        impact_score: 0.8,
-        rationale:
-          "Temporarily reduce non-critical load while protecting trauma and ICU services.",
-        impact_level: "high",
-        reason:
-          "Reduce non-critical hospital load by 1 MW; trauma and ICU capacity remain protected.",
-        created_at: now,
-      },
-      {
-        id: randomUUID(),
-        incident_id: initialIncidentId,
-        sector_id: "water_infrastructure",
-        demand_delta_mw: 2,
-        impact_score: 1.0,
-        rationale:
-          "Fire suppression and hazardous-material response increase water demand by 2 MW.",
-        impact_level: "high",
-        reason:
-          "Increase water infrastructure capacity by 2 MW for fire suppression.",
-        created_at: now,
-      },
-      {
-        id: randomUUID(),
-        incident_id: initialIncidentId,
-        sector_id: "telecommunications",
-        demand_delta_mw: -2,
-        impact_score: 0.8,
-        rationale:
-          "Telecommunications can safely reduce allocation by 2 MW without crossing its 4.5 MW floor.",
-        impact_level: "high",
-        reason:
-          "Reduce telecommunications allocation by 2 MW; resulting 5 MW remains above its safety floor.",
-        created_at: now,
-      },
-      {
-        id: randomUUID(),
-        incident_id: initialIncidentId,
-        sector_id: "emergency_operations",
-        demand_delta_mw: 1,
-        impact_score: 1.0,
-        rationale: "Emergency response operations require an additional 1 MW.",
-        impact_level: "high",
-        reason:
-          "Increase emergency operations capacity by 1 MW for incident response.",
-        created_at: now,
-      },
-    ];
-
-    const initialReportId = "00000000-0000-4000-8000-000000000301";
-    this.emergencyReports = [
-      {
-        id: initialReportId,
-        incident_id: initialIncidentId,
-        reporter_alias: "Scenario seed",
-        description:
-          "3-alarm chemical and structural fire; hazardous-material response requested.",
-        location:
-          "Indiranagar Industrial Complex / Indiranagar 100ft Road / Sector 4",
-        severity: "critical",
-        is_anonymous: true,
-        category: "fire_rescue",
-        urgency: "critical",
-        latitude: 12.9719,
-        longitude: 77.6412,
-        address:
-          "Indiranagar Industrial Complex / Indiranagar 100ft Road / Sector 4",
-        language: "en",
-        status: "accepted",
-        confirmation_status: "authority_review",
-        location_source: "demo_fallback",
-        input_mode: "text",
-        evidence_paths: [],
-        location_accuracy_m: null,
-        triage_summary:
-          "Deterministic triage assigned critical severity and high fire impact.",
-        created_at: now,
-      },
-    ];
-
-    this.emergencyReportEvents = [
-      {
-        id: randomUUID(),
-        report_id: initialReportId,
-        status: "report_received",
-        note: "Citizen emergency report accepted by the CRISISGRID simulation.",
-        created_at: now,
-      },
-      {
-        id: randomUUID(),
-        report_id: initialReportId,
-        status: "triaged",
-        note: "Deterministic triage assigned severity and affected sectors.",
-        created_at: now,
-      },
-      {
-        id: randomUUID(),
-        report_id: initialReportId,
-        status: "dispatch_requested",
-        note: "Simulated in-app dispatch request only. Not connected to police, ambulance, fire, 112, or government dispatch.",
-        created_at: now,
-      },
-      {
-        id: randomUUID(),
-        report_id: initialReportId,
-        status: "authority_review",
-        note: "A pending allocation recommendation was created for human authority review.",
-        created_at: now,
-      },
-    ];
+    this.incidents = [];
+    this.incidentImpacts = [];
+    this.emergencyReports = [];
+    this.emergencyReportEvents = [];
 
     const baselinePlanId = "00000000-0000-4000-8000-000000000201";
-    const recommendedPlanId = "00000000-0000-4000-8000-000000000202";
 
     this.allocationPlans = [
       {
@@ -317,44 +396,8 @@ export class InMemoryCrisisRepository {
         },
         approved_at: now,
         rejected_at: null,
-        created_by: "scenario-seed",
+        created_by: "system-baseline",
         dispatch_status: "synchronized",
-        created_at: now,
-        updated_at: now,
-      },
-      {
-        id: recommendedPlanId,
-        incident_id: initialIncidentId,
-        title: "Deterministic recommendation for INC-8092",
-        status: "recommended",
-        total_capacity_mw: 45,
-        total_available_capacity_mw: 45,
-        rationale: {
-          city: "Bengaluru Metropolitan Region",
-          model_version: "crisisgrid-rules-v2",
-          simulation_only: true,
-          signatures: [
-            {
-              role: "Gov. Operations Lead",
-              signerName: "S. Mukherjee",
-              signatureHash: "0x9F4C7A1B8E2D9914F6B2C8E4A01234B2",
-              signedAt: now,
-            },
-          ],
-        },
-        approved_at: null,
-        rejected_at: null,
-        created_by: "crisisgrid-rules-v2",
-        dispatch_status: "standby",
-        signatures: [
-          {
-            role: "Gov. Operations Lead",
-            signer_name: "S. Mukherjee",
-            signature_hash: "0x9F4C7A1B8E2D9914F6B2C8E4A01234B2",
-            signed_at: now,
-          },
-        ],
-        required_signatures: 2,
         created_at: now,
         updated_at: now,
       },
@@ -409,76 +452,24 @@ export class InMemoryCrisisRepository {
         safety_status: "safe",
         created_at: now,
       },
-      {
-        id: randomUUID(),
-        allocation_plan_id: recommendedPlanId,
-        sector_id: "hospital_network",
-        allocated_capacity_mw: 17,
-        previous_allocation_mw: 18,
-        recommended_allocation_mw: 17,
-        delta_mw: -1,
-        rationale:
-          "Reduce non-critical hospital load by 1 MW; trauma and ICU capacity remain protected.",
-        safety_status: "safe",
-        created_at: now,
-      },
-      {
-        id: randomUUID(),
-        allocation_plan_id: recommendedPlanId,
-        sector_id: "water_infrastructure",
-        allocated_capacity_mw: 12,
-        previous_allocation_mw: 10,
-        recommended_allocation_mw: 12,
-        delta_mw: 2,
-        rationale:
-          "Increase water infrastructure capacity by 2 MW for fire suppression.",
-        safety_status: "safe",
-        created_at: now,
-      },
-      {
-        id: randomUUID(),
-        allocation_plan_id: recommendedPlanId,
-        sector_id: "telecommunications",
-        allocated_capacity_mw: 5,
-        previous_allocation_mw: 7,
-        recommended_allocation_mw: 5,
-        delta_mw: -2,
-        rationale:
-          "Reduce telecommunications allocation by 2 MW; resulting 5 MW remains above its safety floor.",
-        safety_status: "safe",
-        created_at: now,
-      },
-      {
-        id: randomUUID(),
-        allocation_plan_id: recommendedPlanId,
-        sector_id: "emergency_operations",
-        allocated_capacity_mw: 11,
-        previous_allocation_mw: 10,
-        recommended_allocation_mw: 11,
-        delta_mw: 1,
-        rationale:
-          "Increase emergency operations capacity by 1 MW for incident response.",
-        safety_status: "safe",
-        created_at: now,
-      },
     ];
 
     this.auditLogs = [
       {
         id: randomUUID(),
-        actor: "scenario-seed",
-        action: "scenario.initialized",
+        actor: "system",
+        action: "system.initialized",
         entity_type: "command_center",
         entity_id: "bengaluru",
         details: {
           city: "Bengaluru Metropolitan Region",
           emergency_capacity_mw: 45,
-          active_incident: "INC-8092",
+          city_status: "STABLE",
           simulation_only: true,
         },
-        event_type: "system.scenario_initialized",
+        event_type: "system.normal_operations",
         description:
-          "CRISISGRID simulation environment initialized with Bengaluru scenario.",
+          "Bengaluru Urban Command Ops operating within normal baseline parameters.",
         metadata: { simulation_only: true },
         created_at: now,
       },
@@ -530,6 +521,358 @@ export class InMemoryCrisisRepository {
 
   getAuditLogs(): AuditLogRow[] {
     return [...this.auditLogs];
+  }
+
+  getSimulationScenarios(): CrisisScenario[] {
+    return Object.values(CRISIS_SCENARIOS);
+  }
+
+  initiateSimulation(scenarioKey = "industrial_fire"): {
+    success: boolean;
+    incidentId: string;
+    incidentCode: string;
+    title: string;
+    severity: string;
+    status: string;
+    location: string;
+    affectedDomains: string[];
+    cityStatus: string;
+    activeIncidents: number;
+    planId: string;
+  } {
+    const normalizedKey =
+      scenarioKey === "power_infrastructure_failure"
+        ? "power_failure"
+        : scenarioKey === "hazardous_material"
+          ? "hazmat"
+          : scenarioKey;
+    const scenario: CrisisScenario =
+      CRISIS_SCENARIOS[normalizedKey] ?? CRISIS_SCENARIOS.industrial_fire!;
+    const now = new Date().toISOString();
+    const incidentId = randomUUID();
+    const incidentCode = `INC-SIM-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const incident: IncidentRow = {
+      id: incidentId,
+      incident_code: incidentCode,
+      title: scenario.title,
+      description: scenario.description,
+      incident_type: scenario.incidentType,
+      severity: scenario.severity,
+      status: "active",
+      location: scenario.location,
+      address: scenario.address,
+      latitude: 12.9719,
+      longitude: 77.6412,
+      response_units: scenario.responseUnits,
+      is_escalated: true,
+      automated_triage: true,
+      dispatch_details: scenario.dispatchDetails,
+      evacuation_radius_m: scenario.evacuationRadius,
+      residents_alerted: scenario.residentsAlerted,
+      perimeter_details: scenario.perimeterDetails,
+      is_simulation: true,
+      scenario_type: scenario.key,
+      created_at: now,
+      updated_at: now,
+    };
+
+    this.incidents.unshift(incident);
+
+    for (const impact of scenario.impacts) {
+      this.incidentImpacts.push({
+        id: randomUUID(),
+        incident_id: incidentId,
+        sector_id: impact.sectorId,
+        demand_delta_mw: impact.demandDeltaMw,
+        impact_score: impact.impactScore,
+        impact_level: impact.impactLevel,
+        reason: impact.reason,
+        rationale: impact.rationale,
+        created_at: now,
+      });
+    }
+
+    this.commandCenterState.city_status = "CRISIS ACTIVE";
+    this.commandCenterState.active_crisis = scenario.title;
+    this.commandCenterState.active_incident_id = incidentId;
+    this.commandCenterState.dispatch_status = "active";
+    this.commandCenterState.updated_at = now;
+
+    this.auditLogs.unshift({
+      id: randomUUID(),
+      actor: "Command Center",
+      action: "SIMULATION_INITIATED",
+      entity_type: "incident",
+      entity_id: incidentId,
+      details: {
+        incidentId,
+        incidentCode,
+        scenarioType: scenario.key,
+        initiatingUser: "Command Center Operator",
+        timestamp: now,
+        message: `${scenario.title} crisis simulation initiated from Command Center.`,
+      },
+      event_type: "SIMULATION_INITIATED",
+      description: `${scenario.title} crisis simulation initiated from Command Center.`,
+      metadata: {
+        simulation_only: true,
+        scenario_type: scenario.key,
+      },
+      created_at: now,
+    });
+
+    const currentActivePlan =
+      this.allocationPlans.find((p) => p.status === "approved") ??
+      this.allocationPlans[0];
+    const activeItems = this.allocationPlanItems.filter(
+      (i) => i.allocation_plan_id === currentActivePlan?.id,
+    );
+
+    const dynInput: DynamicAllocationInput = {
+      totalAvailableCapacityMw: this.commandCenterState.emergency_capacity_mw,
+      sectors: this.sectors.map((s) => {
+        const item = activeItems.find((ai) => ai.sector_id === s.id);
+        const currentAlloc = item ? item.allocated_capacity_mw : s.current_allocation_mw;
+        return {
+          sectorId: s.id,
+          sectorName: s.name,
+          currentAllocationMw: currentAlloc,
+          baselineDemandMw: s.baseline_demand_mw,
+          minimumSafeCapacityMw: s.minimum_safe_capacity_mw,
+          maximumRequestedCapacityMw: s.maximum_capacity_mw,
+          priorityWeight: s.priority_weight,
+          operationalFlexibility: s.operational_flexibility,
+          lifeCritical: s.life_critical,
+          incidentImpacts: scenario.impacts
+            .filter((imp) => imp.sectorId === s.id)
+            .map((imp) => ({
+              incidentId,
+              incidentTitle: scenario.title,
+              incidentType: scenario.incidentType,
+              severity: scenario.severity,
+              demandDeltaMw: imp.demandDeltaMw,
+            })),
+        };
+      }),
+    };
+
+    const dynResult = calculateDynamicAllocation(dynInput);
+
+    const planId = randomUUID();
+    const recommendationPlan: AllocationPlanRow = {
+      id: planId,
+      incident_id: incidentId,
+      title: `Deterministic recommendation for ${incidentCode}`,
+      status: "recommended",
+      total_capacity_mw: dynResult.totalAllocated,
+      total_available_capacity_mw: dynResult.totalAvailableCapacity,
+      rationale: {
+        city: "Bengaluru Metropolitan Region",
+        model_version: "crisisgrid-rules-v2",
+        simulation_only: true,
+        scenario_type: scenario.key,
+        signatures: [
+          {
+            role: "Gov. Operations Lead",
+            signerName: "S. Mukherjee",
+            signatureHash: "0x9F4C7A1B8E2D9914F6B2C8E4A01234B2",
+            signedAt: now,
+          },
+        ],
+      },
+      approved_at: null,
+      rejected_at: null,
+      created_by: "crisisgrid-rules-v2",
+      dispatch_status: "standby",
+      signatures: [
+        {
+          role: "Gov. Operations Lead",
+          signer_name: "S. Mukherjee",
+          signature_hash: "0x9F4C7A1B8E2D9914F6B2C8E4A01234B2",
+          signed_at: now,
+        },
+      ],
+      required_signatures: 2,
+      created_at: now,
+      updated_at: now,
+    };
+
+    for (const p of this.allocationPlans) {
+      if (p.status === "recommended" || p.status === "pending_review") {
+        p.status = "superseded";
+        p.updated_at = now;
+      }
+    }
+
+    this.allocationPlans.unshift(recommendationPlan);
+
+    for (const sectorRes of dynResult.sectors) {
+      this.allocationPlanItems.push({
+        id: randomUUID(),
+        allocation_plan_id: planId,
+        sector_id: sectorRes.sectorId,
+        allocated_capacity_mw: sectorRes.recommendedAllocation,
+        previous_allocation_mw: sectorRes.previousAllocation,
+        recommended_allocation_mw: sectorRes.recommendedAllocation,
+        delta_mw: sectorRes.delta,
+        rationale: sectorRes.rationale,
+        safety_status: sectorRes.safetyMargin >= 0 ? "safe" : "floor_breached",
+        created_at: now,
+      });
+    }
+
+    return {
+      success: true,
+      incidentId,
+      incidentCode,
+      title: scenario.title,
+      severity: scenario.severity,
+      status: "active",
+      location: scenario.location,
+      affectedDomains: scenario.impacts.map((i) => i.sectorId),
+      cityStatus: "CRISIS ACTIVE",
+      activeIncidents: this.incidents.filter((i) => i.status === "active").length,
+      planId,
+    };
+  }
+
+  resetDemo(): {
+    success: true;
+    cityStatus: "STABLE";
+    activeIncidents: 0;
+    message: string;
+  } {
+    const now = new Date().toISOString();
+
+    this.incidents = this.incidents.filter(
+      (i) => !i.is_simulation && !i.incident_code.startsWith("INC-SIM-"),
+    );
+
+    const remainingIncidentIds = new Set(this.incidents.map((i) => i.id));
+    this.incidentImpacts = this.incidentImpacts.filter((imp) =>
+      remainingIncidentIds.has(imp.incident_id),
+    );
+    this.emergencyReports = this.emergencyReports.filter((r) =>
+      remainingIncidentIds.has(r.incident_id),
+    );
+
+    this.allocationPlans = this.allocationPlans.filter(
+      (p) => p.status === "approved" && p.incident_id === null,
+    );
+
+    const baselinePlanId = "00000000-0000-4000-8000-000000000201";
+    if (this.allocationPlans.length === 0) {
+      this.allocationPlans.push({
+        id: baselinePlanId,
+        incident_id: null,
+        title: "Bengaluru pre-incident baseline allocation",
+        status: "approved",
+        total_capacity_mw: 45,
+        total_available_capacity_mw: 45,
+        rationale: {
+          city: "Bengaluru Metropolitan Region",
+          model_version: "crisisgrid-rules-v2",
+          simulation_only: true,
+        },
+        approved_at: now,
+        rejected_at: null,
+        created_by: "system-baseline",
+        dispatch_status: "synchronized",
+        created_at: now,
+        updated_at: now,
+      });
+    }
+
+    const activePlanId = this.allocationPlans[0]?.id ?? baselinePlanId;
+    this.allocationPlanItems = [
+      {
+        id: randomUUID(),
+        allocation_plan_id: activePlanId,
+        sector_id: "hospital_network",
+        allocated_capacity_mw: 18,
+        previous_allocation_mw: 18,
+        recommended_allocation_mw: 18,
+        delta_mw: 0,
+        rationale: "Pre-incident baseline allocation.",
+        safety_status: "safe",
+        created_at: now,
+      },
+      {
+        id: randomUUID(),
+        allocation_plan_id: activePlanId,
+        sector_id: "water_infrastructure",
+        allocated_capacity_mw: 10,
+        previous_allocation_mw: 10,
+        recommended_allocation_mw: 10,
+        delta_mw: 0,
+        rationale: "Pre-incident baseline allocation.",
+        safety_status: "safe",
+        created_at: now,
+      },
+      {
+        id: randomUUID(),
+        allocation_plan_id: activePlanId,
+        sector_id: "telecommunications",
+        allocated_capacity_mw: 7,
+        previous_allocation_mw: 7,
+        recommended_allocation_mw: 7,
+        delta_mw: 0,
+        rationale: "Pre-incident baseline allocation.",
+        safety_status: "safe",
+        created_at: now,
+      },
+      {
+        id: randomUUID(),
+        allocation_plan_id: activePlanId,
+        sector_id: "emergency_operations",
+        allocated_capacity_mw: 10,
+        previous_allocation_mw: 10,
+        recommended_allocation_mw: 10,
+        delta_mw: 0,
+        rationale: "Pre-incident baseline allocation.",
+        safety_status: "safe",
+        created_at: now,
+      },
+    ];
+
+    for (const sector of this.sectors) {
+      sector.current_allocation_mw = sector.baseline_demand_mw;
+      sector.operational_status =
+        sector.id === "emergency_operations" ? "READY" : "STABLE";
+    }
+
+    this.commandCenterState.city_status = "STABLE";
+    this.commandCenterState.active_crisis = "NONE";
+    this.commandCenterState.active_incident_id = null;
+    this.commandCenterState.dispatch_status = "standby";
+    this.commandCenterState.emergency_capacity_mw = 45;
+    this.commandCenterState.updated_at = now;
+
+    this.auditLogs.unshift({
+      id: randomUUID(),
+      actor: "System Operator",
+      action: "DEMO_RESET_COMPLETED",
+      entity_type: "command_center_state",
+      entity_id: "bengaluru",
+      details: {
+        message: "Demo reset: Normal operations restored, baseline 45 MW active.",
+        city_status: "STABLE",
+        active_incidents: 0,
+        timestamp: now,
+      },
+      event_type: "DEMO_RESET_COMPLETED",
+      description: "Demo reset: Normal operations restored, baseline 45 MW active.",
+      metadata: { simulation_only: true },
+      created_at: now,
+    });
+
+    return {
+      success: true,
+      cityStatus: "STABLE",
+      activeIncidents: 0,
+      message: "Demo reset complete. Normal operations restored.",
+    };
   }
 
   submitEmergencyReport(report: CreateEmergencyReport): {
@@ -644,6 +987,10 @@ export class InMemoryCrisisRepository {
     }
 
     // 3. Update Crisis State
+    this.commandCenterState.city_status = "CRISIS ACTIVE";
+    this.commandCenterState.active_crisis = triage.title;
+    this.commandCenterState.active_incident_id = incidentId;
+    this.commandCenterState.dispatch_status = "active";
     this.commandCenterState.updated_at = now;
 
     // 4 & 5. Trigger Allocation Engine & Create Pending Recommendation

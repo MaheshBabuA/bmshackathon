@@ -7,7 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/src/server.js",
-    "test": "tsx --test src/domain/allocation.test.ts src/domain/dynamic-allocation.test.ts src/domain/authority-review.test.ts src/domain/citizen-reporting.test.ts",
+    "test": "tsx --test src/domain/allocation.test.ts src/domain/dynamic-allocation.test.ts src/domain/authority-review.test.ts src/domain/citizen-reporting.test.ts src/domain/crisis-simulation.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {

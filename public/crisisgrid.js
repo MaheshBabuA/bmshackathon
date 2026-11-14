@@ -1229,6 +1229,7 @@
   }
 
   function updateSectorCards(data) {
+    updateHeaderStatus(data);
     const page = window.location.pathname;
     if (page.includes("allocation_confirmed_dispatched")) {
       for (const label of SECTORS) {
@@ -1253,88 +1254,107 @@
     }
 
     if (page.includes("city_command_center")) {
-      const availableCard = findCard(
-        { names: ["Available Emergency Capacity"] },
-      );
-      if (availableCard) {
-        const capacityValue = Array.from(availableCard.querySelectorAll("span")).find(
-          function (span) {
-            return /^\d+(?:\.\d+)?$/.test(span.textContent.trim()) &&
-              span.className.includes("font-display");
-          },
-        );
-        if (capacityValue) {
-          capacityValue.textContent = String(data.availableCapacityMw);
-        }
-        const reserveLabel = Array.from(
-          availableCard.querySelectorAll("span"),
-        ).find(function (span) {
-          return span.textContent.includes("Reserve Grid Load");
-        });
-        if (reserveLabel) {
-          reserveLabel.textContent =
-            "Metropolitan Grid Load (" +
-            data.cityGridLoadMw.toFixed(1) +
-            " / " +
-            data.cityGridCapacityMw.toFixed(1) +
-            " MW)";
-        }
-        const reserved = Array.from(
-          availableCard.querySelectorAll("span"),
-        ).find(function (span) {
-          return /\d+%\s*Utilized/.test(span.textContent);
-        });
-        const activeTotal =
-          data.activePlan?.totalCapacityMw ?? 0;
-        if (reserved) {
-          reserved.textContent =
-            Math.round((activeTotal / data.availableCapacityMw) * 100) +
-            "% Allocated";
-        }
-        const meter = availableCard.querySelector('[style*="width"]');
-        if (meter) {
-          meter.style.width =
-            Math.min(100, (activeTotal / data.availableCapacityMw) * 100) + "%";
-        }
-      }
+      updateCommandCenterMode(data);
+      const isStable =
+        data.cityStatus === "STABLE" || data.activeIncidentsCount === 0;
 
-      const activeCard = findCard(
-        { names: ["Active Incidents"] },
-      );
-      if (activeCard) {
-        const clusterCount = Array.from(
-          activeCard.querySelectorAll("span"),
-        ).find(function (span) {
-          return /^\d{1,2}$/.test(span.textContent.trim()) &&
-            span.className.includes("font-display");
-        });
-        if (clusterCount) {
-          clusterCount.textContent = String(data.activeIncidentsCount).padStart(
-            2,
-            "0",
+      if (!isStable) {
+        const availableCard = findCard(
+          { names: ["Available Emergency Capacity"] },
+        );
+        if (availableCard) {
+          const capacityValue = Array.from(availableCard.querySelectorAll("span")).find(
+            function (span) {
+              return /^\d+(?:\.\d+)?$/.test(span.textContent.trim()) &&
+                span.className.includes("font-display");
+            },
           );
+          if (capacityValue) {
+            capacityValue.textContent = String(data.availableCapacityMw);
+          }
+          const reserveLabel = Array.from(
+            availableCard.querySelectorAll("span"),
+          ).find(function (span) {
+            return span.textContent.includes("Reserve Grid Load");
+          });
+          if (reserveLabel) {
+            reserveLabel.textContent =
+              "Metropolitan Grid Load (" +
+              data.cityGridLoadMw.toFixed(1) +
+              " / " +
+              data.cityGridCapacityMw.toFixed(1) +
+              " MW)";
+          }
+          const reserved = Array.from(
+            availableCard.querySelectorAll("span"),
+          ).find(function (span) {
+            return /\d+%\s*Utilized/.test(span.textContent);
+          });
+          const activeTotal =
+            data.activePlan?.totalCapacityMw ?? 0;
+          if (reserved) {
+            reserved.textContent =
+              Math.round((activeTotal / data.availableCapacityMw) * 100) +
+              "% Allocated";
+          }
+          const meter = availableCard.querySelector('[style*="width"]');
+          if (meter) {
+            meter.style.width =
+              Math.min(100, (activeTotal / data.availableCapacityMw) * 100) + "%";
+          }
         }
-        const criticalBadge = Array.from(
-          activeCard.querySelectorAll("span"),
-        ).find(function (span) {
-          return /^\d+\s+CRITICAL$/.test(span.textContent.trim());
-        });
-        if (criticalBadge) {
-          const criticalCount = data.incidents.filter(function (incident) {
-            return incident.status === "active" && incident.severity === "critical";
-          }).length;
-          criticalBadge.textContent = criticalCount + " CRITICAL";
-        }
-        const monitoredBadge = Array.from(
-          activeCard.querySelectorAll("span"),
-        ).find(function (span) {
-          return /^\d+\s+MONITORED$/.test(span.textContent.trim());
-        });
-        if (monitoredBadge) {
-          monitoredBadge.textContent =
-            Math.max(0, data.activeIncidentsCount - (criticalBadge
-              ? Number(criticalBadge.textContent.split(" ")[0])
-              : 0)) + " MONITORED";
+
+        const activeCard = findCard(
+          { names: ["Active Incidents"] },
+        );
+        if (activeCard) {
+          const clusterCount = Array.from(
+            activeCard.querySelectorAll("span"),
+          ).find(function (span) {
+            return /^\d{1,2}$/.test(span.textContent.trim()) &&
+              span.className.includes("font-display");
+          });
+          if (clusterCount) {
+            clusterCount.textContent = String(data.activeIncidentsCount).padStart(
+              2,
+              "0",
+            );
+          }
+          const criticalBadge = Array.from(
+            activeCard.querySelectorAll("span"),
+          ).find(function (span) {
+            return /^\d+\s+CRITICAL$/.test(span.textContent.trim());
+          });
+          if (criticalBadge) {
+            const criticalCount = data.incidents.filter(function (incident) {
+              return incident.status === "active" && incident.severity === "critical";
+            }).length;
+            criticalBadge.textContent = criticalCount + " CRITICAL";
+          }
+          const monitoredBadge = Array.from(
+            activeCard.querySelectorAll("span"),
+          ).find(function (span) {
+            return /^\d+\s+MONITORED$/.test(span.textContent.trim());
+          });
+          if (monitoredBadge) {
+            monitoredBadge.textContent =
+              Math.max(0, data.activeIncidentsCount - (criticalBadge
+                ? Number(criticalBadge.textContent.split(" ")[0])
+                : 0)) + " MONITORED";
+          }
+          const severeTitle = activeCard.querySelector(".truncate");
+          if (severeTitle && data.incidents.length > 0) {
+            const activeInc =
+              data.incidents.find((i) => i.status === "active") || data.incidents[0];
+            severeTitle.textContent = activeInc.title;
+            const severeSub = severeTitle.nextElementSibling;
+            if (severeSub) {
+              severeSub.textContent =
+                (activeInc.severity || "Critical").toUpperCase() +
+                " • " +
+                (activeInc.location || "Indiranagar");
+            }
+          }
         }
       }
 
@@ -1373,7 +1393,7 @@
         const statusBadge = Array.from(card.querySelectorAll("span")).find(
           function (span) {
             return span.classList.contains("rounded-full") &&
-              /^(stable|warning|critical|operational|elevated|surge)$/i.test(
+              /^(stable|warning|critical|operational|elevated|surge|ready)$/i.test(
                 normalizeText(span.textContent),
               );
           },
@@ -1396,11 +1416,11 @@
         );
         if (noteNodes.length > 0) {
           noteNodes[0].textContent =
-            sector.incidentImpactNotes[0] || sector.operationalNote;
+            (data.activeIncidentsCount > 0 ? sector.incidentImpactNotes[0] : null) || sector.operationalNote;
         }
         if (noteNodes.length > 1) {
           noteNodes[1].textContent =
-            sector.incidentImpactNotes[1] || sector.operationalNote;
+            (data.activeIncidentsCount > 0 ? sector.incidentImpactNotes[1] : null) || sector.operationalNote;
         }
         card.setAttribute(
           "aria-label",
@@ -1486,7 +1506,8 @@
       const cell = document.createElement("td");
       cell.className = "py-4 text-on-surface-variant";
       cell.colSpan = 6;
-      cell.textContent = "No active incidents are currently recorded.";
+      cell.textContent =
+        "No critical incidents requiring intervention. All sectors operating on normal baselines.";
       row.appendChild(cell);
       body.appendChild(row);
       return;
@@ -2851,7 +2872,678 @@
     );
   }
 
+  const CRISIS_SCENARIOS_CLIENT = [
+    {
+      key: "industrial_fire",
+      name: "Industrial Fire",
+      icon: "local_fire_department",
+      severity: "CRITICAL",
+      severityClass: "bg-error-container/20 text-error",
+      location: "Indiranagar Industrial Zone",
+      description:
+        "Large-scale industrial fire requiring coordinated emergency response.",
+      impacts: [
+        { label: "Water Infrastructure", detail: "+2 MW demand", color: "text-primary" },
+        { label: "Emergency Operations", detail: "+1 MW demand", color: "text-error" },
+        { label: "Telecommunications", detail: "-2 MW available for reallocation", color: "text-secondary" },
+        { label: "Hospital Network", detail: "-1 MW available for reallocation from non-critical systems", color: "text-tertiary" },
+      ],
+      affectedSystems: [
+        "Water Infrastructure",
+        "Emergency Operations",
+        "Telecommunications",
+        "Hospital Network",
+      ],
+    },
+    {
+      key: "urban_flood",
+      name: "Urban Flood",
+      icon: "flood",
+      severity: "CRITICAL",
+      severityClass: "bg-error-container/20 text-error",
+      location: "K.R. Market Lowlands & South Valley",
+      description:
+        "Major flooding affecting infrastructure, transport and emergency access.",
+      impacts: [
+        { label: "Water Infrastructure", detail: "+3 MW demand", color: "text-primary" },
+        { label: "Emergency Operations", detail: "+2 MW demand", color: "text-error" },
+        { label: "Telecommunications", detail: "Priority communications required", color: "text-secondary" },
+        { label: "Hospital Network", detail: "Emergency preparedness increase", color: "text-tertiary" },
+      ],
+      affectedSystems: [
+        "Water Infrastructure",
+        "Emergency Operations",
+        "Telecommunications",
+        "Hospital Network",
+      ],
+    },
+    {
+      key: "power_failure",
+      name: "Power Infrastructure Failure",
+      icon: "bolt",
+      severity: "HIGH",
+      severityClass: "bg-amber-500/20 text-amber-400",
+      location: "Peenya Major Substation Cluster",
+      description:
+        "Critical substation failure reducing available infrastructure capacity.",
+      impacts: [
+        { label: "Capacity Pool", detail: "Available emergency capacity reduced", color: "text-amber-400" },
+        { label: "Allocation Engine", detail: "Dynamic rebalancing while respecting safety floors", color: "text-primary" },
+      ],
+      affectedSystems: [
+        "Hospital Network",
+        "Water Infrastructure",
+        "Telecommunications",
+        "Emergency Operations",
+      ],
+    },
+    {
+      key: "hazmat",
+      name: "Hazardous Material Incident",
+      icon: "science",
+      severity: "CRITICAL",
+      severityClass: "bg-error-container/20 text-error",
+      location: "Whitefield Chemical Corridor",
+      description:
+        "Chemical or hazardous material incident requiring containment and evacuation.",
+      impacts: [
+        { label: "Emergency Operations", detail: "Demand increases (+2 MW)", color: "text-error" },
+        { label: "Water Infrastructure", detail: "Containment pumping capacity (+1 MW)", color: "text-primary" },
+        { label: "Telecommunications", detail: "Prioritize emergency channels (-2 MW)", color: "text-secondary" },
+        { label: "Hospital Network", detail: "Triage & decontamination readiness (-1 MW)", color: "text-tertiary" },
+      ],
+      affectedSystems: [
+        "Emergency Operations",
+        "Water Infrastructure",
+        "Telecommunications",
+        "Hospital Network",
+      ],
+    },
+  ];
+
+  function wireGlobalDemoReset() {
+    const headerRight = document.querySelector("header .flex.items-center.gap-space-md");
+    if (!headerRight || document.getElementById("crisisgrid-demo-reset-btn")) return;
+
+    const resetBtn = document.createElement("button");
+    resetBtn.id = "crisisgrid-demo-reset-btn";
+    resetBtn.type = "button";
+    resetBtn.className =
+      "flex items-center gap-1.5 px-3 py-1 rounded-lg border border-outline-variant/60 bg-surface-container-low hover:bg-surface-container-high text-on-surface text-label-sm uppercase tracking-wider font-semibold transition-all shadow-sm hover:border-tertiary/60 cursor-pointer";
+    resetBtn.title = "Restore Normal Operations Baseline (STABLE, 0 incidents, 45 MW)";
+    resetBtn.innerHTML = `
+      <span class="material-symbols-outlined text-[16px] text-tertiary">restart_alt</span>
+      <span>DEMO RESET</span>
+    `;
+
+    resetBtn.addEventListener("click", async function (e) {
+      e.preventDefault();
+      if (busy) return;
+      setBusy(resetBtn, true);
+      showNotice("Restoring Normal Operations baseline…", false, true);
+      try {
+        await request("/api/simulation/reset", { method: "POST" });
+        selectedIncidentId = null;
+        selectedIncidentAnalysis = null;
+        currentAuthorityPlan = null;
+        showNotice(
+          "Normal Operations restored. City Status: STABLE (0 active incidents, 45 MW baseline).",
+          false,
+          false,
+        );
+        if (!window.location.pathname.includes("city_command_center")) {
+          window.location.assign(PAGE_PATHS.city_command_center);
+        } else {
+          await refreshDashboard(false);
+        }
+      } catch (err) {
+        showNotice(
+          err instanceof Error ? err.message : "Failed to reset demo.",
+          true,
+          true,
+        );
+      } finally {
+        setBusy(resetBtn, false);
+      }
+    });
+
+    headerRight.insertBefore(resetBtn, headerRight.firstChild);
+  }
+
+  function updateHeaderStatus(data) {
+    const pill = document.querySelector(
+      "header .rounded-full.bg-error-container\\/20, header [data-crisisgrid-status-pill]",
+    );
+    if (!pill) return;
+    pill.setAttribute("data-crisisgrid-status-pill", "true");
+
+    const isStable =
+      data.cityStatus === "STABLE" || data.activeIncidentsCount === 0;
+
+    if (isStable) {
+      pill.className =
+        "flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-tertiary/15 text-tertiary border border-tertiary/30";
+      pill.innerHTML = `
+        <span class="w-2 h-2 rounded-full bg-tertiary"></span>
+        <span class="font-label-sm text-label-sm tracking-wider uppercase text-tertiary font-semibold">CITY STABLE</span>
+      `;
+    } else {
+      pill.className =
+        "flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-error-container/20 text-error border border-error/30";
+      pill.innerHTML = `
+        <span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+        <span class="font-label-sm text-label-sm tracking-wider uppercase text-error font-semibold">CRISIS ACTIVE</span>
+      `;
+    }
+  }
+
+  let defaultCrisisTopCardsHtml = null;
+
+  function updateCommandCenterMode(data) {
+    if (!window.location.pathname.includes("city_command_center")) return;
+
+    const title = Array.from(document.querySelectorAll("main h1")).find(
+      (h) => h.textContent.includes("Bengaluru Urban Command Ops"),
+    );
+    if (title) {
+      let subtitle = document.getElementById("command-ops-subtitle");
+      if (!subtitle) {
+        subtitle = document.createElement("p");
+        subtitle.id = "command-ops-subtitle";
+        subtitle.className =
+          "font-body-sm text-body-sm text-on-surface-variant mt-1";
+        title.parentNode.insertBefore(subtitle, title.nextSibling);
+      }
+      const isStable =
+        data.cityStatus === "STABLE" || data.activeIncidentsCount === 0;
+      subtitle.textContent = isStable
+        ? "All critical infrastructure operating within normal parameters."
+        : "Emergency capacity reallocation active. Monitored incident response underway.";
+    }
+
+    ensureSimulateCrisisButton();
+
+    const topGrid = document.querySelector(
+      "main .grid.grid-cols-1.lg\\:grid-cols-2.gap-space-lg, main #command-center-top-metrics",
+    );
+    if (!topGrid) return;
+
+    if (!topGrid.id) {
+      topGrid.id = "command-center-top-metrics";
+    }
+
+    if (!defaultCrisisTopCardsHtml) {
+      defaultCrisisTopCardsHtml = topGrid.innerHTML;
+    }
+
+    const isStable =
+      data.cityStatus === "STABLE" || data.activeIncidentsCount === 0;
+
+    if (isStable) {
+      topGrid.className =
+        "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-lg";
+      topGrid.innerHTML = `
+        <!-- 1. CITY STATUS -->
+        <div class="relative overflow-hidden rounded-2xl bg-surface-container/70 backdrop-blur-xl p-space-xl shadow-xl flex flex-col justify-between border border-outline-variant/30">
+          <div class="flex items-center justify-between">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">CITY STATUS</span>
+            <span class="material-symbols-outlined text-tertiary text-[20px]">verified</span>
+          </div>
+          <div class="mt-space-md">
+            <div class="font-display text-display font-bold text-tertiary tracking-tight">
+              STABLE
+            </div>
+            <p class="mt-2 text-body-sm font-body-sm text-on-surface-variant">All monitored infrastructure operating normally</p>
+          </div>
+          <div class="mt-4 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-label-sm text-outline">
+            <span>Grid Synchronized</span>
+            <span class="text-tertiary font-mono">OP-4 READY</span>
+          </div>
+        </div>
+
+        <!-- 2. EMERGENCY RESERVE -->
+        <div class="relative overflow-hidden rounded-2xl bg-surface-container/70 backdrop-blur-xl p-space-xl shadow-xl flex flex-col justify-between border border-outline-variant/30">
+          <div class="flex items-center justify-between">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">EMERGENCY RESERVE</span>
+            <span class="material-symbols-outlined text-primary text-[20px]">battery_charging_full</span>
+          </div>
+          <div class="mt-space-md">
+            <div class="flex items-baseline gap-space-xs font-display text-display font-bold text-on-surface tracking-tight">
+              ${data.availableCapacityMw || 45}
+              <span class="font-headline-md text-headline-md text-on-surface-variant font-medium">MW</span>
+            </div>
+            <p class="mt-2 text-body-sm font-body-sm text-on-surface-variant">Available capacity for emergency response</p>
+          </div>
+          <div class="mt-4 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-label-sm text-outline">
+            <span>Pool Limit: 45 MW</span>
+            <span class="text-primary font-mono">100% Reserved</span>
+          </div>
+        </div>
+
+        <!-- 3. ACTIVE INCIDENTS -->
+        <div class="relative overflow-hidden rounded-2xl bg-surface-container/70 backdrop-blur-xl p-space-xl shadow-xl flex flex-col justify-between border border-outline-variant/30">
+          <div class="flex items-center justify-between">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">ACTIVE INCIDENTS</span>
+            <span class="material-symbols-outlined text-tertiary text-[20px]">shield</span>
+          </div>
+          <div class="mt-space-md">
+            <div class="font-display text-display font-bold text-on-surface tracking-tight">
+              0
+            </div>
+            <p class="mt-2 text-body-sm font-body-sm text-on-surface-variant">No critical incidents requiring intervention</p>
+          </div>
+          <div class="mt-4 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-label-sm text-outline">
+            <span>Threat Level: Nominal</span>
+            <span class="text-tertiary font-mono">0 CRITICAL</span>
+          </div>
+        </div>
+
+        <!-- 4. INFRASTRUCTURE HEALTH -->
+        <div class="relative overflow-hidden rounded-2xl bg-surface-container/70 backdrop-blur-xl p-space-xl shadow-xl flex flex-col justify-between border border-outline-variant/30">
+          <div class="flex items-center justify-between">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">INFRASTRUCTURE HEALTH</span>
+            <span class="material-symbols-outlined text-tertiary text-[20px]">monitoring</span>
+          </div>
+          <div class="mt-space-md">
+            <div class="font-display text-display font-bold text-tertiary tracking-tight">
+              100%
+            </div>
+            <p class="mt-2 text-body-sm font-body-sm text-on-surface-variant">All primary systems operational</p>
+          </div>
+          <div class="mt-4 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-label-sm text-outline">
+            <span>Telemetry: 99.2% Online</span>
+            <span class="text-tertiary font-mono">4 / 4 Sectors Safe</span>
+          </div>
+        </div>
+      `;
+    } else {
+      topGrid.className = "grid grid-cols-1 lg:grid-cols-2 gap-space-lg";
+      topGrid.innerHTML = defaultCrisisTopCardsHtml;
+    }
+  }
+
+  function ensureSimulateCrisisButton() {
+    if (!window.location.pathname.includes("city_command_center")) return;
+    if (document.getElementById("crisisgrid-simulate-crisis-btn")) return;
+    const rail = document.querySelector(
+      "main .flex.items-center.gap-space-sm.flex-wrap",
+    );
+    if (!rail) return;
+
+    const btn = document.createElement("button");
+    btn.id = "crisisgrid-simulate-crisis-btn";
+    btn.type = "button";
+    btn.className =
+      "flex items-center gap-space-xs px-space-md py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold font-label-md text-label-md transition-all shadow-lg hover:shadow-amber-500/20 cursor-pointer";
+    btn.innerHTML = `
+      <span class="material-symbols-outlined text-[18px]">bolt</span>
+      <span>SIMULATE CRISIS</span>
+    `;
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      openSimulationModal();
+    });
+
+    rail.insertBefore(btn, rail.firstChild);
+  }
+
+  function ensureRerunAllocationModelButton() {
+    if (!window.location.pathname.includes("live_incidents_system_impact")) return;
+    if (document.getElementById("rerunModelBtn")) return;
+
+    const footerActions = document.querySelector(
+      "main footer .flex.items-center.gap-space-sm.justify-end",
+    );
+    if (!footerActions) return;
+
+    const rerunBtn = document.createElement("button");
+    rerunBtn.id = "rerunModelBtn";
+    rerunBtn.type = "button";
+    rerunBtn.className =
+      "h-10 px-4 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md transition-colors flex items-center gap-1.5 cursor-pointer";
+    rerunBtn.innerHTML = `
+      <span class="material-symbols-outlined text-[16px]">refresh</span>
+      <span>Re-run Allocation Model</span>
+    `;
+
+    rerunBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (!busy) void reRunRecommendation(rerunBtn);
+    });
+
+    const reviewLink = footerActions.querySelector('a[data-path="authority-review"]');
+    if (reviewLink) {
+      footerActions.insertBefore(rerunBtn, reviewLink);
+    } else {
+      footerActions.appendChild(rerunBtn);
+    }
+  }
+
+  let simulationModalEl = null;
+
+  function ensureSimulationModal() {
+    if (simulationModalEl) return simulationModalEl;
+    let modal = document.getElementById("crisisgrid-simulation-modal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "crisisgrid-simulation-modal";
+      modal.className =
+        "fixed inset-0 z-[120] bg-surface-container-lowest/80 backdrop-blur-md hidden items-center justify-center p-4 overflow-y-auto";
+      document.body.appendChild(modal);
+    }
+    simulationModalEl = modal;
+    return simulationModalEl;
+  }
+
+  function openSimulationModal() {
+    const modal = ensureSimulationModal();
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    renderScenarioSelectionView();
+  }
+
+  function closeSimulationModal() {
+    if (!simulationModalEl) return;
+    simulationModalEl.classList.add("hidden");
+    simulationModalEl.classList.remove("flex");
+  }
+
+  function renderScenarioSelectionView() {
+    const modal = ensureSimulationModal();
+    modal.innerHTML = `
+      <div class="relative w-full max-w-4xl bg-surface-container border border-outline-variant/40 rounded-2xl shadow-2xl p-6 sm:p-8 flex flex-col gap-6 text-on-surface max-h-[90vh] overflow-y-auto">
+        <div class="flex items-start justify-between gap-4 border-b border-outline-variant/30 pb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="material-symbols-outlined text-amber-400 text-[24px]">crisis_alert</span>
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-amber-400 font-semibold">CRISIS SIMULATION</span>
+            </div>
+            <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">Select Crisis Scenario</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Select a municipal disaster scenario to evaluate dynamic emergency capacity reallocation and test authority dispatch workflows.</p>
+          </div>
+          <button id="crisis-sim-close-btn" class="p-2 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ${CRISIS_SCENARIOS_CLIENT.map(function (scenario) {
+            return `
+              <div data-scenario-key="${scenario.key}" class="scenario-card p-5 rounded-xl bg-surface-container-low border border-outline-variant/30 hover:border-amber-400/60 hover:bg-surface-container-high/60 transition-all cursor-pointer flex flex-col justify-between group">
+                <div>
+                  <div class="flex items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-[22px] text-amber-400">${scenario.icon}</span>
+                      <span class="font-headline-sm text-headline-sm font-semibold text-on-surface group-hover:text-amber-300 transition-colors">${scenario.name}</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider ${scenario.severityClass}">
+                      ${scenario.severity}
+                    </span>
+                  </div>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant mb-4">${scenario.description}</p>
+                  
+                  <div class="space-y-1.5 pt-3 border-t border-outline-variant/20 text-body-sm">
+                    <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block mb-1">Infrastructure Impact</span>
+                    ${scenario.impacts.map(function (imp) {
+                      return `
+                        <div class="flex items-center justify-between text-[12px] font-mono">
+                          <span class="text-on-surface-variant">${imp.label}:</span>
+                          <span class="${imp.color} font-medium">${imp.detail}</span>
+                        </div>
+                      `;
+                    }).join("")}
+                  </div>
+                </div>
+
+                <div class="mt-4 pt-3 flex items-center justify-end text-label-md text-amber-400 group-hover:translate-x-1 transition-transform">
+                  <span class="font-medium">Configure Simulation</span>
+                  <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-outline-variant/30">
+          <span class="text-body-sm text-outline font-mono">Safety floors strictly enforced across all scenarios</span>
+          <button id="crisis-sim-cancel-btn" class="px-4 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md transition-colors cursor-pointer">
+            Cancel
+          </button>
+        </div>
+      </div>
+    `;
+
+    modal.querySelector("#crisis-sim-close-btn")?.addEventListener("click", closeSimulationModal);
+    modal.querySelector("#crisis-sim-cancel-btn")?.addEventListener("click", closeSimulationModal);
+
+    modal.querySelectorAll(".scenario-card").forEach(function (card) {
+      card.addEventListener("click", function () {
+        const key = card.getAttribute("data-scenario-key");
+        const scenario = CRISIS_SCENARIOS_CLIENT.find((s) => s.key === key);
+        if (scenario) renderConfirmationView(scenario);
+      });
+    });
+  }
+
+  function renderConfirmationView(scenario) {
+    const modal = ensureSimulationModal();
+    modal.innerHTML = `
+      <div class="relative w-full max-w-2xl bg-surface-container border border-outline-variant/40 rounded-2xl shadow-2xl p-6 sm:p-8 flex flex-col gap-6 text-on-surface">
+        <div class="border-b border-outline-variant/30 pb-4">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="material-symbols-outlined text-amber-400 text-[20px]">verified</span>
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-amber-400 font-semibold">SIMULATION READY</span>
+          </div>
+          <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">Confirm Crisis Simulation</h2>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Review the simulation configuration before initiating municipal emergency response.</p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-4">
+          <div class="flex items-center justify-between border-b border-outline-variant/20 pb-3">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Scenario</span>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-amber-400">${scenario.icon}</span>
+              <span class="font-headline-sm text-headline-sm font-semibold text-on-surface">${scenario.name}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between border-b border-outline-variant/20 pb-3">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Location</span>
+            <span class="font-body-md text-body-md font-medium text-on-surface">${scenario.location}</span>
+          </div>
+
+          <div class="flex items-center justify-between border-b border-outline-variant/20 pb-3">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Severity</span>
+            <span class="px-2.5 py-1 rounded text-label-sm font-semibold uppercase tracking-wider ${scenario.severityClass}">
+              ${scenario.severity}
+            </span>
+          </div>
+
+          <div>
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block mb-2">Affected Systems</span>
+            <div class="grid grid-cols-2 gap-2">
+              ${scenario.affectedSystems.map(function (sys) {
+                return `
+                  <div class="flex items-center gap-2 p-2 rounded-lg bg-surface-container text-body-sm text-on-surface font-medium">
+                    <span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>
+                    <span>${sys}</span>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-lg bg-surface-container-high/50 border border-outline-variant/20 text-body-sm text-outline flex items-center gap-2.5">
+          <span class="material-symbols-outlined text-[20px] text-primary">info</span>
+          <span>Clicking Initiate will register a live simulated incident and calculate dynamic capacity reallocation.</span>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button id="sim-confirm-back-btn" class="px-5 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md transition-colors cursor-pointer">
+            Cancel
+          </button>
+          <button id="sim-confirm-initiate-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold font-label-md transition-all shadow-lg hover:shadow-amber-500/25 cursor-pointer">
+            <span class="material-symbols-outlined text-[18px]">bolt</span>
+            <span>INITIATE CRISIS SIMULATION</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    modal.querySelector("#sim-confirm-back-btn")?.addEventListener("click", renderScenarioSelectionView);
+    modal.querySelector("#sim-confirm-initiate-btn")?.addEventListener("click", function () {
+      renderOperationalSequenceView(scenario);
+    });
+  }
+
+  function renderOperationalSequenceView(scenario) {
+    const modal = ensureSimulationModal();
+    modal.innerHTML = `
+      <div class="relative w-full max-w-xl bg-surface-container border border-outline-variant/40 rounded-2xl shadow-2xl p-6 sm:p-8 flex flex-col gap-6 text-on-surface">
+        <div class="border-b border-outline-variant/30 pb-4">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="material-symbols-outlined text-amber-400 text-[20px] animate-pulse">crisis_alert</span>
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-amber-400 font-semibold">SIMULATION INITIALIZING</span>
+          </div>
+          <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">${scenario.name}</h2>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Executing controlled municipal operational sequence…</p>
+        </div>
+
+        <div class="space-y-3 font-mono">
+          <!-- Step 1 -->
+          <div id="sim-seq-step-1" class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between transition-all">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-[20px] text-primary">sensors</span>
+              <span class="text-on-surface font-semibold text-body-md">DETECTING INCIDENT</span>
+            </div>
+            <div class="step-status text-outline text-label-sm flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+              <span>Registering…</span>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div id="sim-seq-step-2" class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between opacity-40 transition-all">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-[20px] text-outline">schema</span>
+              <span class="text-on-surface font-semibold text-body-md">ASSESSING SYSTEM IMPACT</span>
+            </div>
+            <div class="step-status text-outline text-label-sm">Standby</div>
+          </div>
+
+          <!-- Step 3 -->
+          <div id="sim-seq-step-3" class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between opacity-40 transition-all">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-[20px] text-outline">calculate</span>
+              <span class="text-on-surface font-semibold text-body-md">CALCULATING RESPONSE REQUIREMENTS</span>
+            </div>
+            <div class="step-status text-outline text-label-sm">Standby</div>
+          </div>
+        </div>
+
+        <div id="sim-seq-footer" class="text-center font-mono text-body-sm text-outline pt-2">
+          Initializing telemetry streams…
+        </div>
+      </div>
+    `;
+
+    const step1 = modal.querySelector("#sim-seq-step-1");
+    const step2 = modal.querySelector("#sim-seq-step-2");
+    const step3 = modal.querySelector("#sim-seq-step-3");
+    const footer = modal.querySelector("#sim-seq-footer");
+
+    let apiResult = null;
+    let apiError = null;
+
+    request("/api/simulation/initiate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scenarioKey: scenario.key }),
+    })
+      .then(function (res) {
+        apiResult = res;
+      })
+      .catch(function (err) {
+        apiError = err;
+      });
+
+    setTimeout(function () {
+      if (step1) {
+        step1.classList.add("border-tertiary/40");
+        const status = step1.querySelector(".step-status");
+        if (status) {
+          status.className = "step-status text-tertiary font-semibold text-label-sm flex items-center gap-1";
+          status.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span> ✓ Incident registered`;
+        }
+      }
+      if (step2) {
+        step2.classList.remove("opacity-40");
+        const status = step2.querySelector(".step-status");
+        if (status) {
+          status.className = "step-status text-outline text-label-sm flex items-center gap-1.5";
+          status.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> <span>Analyzing domains…</span>`;
+        }
+      }
+      if (footer) footer.textContent = "Assessing grid load impact across 4 sectors…";
+    }, 500);
+
+    setTimeout(function () {
+      if (step2) {
+        step2.classList.add("border-tertiary/40");
+        const status = step2.querySelector(".step-status");
+        if (status) {
+          status.className = "step-status text-tertiary font-semibold text-label-sm flex items-center gap-1";
+          status.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span> ✓ 4 infrastructure domains affected`;
+        }
+      }
+      if (step3) {
+        step3.classList.remove("opacity-40");
+        const status = step3.querySelector(".step-status");
+        if (status) {
+          status.className = "step-status text-outline text-label-sm flex items-center gap-1.5";
+          status.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> <span>Calculating…</span>`;
+        }
+      }
+      if (footer) footer.textContent = "Running deterministic dynamic allocation engine…";
+    }, 1100);
+
+    setTimeout(function () {
+      if (apiError) {
+        if (footer) {
+          footer.className = "text-center font-mono text-body-sm text-error pt-2";
+          footer.textContent =
+            apiError instanceof Error ? apiError.message : "Simulation initiation failed.";
+        }
+        return;
+      }
+
+      if (step3) {
+        step3.classList.add("border-tertiary/40");
+        const status = step3.querySelector(".step-status");
+        if (status) {
+          status.className = "step-status text-tertiary font-semibold text-label-sm flex items-center gap-1";
+          status.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span> ✓ Emergency capacity analysis initiated`;
+        }
+      }
+
+      if (footer) {
+        footer.className = "text-center font-mono text-body-sm text-tertiary pt-2";
+        footer.textContent = "Redirecting to Live Incidents & System Impact…";
+      }
+
+      setTimeout(function () {
+        const incidentId = apiResult?.incident?.id || apiResult?.incidentId;
+        const targetUrl = incidentId
+          ? PAGE_PATHS.live_incidents_system_impact + "?incident=" + encodeURIComponent(incidentId)
+          : PAGE_PATHS.live_incidents_system_impact;
+        window.location.assign(targetUrl);
+      }, 700);
+    }, 1700);
+  }
+
   function wireCommandCenterControls() {
+    ensureSimulateCrisisButton();
     const reserveButton = Array.from(document.querySelectorAll("button")).find(
       function (button) {
         return /initiate reserve transfer/i.test(button.textContent);
@@ -2863,6 +3555,14 @@
       function (event) {
         const target = event.target;
         if (!(target instanceof Element)) return;
+
+        const simBtn = target.closest("#crisisgrid-simulate-crisis-btn");
+        if (simBtn) {
+          event.preventDefault();
+          openSimulationModal();
+          return;
+        }
+
         const inspectButton = target.closest("[data-crisisgrid-inspect]");
         if (inspectButton) {
           event.preventDefault();
@@ -2912,6 +3612,7 @@
   }
 
   function wireIncidentScreenControls() {
+    ensureRerunAllocationModelButton();
     const filterButtons = Array.from(
       document.querySelectorAll("main button"),
     ).filter(function (button) {
@@ -3146,6 +3847,7 @@
 
   async function start() {
     wireNavigation();
+    wireGlobalDemoReset();
     consumePendingNotice();
 
     if (window.location.pathname.includes("city_command_center")) {

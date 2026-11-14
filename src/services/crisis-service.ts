@@ -330,6 +330,8 @@ export interface DetailedPlanView {
 }
 
 export interface DashboardData {
+  cityStatus: "STABLE" | "CRISIS ACTIVE";
+  activeCrisis: string;
   availableCapacityMw: number;
   maximumEmergencyCapacityMw: number;
   cityGridLoadMw: number;
@@ -1287,7 +1289,29 @@ export async function getDashboard(
       centerState.city_grid_base_load_mw +
       (activePlanRow?.total_capacity_mw ?? 0);
 
+    const activeIncidents = incidents.filter((i) => i.status === "active");
+    const isNormalOps = activeIncidents.length === 0;
+    const cityStatus: "STABLE" | "CRISIS ACTIVE" = isNormalOps ? "STABLE" : "CRISIS ACTIVE";
+    const activeCrisis = isNormalOps
+      ? "NONE"
+      : (centerState.active_crisis || activeIncidents[0]?.title || "CRISIS ACTIVE");
+
+    const normalNotes: Record<string, string> = {
+      hospital_network: "Critical medical infrastructure protected",
+      water_infrastructure: "Normal pumping and reservoir operations",
+      telecommunications: "Communication network operating normally",
+      emergency_operations: "Emergency response capacity available",
+    };
+    const normalStatuses: Record<string, string> = {
+      hospital_network: "STABLE",
+      water_infrastructure: "STABLE",
+      telecommunications: "STABLE",
+      emergency_operations: "READY",
+    };
+
     return {
+      cityStatus,
+      activeCrisis,
       availableCapacityMw:
         activePlanRow?.total_available_capacity_mw ??
         centerState.emergency_capacity_mw,
@@ -1298,11 +1322,11 @@ export async function getDashboard(
         0,
         centerState.city_grid_capacity_mw - cityGridLoadMw,
       ),
-      activeIncidentsCount: incidents.filter((i) => i.status === "active")
-        .length,
-      emergencyResponseUnitsDeployed: incidents
-        .filter((i) => i.status === "active")
-        .reduce((total, i) => total + i.response_units, 0),
+      activeIncidentsCount: activeIncidents.length,
+      emergencyResponseUnitsDeployed: activeIncidents.reduce(
+        (total, i) => total + i.response_units,
+        0,
+      ),
       telemetryNodesActive: centerState.telemetry_nodes_active,
       telemetryOnlinePercentage: centerState.telemetry_online_percentage,
       gridStabilityIndex: centerState.grid_stability_index,
@@ -1326,25 +1350,31 @@ export async function getDashboard(
                   (sectorRows.find((row) => row.id === sector.id)?.maximum_capacity_mw ?? 1)) *
                   100,
               ),
-        operationalStatus:
-          sectorRows.find((row) => row.id === sector.id)?.operational_status ??
-          "operational",
-        incidentImpactMw: activeImpacts
-          .filter((impact) => impact.sector_id === sector.id)
-          .reduce((total, impact) => total + impact.demand_delta_mw, 0),
-        incidentImpactNotes: Array.from(
-          new Set(
-            activeImpacts
+        operationalStatus: isNormalOps
+          ? (normalStatuses[sector.id] ?? "STABLE")
+          : (sectorRows.find((row) => row.id === sector.id)?.operational_status ??
+            "operational"),
+        incidentImpactMw: isNormalOps
+          ? 0
+          : activeImpacts
               .filter((impact) => impact.sector_id === sector.id)
-              .map((impact) => impact.reason || impact.rationale)
-              .filter((note) => note.length > 0),
-          ),
-        ),
-        operationalNote:
-          getMetadataText(
-            sectorRows.find((row) => row.id === sector.id)?.metadata ?? {},
-            "operational_note",
-          ) ?? "No additional operational note.",
+              .reduce((total, impact) => total + impact.demand_delta_mw, 0),
+        incidentImpactNotes: isNormalOps
+          ? [normalNotes[sector.id] ?? ""]
+          : Array.from(
+              new Set(
+                activeImpacts
+                  .filter((impact) => impact.sector_id === sector.id)
+                  .map((impact) => impact.reason || impact.rationale)
+                  .filter((note) => note.length > 0),
+              ),
+            ),
+        operationalNote: isNormalOps
+          ? (normalNotes[sector.id] ?? "")
+          : (getMetadataText(
+              sectorRows.find((row) => row.id === sector.id)?.metadata ?? {},
+              "operational_note",
+            ) ?? "No additional operational note."),
         allocationStatus: activePlanRow?.status ?? null,
       })),
       incidents: enrichedIncidents,
@@ -1452,7 +1482,29 @@ export async function getDashboard(
   const cityGridLoadMw =
     centerState.city_grid_base_load_mw + (activePlanRow?.total_capacity_mw ?? 0);
 
+  const activeIncidents = incidents.filter((incident) => incident.status === "active");
+  const isNormalOps = activeIncidents.length === 0;
+  const cityStatus: "STABLE" | "CRISIS ACTIVE" = isNormalOps ? "STABLE" : "CRISIS ACTIVE";
+  const activeCrisis = isNormalOps
+    ? "NONE"
+    : (centerState.active_crisis || activeIncidents[0]?.title || "CRISIS ACTIVE");
+
+  const normalNotes: Record<string, string> = {
+    hospital_network: "Critical medical infrastructure protected",
+    water_infrastructure: "Normal pumping and reservoir operations",
+    telecommunications: "Communication network operating normally",
+    emergency_operations: "Emergency response capacity available",
+  };
+  const normalStatuses: Record<string, string> = {
+    hospital_network: "STABLE",
+    water_infrastructure: "STABLE",
+    telecommunications: "STABLE",
+    emergency_operations: "READY",
+  };
+
   return {
+    cityStatus,
+    activeCrisis,
     availableCapacityMw:
       activePlanRow?.total_available_capacity_mw ??
       centerState.emergency_capacity_mw,
@@ -1463,10 +1515,11 @@ export async function getDashboard(
       0,
       centerState.city_grid_capacity_mw - cityGridLoadMw,
     ),
-    activeIncidentsCount: incidents.filter((incident) => incident.status === "active").length,
-    emergencyResponseUnitsDeployed: incidents
-      .filter((incident) => incident.status === "active")
-      .reduce((total, incident) => total + incident.response_units, 0),
+    activeIncidentsCount: activeIncidents.length,
+    emergencyResponseUnitsDeployed: activeIncidents.reduce(
+      (total, incident) => total + incident.response_units,
+      0,
+    ),
     telemetryNodesActive: centerState.telemetry_nodes_active,
     telemetryOnlinePercentage: centerState.telemetry_online_percentage,
     gridStabilityIndex: centerState.grid_stability_index,
@@ -1489,26 +1542,32 @@ export async function getDashboard(
                 (sectorRows.find((row) => row.id === sector.id)?.maximum_capacity_mw ?? 1)) *
                 100,
             ),
-      operationalStatus:
-        telemetry.sectors.get(sector.id)?.status ??
-        sectorRows.find((row) => row.id === sector.id)?.operational_status ??
-        "unknown",
-      incidentImpactMw: activeImpacts
-        .filter((impact) => impact.sector_id === sector.id)
-        .reduce((total, impact) => total + impact.demand_delta_mw, 0),
-      incidentImpactNotes: Array.from(
-        new Set(
-          activeImpacts
+      operationalStatus: isNormalOps
+        ? (normalStatuses[sector.id] ?? "STABLE")
+        : (telemetry.sectors.get(sector.id)?.status ??
+          sectorRows.find((row) => row.id === sector.id)?.operational_status ??
+          "unknown"),
+      incidentImpactMw: isNormalOps
+        ? 0
+        : activeImpacts
             .filter((impact) => impact.sector_id === sector.id)
-            .map((impact) => impact.reason || impact.rationale)
-            .filter((note) => note.length > 0),
-        ),
-      ),
-      operationalNote:
-        getMetadataText(
-          sectorRows.find((row) => row.id === sector.id)?.metadata ?? {},
-          "operational_note",
-        ) ?? "No additional operational note.",
+            .reduce((total, impact) => total + impact.demand_delta_mw, 0),
+      incidentImpactNotes: isNormalOps
+        ? [normalNotes[sector.id] ?? ""]
+        : Array.from(
+            new Set(
+              activeImpacts
+                .filter((impact) => impact.sector_id === sector.id)
+                .map((impact) => impact.reason || impact.rationale)
+                .filter((note) => note.length > 0),
+            ),
+          ),
+      operationalNote: isNormalOps
+        ? (normalNotes[sector.id] ?? "")
+        : (getMetadataText(
+            sectorRows.find((row) => row.id === sector.id)?.metadata ?? {},
+            "operational_note",
+          ) ?? "No additional operational note."),
       allocationStatus: activePlanRow?.status ?? null,
     })),
     incidents: enrichedIncidents,
@@ -2999,3 +3058,21 @@ export async function markIncidentStatus(
     impactRows,
   );
 }
+
+export async function initiateCrisisSimulation(
+  _databaseValue: SupabaseClient<Database> | null,
+  scenarioKey = "industrial_fire",
+) {
+  return inMemoryCrisisRepository.initiateSimulation(scenarioKey);
+}
+
+export async function resetCrisisSimulation(
+  _databaseValue: SupabaseClient<Database> | null,
+) {
+  return inMemoryCrisisRepository.resetDemo();
+}
+
+export function getSimulationScenarios() {
+  return inMemoryCrisisRepository.getSimulationScenarios();
+}
+

@@ -49,6 +49,8 @@ export type IncidentRow = {
   evacuation_radius_m: number;
   residents_alerted: number;
   perimeter_details: string;
+  is_simulation?: boolean;
+  scenario_type?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -180,6 +182,9 @@ export type CommandCenterStateRow = {
   grid_stability_index: number;
   ambient_temperature_c: number;
   dispatch_status?: string;
+  city_status?: string;
+  active_crisis?: string;
+  active_incident_id?: string | null;
   last_dispatched_at?: string | null;
   updated_at: string;
 };

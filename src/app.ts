@@ -26,9 +26,12 @@ import {
   getEmergencyReport,
   getIncidentAnalysis,
   getSectors,
+  getSimulationScenarios,
+  initiateCrisisSimulation,
   listIncidents,
   markIncidentStatus,
   modifyAllocationParameters,
+  resetCrisisSimulation,
   resetPlanSignatures,
   reviewAllocationPlan,
   ServiceError,
@@ -402,6 +405,33 @@ export function createApp(
       }
       const targetCount = request.body?.count === 1 ? 1 : 0;
       response.json(await resetPlanSignatures(database, planId, targetCount));
+    }),
+  );
+
+  api.get(
+    "/simulation/scenarios",
+    asyncRoute(async (_request, response) => {
+      response.json(getSimulationScenarios());
+    }),
+  );
+
+  api.post(
+    "/simulation/initiate",
+    asyncRoute(async (request, response) => {
+      const scenario =
+        typeof request.body?.scenario === "string"
+          ? request.body.scenario
+          : "industrial_fire";
+      response
+        .status(201)
+        .json(await initiateCrisisSimulation(database, scenario));
+    }),
+  );
+
+  api.post(
+    "/simulation/reset",
+    asyncRoute(async (_request, response) => {
+      response.json(await resetCrisisSimulation(database));
     }),
   );
 
