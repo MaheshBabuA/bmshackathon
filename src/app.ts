@@ -1,5 +1,7 @@
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { timingSafeEqual } from "node:crypto";
 import express, {
   type ErrorRequestHandler,
@@ -51,7 +53,26 @@ import {
 } from "./services/crisis-service.js";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const PROJECT_ROOT = process.cwd();
+function findProjectRoot(): string {
+  const cwd = process.cwd();
+  if (existsSync(path.join(cwd, "stitch_crisisgrid_emergency_command_platform"))) {
+    return cwd;
+  }
+  try {
+    const dir = path.dirname(fileURLToPath(import.meta.url));
+    const parent = path.resolve(dir, "..");
+    if (existsSync(path.join(parent, "stitch_crisisgrid_emergency_command_platform"))) {
+      return parent;
+    }
+    const grandParent = path.resolve(parent, "..");
+    if (existsSync(path.join(grandParent, "stitch_crisisgrid_emergency_command_platform"))) {
+      return grandParent;
+    }
+  } catch {}
+  return cwd;
+}
+
+const PROJECT_ROOT = findProjectRoot();
 const SCREENS_DIRECTORY = path.join(
   PROJECT_ROOT,
   "stitch_crisisgrid_emergency_command_platform",
