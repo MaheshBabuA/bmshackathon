@@ -1,5 +1,16 @@
 begin;
 
+-- Ensure incidents table has prerequisite decision-support columns
+alter table public.incidents
+  add column if not exists is_escalated boolean not null default false,
+  add column if not exists automated_triage boolean not null default true,
+  add column if not exists dispatch_details text not null default 'No response units assigned.',
+  add column if not exists evacuation_radius_m integer not null default 0
+    check (evacuation_radius_m between 0 and 100000),
+  add column if not exists residents_alerted integer not null default 0
+    check (residents_alerted between 0 and 10000000),
+  add column if not exists perimeter_details text not null default 'No evacuation perimeter issued.';
+
 alter table public.emergency_reports
   add column if not exists confirmation_status text not null default 'report_received',
   add column if not exists location_source text not null default 'demo_fallback',
