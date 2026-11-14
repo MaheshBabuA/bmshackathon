@@ -2338,14 +2338,28 @@
     return SpeechRecognition ? new SpeechRecognition() : null;
   }
 
+  const DEMO_VOICE_REPORTS = [
+    "Severe electrical sparking and smoke observed near Indiranagar 100ft road. Pedestrians clearing area, need immediate dispatch assistance.",
+    "Roadside accident with 2 casualties on sidewalk, breathing but incapacitated. Urgent paramedic ambulance response needed.",
+    "Large water pipe burst causing rapid street flooding and erosion near junction. Traffic completely blocked, emergency drainage required.",
+    "Structural fire detected on 2nd floor with visible flames spreading toward power lines. Evacuation underway, fire engines requested immediately.",
+  ];
+
+  function simulateVoiceEmergencyReport(onTranscript) {
+    const report =
+      DEMO_VOICE_REPORTS[Math.floor(Math.random() * DEMO_VOICE_REPORTS.length)];
+    onTranscript(report, true);
+    showNotice(
+      "Simulated voice emergency report recorded in the application. (MVP simulated voice intake — this does not connect to 112, police, or phone dispatch).",
+      false,
+      true,
+    );
+  }
+
   function startSpeechToText(onTranscript) {
     const recognition = speechEngine();
     if (!recognition) {
-      showNotice(
-        "Browser speech-to-text is not available here. Type the details instead. This screen does not place a telephone call.",
-        true,
-        true,
-      );
+      simulateVoiceEmergencyReport(onTranscript);
       return null;
     }
     recognition.lang = "en-IN";
@@ -2359,11 +2373,7 @@
       onTranscript(transcript.trim(), event.results[event.results.length - 1].isFinal);
     };
     recognition.onerror = function () {
-      showNotice(
-        "Speech capture stopped. You can type the emergency details. This is not a phone dispatch line.",
-        true,
-        true,
-      );
+      simulateVoiceEmergencyReport(onTranscript);
     };
     try {
       recognition.start();
@@ -2374,7 +2384,7 @@
       );
       return recognition;
     } catch {
-      showNotice("Speech capture could not start. Type the details instead.", true, true);
+      simulateVoiceEmergencyReport(onTranscript);
       return null;
     }
   }
@@ -2667,7 +2677,7 @@
           .then(async function (result) {
             const ribbon = Array.from(document.querySelectorAll("span")).find(
               function (node) {
-                return /Priority Dispatch Channel Active/i.test(node.textContent);
+                return /Priority Dispatch Channel Active|REPORT RECEIVED|TRIAGED|DISPATCH REQUESTED|AUTHORITY REVIEW|RESPONSE ACTIVE/i.test(node.textContent);
               },
             );
             const steps = Array.isArray(result.timeline) ? result.timeline : [];

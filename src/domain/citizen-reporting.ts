@@ -210,6 +210,7 @@ export function triageCitizenReport(
 
 export function confirmationTimeline(
   allocationRecommended: boolean,
+  options?: { isResponseActive?: boolean; includeAllStages?: boolean },
 ): { status: ConfirmationStatus; label: string; note: string }[] {
   const steps: { status: ConfirmationStatus; label: string; note: string }[] = [
     {
@@ -229,11 +230,19 @@ export function confirmationTimeline(
     },
   ];
 
-  if (allocationRecommended) {
+  if (allocationRecommended || options?.includeAllStages) {
     steps.push({
       status: "authority_review",
       label: CONFIRMATION_LABELS.authority_review,
       note: "A pending allocation recommendation was created for human authority review.",
+    });
+  }
+
+  if (options?.isResponseActive || options?.includeAllStages || !allocationRecommended) {
+    steps.push({
+      status: "response_active",
+      label: CONFIRMATION_LABELS.response_active,
+      note: "Emergency response is active in the CRISISGRID simulation. Units deployed in simulation.",
     });
   }
 

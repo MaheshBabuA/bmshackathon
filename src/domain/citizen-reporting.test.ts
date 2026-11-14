@@ -117,6 +117,26 @@ test("records confirmation through authority review when allocation is needed", 
   );
 });
 
+test("records full confirmation stages through response active", () => {
+  const nonAllocSteps = confirmationTimeline(false);
+  assert.deepEqual(
+    nonAllocSteps.map((step) => step.label),
+    ["REPORT RECEIVED", "TRIAGED", "DISPATCH REQUESTED", "RESPONSE ACTIVE"],
+  );
+
+  const allStages = confirmationTimeline(true, { includeAllStages: true });
+  assert.deepEqual(
+    allStages.map((step) => step.label),
+    [
+      "REPORT RECEIVED",
+      "TRIAGED",
+      "DISPATCH REQUESTED",
+      "AUTHORITY REVIEW",
+      "RESPONSE ACTIVE",
+    ],
+  );
+});
+
 test("accepts citizen category and urgency aliases on the report schema", () => {
   const report = CreateEmergencyReportSchema.safeParse({
     description: "Smoke and visible flames near a transformer.",
